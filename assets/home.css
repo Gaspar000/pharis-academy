@@ -53,7 +53,7 @@ body { display: flex; min-height: 100vh; }
    disponible (flex:1 en .wf-hero-cards) hasta el borde derecho. */
 .wf-hero {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   gap: 28px;
   min-height: 340px;
   background: linear-gradient(135deg, #1f6fe0 0%, var(--accent) 45%, #6aa8ff 100%);
@@ -62,12 +62,17 @@ body { display: flex; min-height: 100vh; }
   margin-bottom: 28px;
   flex-wrap: wrap;
 }
+/* align-items:stretch en .wf-hero + space-between aquí: el saludo (hello+stat)
+   queda arriba, alineado con el tope de las tarjetas; el botón "Ver todos"
+   queda abajo, alineado con la base de las tarjetas — en vez de centrar el
+   bloque completo como una unidad. */
 .wf-hero-greeting {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  justify-content: space-between;
   flex-shrink: 0;
 }
+.wf-hero-greeting-top { display: flex; flex-direction: column; gap: 6px; }
 /* Saludo: texto de apoyo, menor jerarquía — la estadística es el dato que
    debe destacar (mismo patrón que #v2-welcome-greeting vs #v2-carousel-stat b). */
 .wf-hero-greeting .hello {
@@ -91,7 +96,6 @@ body { display: flex; min-height: 100vh; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
   background: rgba(255, 255, 255, 0.14);
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius-sm);
@@ -107,15 +111,21 @@ body { display: flex; min-height: 100vh; }
 /* flex:1 — ocupa todo el ancho restante del hero. Las tarjetas tienen ancho
    fijo (angosto, ver .wf-hero-card), así que justify-content:flex-end las
    empuja al borde derecho del hero — el espacio libre queda entre el
-   saludo y las tarjetas, no después de ellas. */
+   saludo y las tarjetas, no después de ellas.
+   Sin overflow-x:auto: forzaba overflow-y:auto también (un eje no puede
+   quedar "visible" si el otro no lo es), y eso recortaba el
+   translateY(-2px) del hover contra el borde del contenedor. Con solo 2
+   tarjetas de ancho fijo dentro de un hero que ya tiene min-height/ancho
+   de sobra, el desbordamiento horizontal no debería ocurrir en la
+   práctica — flex-wrap:wrap en .wf-hero (línea superior) es el respaldo
+   si algún día no caben. */
 .wf-hero-cards {
   display: flex;
   justify-content: flex-end;
+  align-self: stretch;
   gap: 16px;
   flex: 1;
   min-width: 0;
-  overflow-x: auto;
-  padding-bottom: 4px;
 }
 /* Vertical: mitad superior reservada para una ilustración (placeholder por
    ahora), mitad inferior con nombre + barra de progreso (a futuro: % de
@@ -149,11 +159,17 @@ body { display: flex; min-height: 100vh; }
   flex-direction: column;
   gap: 8px;
 }
+/* min-height reserva el alto de 2 líneas siempre, aunque el título real
+   ocupe solo 1 — antes esto variaba entre tarjetas ("Introducción" a 1
+   línea vs "Curso 01: ..." a 2), y como .wf-hero-card-illustration es
+   flex:1 ("lo que sobra" del alto fijo de la tarjeta), la ilustración de
+   la tarjeta con título corto crecía más que la de al lado. */
 .wf-hero-card h3 {
   font-size: 0.92rem;
   font-weight: 700;
   margin-bottom: 0;
   line-height: 1.3;
+  min-height: calc(1.3em * 2);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
