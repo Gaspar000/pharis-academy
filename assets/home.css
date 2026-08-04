@@ -81,17 +81,28 @@ body { display: flex; min-height: 100vh; }
   letter-spacing: -0.01em;
   line-height: 1.15;
 }
+/* Mismo estilo que .rp-ver-todo en dashboard-v2 (pharis-api): sin fondo,
+   sin borde, texto pequeño en mayúsculas. Aquí sobre el fondo azul del
+   hero en vez del panel oscuro, así que parte de blanco translúcido en
+   vez de --v2-muted. */
 .hero-see-all {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   margin-top: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #fff;
+  background: none;
+  border: none;
+  padding: 2px;
+  font-family: "Fira Sans", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.75);
   width: fit-content;
+  transition: color 0.15s var(--ease);
 }
-.hero-see-all:hover { text-decoration: underline; }
+.hero-see-all:hover { color: #fff; }
 .wf-hero-cards {
   display: flex;
   gap: 14px;

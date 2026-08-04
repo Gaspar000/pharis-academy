@@ -44,6 +44,20 @@
           <label for="codigo">Código de invitación</label>
           <input type="text" id="codigo" required autocomplete="off" placeholder="El código que te compartieron" />
         </div>
+        <div class="field">
+          <label>Soy</label>
+          <div class="category-toggle">
+            <label>
+              <input type="radio" name="categoriaPreferida" value="alumnos" checked />
+              <span>Alumno</span>
+            </label>
+            <label>
+              <input type="radio" name="categoriaPreferida" value="profesores" />
+              <span>Profesor</span>
+            </label>
+          </div>
+          <div class="field-hint">Solo para mostrarte cursos relevantes primero — puedes tomar cualquier curso de cualquier categoría.</div>
+        </div>
         <button type="submit" class="btn btn-primary" id="submitBtn">Crear cuenta</button>
       </form>
 
@@ -76,11 +90,12 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
       const codigo = document.getElementById('codigo').value.trim();
+      const categoriaPreferida = form.querySelector('input[name="categoriaPreferida"]:checked').value;
 
       try {
         const data = await academyFetch('/academy/register', {
           method: 'POST',
-          body: JSON.stringify({ nombre, email, password, codigo }),
+          body: JSON.stringify({ nombre, email, password, codigo, categoriaPreferida }),
         });
         AcademyAuth.setSession(data.token, data.user);
         window.location.href = 'index.html';

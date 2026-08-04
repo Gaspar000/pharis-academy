@@ -40,14 +40,15 @@
     <div class="wf-content">
       <!-- Bienvenida: mismo gradiente/estructura que #v2-welcome en dashboard-v2
            (pharis-api). Saludo con jerarquía menor, estadística destacada con
-           tipografía mayor. Las tarjetas verticales son los cursos individuales
-           (los 4, con scroll horizontal si no caben) — la agrupación por
-           categoría vive más abajo, en "Todos los cursos". -->
+           tipografía mayor. Las tarjetas verticales muestran solo los 2 cursos
+           de la categoría preferida del usuario (categoriaPreferida, elegida
+           en el registro — puramente clasificatorio) — el resto vive en
+           "Todos los cursos" más abajo. -->
       <section class="wf-hero" id="heroSection">
         <div class="wf-hero-greeting">
           <div class="hello" id="helloMsg">Hola</div>
           <div class="stat" id="statCoursesLabel">Tienes – cursos por explorar</div>
-          <a href="#cursos" class="hero-see-all">Ver todos <i class="ph ph-arrow-right"></i></a>
+          <button class="hero-see-all" onclick="document.getElementById('cursos').scrollIntoView({behavior:'smooth'})">Ver todos</button>
         </div>
         <div class="wf-hero-cards" id="heroCourseCards">
           <div class="wf-hero-card"><div class="wf-hero-card-illustration"><i class="ph ph-circle-notch"></i></div></div>
@@ -139,10 +140,17 @@
           return;
         }
 
-        // Hero: una tarjeta vertical por curso individual. Barra de progreso
-        // en 0%: a futuro se medirá por % de slides revisadas (no hay ese
-        // dato todavía).
-        heroCards.innerHTML = data.courses.map(c => `
+        // Hero: solo los cursos de la categoría preferida del usuario (2 de
+        // los 4) — categoriaPreferida es clasificatorio, no restringe acceso;
+        // el usuario igual puede tomar cualquier curso desde "Todos los
+        // cursos". Si por algún motivo no hay coincidencias, se muestran los
+        // primeros 2 cursos como respaldo. Barra de progreso en 0%: a futuro
+        // se medirá por % de slides revisadas (no hay ese dato todavía).
+        const categoriaUsuario = user.categoriaPreferida || 'alumnos';
+        const cursosDestacados = data.courses.filter(c => c.categoria === categoriaUsuario);
+        const cursosParaHero = cursosDestacados.length ? cursosDestacados : data.courses.slice(0, 2);
+
+        heroCards.innerHTML = cursosParaHero.map(c => `
           <a class="wf-hero-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
             <div class="wf-hero-card-illustration"><i class="ph ph-image"></i></div>
             <div class="wf-hero-card-body">

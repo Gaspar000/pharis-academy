@@ -151,6 +151,31 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   border-color: var(--accent);
   outline: none;
 }
+.field .field-hint {
+  font-size: 0.76rem;
+  color: var(--text-faint);
+  margin-top: 6px;
+}
+/* Selector de categoría preferida en el registro — puramente clasificatorio,
+   no otorga ni restringe ningún permiso (ver register.html). */
+.category-toggle { display: flex; gap: 8px; }
+.category-toggle label {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  transition: all 0.15s var(--ease);
+}
+.category-toggle input { display: none; }
+.category-toggle label:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+}
 .btn {
   display: inline-flex;
   align-items: center;
