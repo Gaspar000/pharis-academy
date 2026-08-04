@@ -177,7 +177,9 @@ body { display: flex; min-height: 100vh; }
 }
 .wf-progress-bar { height: 6px; border-radius: 999px; background: var(--rule); overflow: hidden; margin-top: 6px; }
 .wf-progress-bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
-.wf-hero-card .progress-label { font-size: 0.76rem; color: var(--text-faint); margin-top: 6px; }
+/* Fijo en "0 / 0" hasta que exista el conteo real de diapositivas por
+   curso — ver comentario en index.html donde se genera este markup. */
+.wf-progress-label { font-size: 0.72rem; color: var(--text-faint); margin-top: 4px; }
 
 .wf-grid-2col { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
 
