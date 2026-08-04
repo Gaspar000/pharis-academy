@@ -126,7 +126,7 @@ body { display: flex; min-height: 100vh; }
   background: var(--panel);
   border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
-  flex: 0 0 168px;
+  flex: 0 0 198px;
   height: 284px;
   display: flex;
   flex-direction: column;
