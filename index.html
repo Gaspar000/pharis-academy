@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Fira+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" rel="stylesheet" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="stylesheet" href="assets/home.css" />
 </head>
@@ -23,11 +24,11 @@
       Pharis Academy
     </div>
     <nav class="wf-nav">
-      <a href="index.html" class="active"><span class="icon">◆</span> Overview</a>
-      <a href="index.html#cursos"><span class="icon">▤</span> Cursos</a>
-      <a href="dashboard.html" id="navDashboard" style="display:none;"><span class="icon">📊</span> Dashboard</a>
+      <a href="index.html" class="active"><i class="ph ph-squares-four icon"></i> Overview</a>
+      <a href="index.html#cursos"><i class="ph ph-books icon"></i> Cursos</a>
+      <a href="dashboard.html" id="navDashboard" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard</a>
     </nav>
-    <button class="btn btn-secondary" style="margin-top:auto; width:100%;" onclick="AcademyAuth.logout()">Salir</button>
+    <button class="btn btn-secondary" style="margin-top:auto; width:100%;" onclick="AcademyAuth.logout()"><i class="ph ph-sign-out"></i> Salir</button>
   </aside>
 
   <div class="wf-main">
@@ -37,14 +38,16 @@
     </div>
 
     <div class="wf-content">
-      <!-- Hero: bienvenida + cursos destacados (datos reales de /academy/courses) -->
+      <!-- Bienvenida: mismo gradiente/estructura que #v2-welcome en dashboard-v2
+           (pharis-api). Saludo con jerarquía menor, estadística destacada con
+           tipografía mayor. En vez de una ilustración a la derecha, van las
+           tarjetas de curso (datos reales de /academy/courses). -->
       <section class="wf-hero" id="heroSection">
         <div class="wf-hero-greeting">
           <div class="hello" id="helloMsg">Hola</div>
-          <h2>Elige un curso para empezar</h2>
-          <a href="#cursos" class="btn btn-primary" style="width:auto; padding:10px 20px; display:inline-flex;">Ver todos los cursos</a>
+          <div class="stat" id="statCoursesLabel">Tienes – cursos por explorar</div>
         </div>
-        <div id="heroCourseCards">
+        <div class="wf-hero-cards" id="heroCourseCards">
           <div class="wf-hero-card"><div class="tag">Cargando…</div></div>
         </div>
       </section>
@@ -120,11 +123,13 @@
     const grid = document.getElementById('courseGrid');
     const heroCards = document.getElementById('heroCourseCards');
     const statCourses = document.getElementById('statCourses');
+    const statCoursesLabel = document.getElementById('statCoursesLabel');
 
     async function loadCourses() {
       try {
         const data = await academyFetch('/academy/courses');
         statCourses.textContent = data.courses.length;
+        statCoursesLabel.textContent = `Tienes ${data.courses.length} curso${data.courses.length === 1 ? '' : 's'} por explorar`;
 
         if (!data.courses.length) {
           grid.innerHTML = '<div class="empty-state">No hay cursos disponibles todavía.</div>';
@@ -146,10 +151,10 @@
         heroCards.innerHTML = data.courses.slice(0, 2).map(c => `
           <a class="wf-hero-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
             <div>
-              <div class="tag">Curso</div>
+              <div class="tag"><i class="ph ph-book-open"></i> Curso</div>
               <h3>${c.titulo}</h3>
             </div>
-            <span class="hero-card-cta">Entrar →</span>
+            <span class="hero-card-cta">Entrar <i class="ph ph-arrow-right"></i></span>
           </a>
         `).join('');
       } catch (err) {

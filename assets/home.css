@@ -31,7 +31,7 @@ body { display: flex; min-height: 100vh; }
 }
 .wf-nav a:hover { background: var(--accent-soft); color: var(--text); }
 .wf-nav a.active { background: var(--accent-soft); color: var(--accent-bright); }
-.wf-nav .icon { width: 18px; text-align: center; flex-shrink: 0; }
+.wf-nav .icon { width: 18px; text-align: center; flex-shrink: 0; font-size: 1.05rem; }
 
 .wf-main { flex: 1; min-width: 0; }
 .wf-topbar {
@@ -45,19 +45,49 @@ body { display: flex; min-height: 100vh; }
 .wf-topbar h1 { font-size: 1.5rem; margin: 0; }
 .wf-content { padding: 28px 32px 60px; }
 
+/* Mismo gradiente de marca que #v2-welcome en dashboard-v2 (pharis-api).
+   Ahí el hueco derecho lo llena una ilustración; aquí van las tarjetas de
+   curso en su lugar, así que el layout es flex en vez de grid con imagen. */
 .wf-hero {
-  background: linear-gradient(135deg, var(--panel-2), var(--bg-deep));
-  border: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  min-height: 168px;
+  background: linear-gradient(135deg, #1f6fe0 0%, var(--accent) 45%, #6aa8ff 100%);
   border-radius: var(--radius);
-  padding: 28px;
-  display: grid;
-  grid-template-columns: minmax(220px, 1fr) repeat(2, minmax(180px, 1fr));
-  gap: 20px;
+  padding: 24px 32px;
   margin-bottom: 28px;
+  flex-wrap: wrap;
 }
-.wf-hero-greeting { display: flex; flex-direction: column; justify-content: center; }
-.wf-hero-greeting .hello { color: var(--accent-bright); font-size: 0.85rem; margin-bottom: 8px; }
-.wf-hero-greeting h2 { font-size: 1.5rem; margin-bottom: 18px; }
+.wf-hero-greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+/* Saludo: texto de apoyo, menor jerarquía — la estadística es el dato que
+   debe destacar (mismo patrón que #v2-welcome-greeting vs #v2-carousel-stat b). */
+.wf-hero-greeting .hello {
+  font-family: "Manrope", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+.wf-hero-greeting .stat {
+  font-family: "Manrope", sans-serif;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+.wf-hero-cards {
+  display: flex;
+  gap: 14px;
+  flex: 1;
+  min-width: 260px;
+  flex-wrap: wrap;
+}
 .wf-hero-card {
   background: var(--panel);
   border: 1px solid var(--rule);
@@ -67,12 +97,30 @@ body { display: flex; min-height: 100vh; }
   flex-direction: column;
   justify-content: space-between;
   gap: 12px;
-  transition: border-color 0.15s var(--ease);
+  flex: 1;
+  min-width: 180px;
+  transition: border-color 0.15s var(--ease), transform 0.15s var(--ease);
 }
-.wf-hero-card:hover { border-color: var(--rule-strong); }
-.wf-hero-card .tag { font-size: 0.72rem; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.wf-hero-card:hover { border-color: var(--rule-strong); transform: translateY(-2px); }
+.wf-hero-card .tag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
 .wf-hero-card h3 { font-size: 0.98rem; margin-bottom: 0; }
-.hero-card-cta { font-size: 0.8rem; color: var(--accent-bright); font-weight: 600; }
+.hero-card-cta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--accent-bright);
+  font-weight: 600;
+}
 .wf-progress-bar { height: 6px; border-radius: 999px; background: var(--rule); overflow: hidden; margin-top: 6px; }
 .wf-progress-bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
 .wf-hero-card .progress-label { font-size: 0.76rem; color: var(--text-faint); margin-top: 6px; }
