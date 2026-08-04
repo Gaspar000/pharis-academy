@@ -40,13 +40,14 @@
     <div class="wf-content">
       <!-- Bienvenida: mismo gradiente/estructura que #v2-welcome en dashboard-v2
            (pharis-api). Saludo con jerarquía menor, estadística destacada con
-           tipografía mayor. Las tarjetas verticales llevan a las 2 categorías
-           (Para profesores / Para alumnos) — temáticas, no restrictivas:
-           cualquier usuario puede entrar a cualquiera de las 2. -->
+           tipografía mayor. Las tarjetas verticales son los cursos individuales
+           (los 4, con scroll horizontal si no caben) — la agrupación por
+           categoría vive más abajo, en "Todos los cursos". -->
       <section class="wf-hero" id="heroSection">
         <div class="wf-hero-greeting">
           <div class="hello" id="helloMsg">Hola</div>
           <div class="stat" id="statCoursesLabel">Tienes – cursos por explorar</div>
+          <a href="#cursos" class="hero-see-all">Ver todos <i class="ph ph-arrow-right"></i></a>
         </div>
         <div class="wf-hero-cards" id="heroCourseCards">
           <div class="wf-hero-card"><div class="wf-hero-card-illustration"><i class="ph ph-circle-notch"></i></div></div>
@@ -63,11 +64,11 @@
       </div>
 
       <div class="wf-grid-2col" id="cursos">
-        <!-- Todos los cursos -->
+        <!-- Todos los cursos, agrupados por categoría (Para profesores / Para alumnos) -->
         <div>
           <div class="wf-section-title">Todos los cursos</div>
-          <div class="course-grid" id="courseGrid">
-            <div class="empty-state">Cargando cursos...</div>
+          <div class="course-grid" id="categoriaGrid">
+            <div class="empty-state">Cargando categorías...</div>
           </div>
         </div>
 
@@ -121,7 +122,7 @@
       document.getElementById('navDashboard').style.display = 'flex';
     }
 
-    const grid = document.getElementById('courseGrid');
+    const categoriaGrid = document.getElementById('categoriaGrid');
     const heroCards = document.getElementById('heroCourseCards');
     const statCourses = document.getElementById('statCourses');
     const statCoursesLabel = document.getElementById('statCoursesLabel');
@@ -133,36 +134,37 @@
         statCoursesLabel.textContent = `Tienes ${data.courses.length} curso${data.courses.length === 1 ? '' : 's'} por explorar`;
 
         if (!data.courses.length) {
-          grid.innerHTML = '<div class="empty-state">No hay cursos disponibles todavía.</div>';
+          categoriaGrid.innerHTML = '<div class="empty-state">No hay cursos disponibles todavía.</div>';
           heroCards.innerHTML = '';
           return;
         }
 
-        grid.innerHTML = data.courses.map(c => `
-          <a class="course-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
-            <span class="course-tag"><i class="ph ph-book-open"></i> Curso</span>
-            <h2>${c.titulo}</h2>
-            <p>${c.descripcion || ''}</p>
-            <span class="btn btn-primary">Entrar al curso</span>
-          </a>
-        `).join('');
-
-        // Hero: una tarjeta por categoría (Para profesores / Para alumnos),
-        // no por curso individual — cada una lleva a categoria.html con sus
-        // 2 cursos. Barra de progreso en 0%: a futuro se medirá por % de
-        // slides revisadas (no hay ese dato todavía).
-        heroCards.innerHTML = (data.categorias || []).map(cat => `
-          <a class="wf-hero-card" href="categoria.html?slug=${encodeURIComponent(cat.slug)}">
+        // Hero: una tarjeta vertical por curso individual. Barra de progreso
+        // en 0%: a futuro se medirá por % de slides revisadas (no hay ese
+        // dato todavía).
+        heroCards.innerHTML = data.courses.map(c => `
+          <a class="wf-hero-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
             <div class="wf-hero-card-illustration"><i class="ph ph-image"></i></div>
             <div class="wf-hero-card-body">
-              <div class="tag"><i class="ph ph-books"></i> Categoría</div>
-              <h3>${cat.titulo}</h3>
+              <div class="tag"><i class="ph ph-book-open"></i> Curso</div>
+              <h3>${c.titulo}</h3>
               <div class="wf-progress-bar"><span style="width:0%"></span></div>
             </div>
           </a>
         `).join('');
+
+        // "Todos los cursos": una tarjeta por categoría (Para profesores /
+        // Para alumnos), cada una lleva a categoria.html con sus 2 cursos.
+        categoriaGrid.innerHTML = (data.categorias || []).map(cat => `
+          <a class="course-card" href="categoria.html?slug=${encodeURIComponent(cat.slug)}">
+            <span class="course-tag"><i class="ph ph-books"></i> Categoría</span>
+            <h2>${cat.titulo}</h2>
+            <p>Cursos para ${cat.titulo.toLowerCase().replace('para ', '')}.</p>
+            <span class="btn btn-primary">Ver cursos</span>
+          </a>
+        `).join('');
       } catch (err) {
-        grid.innerHTML = `<div class="empty-state">${err.message}</div>`;
+        categoriaGrid.innerHTML = `<div class="empty-state">${err.message}</div>`;
         heroCards.innerHTML = '';
       }
     }
