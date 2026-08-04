@@ -40,15 +40,16 @@
     <div class="wf-content">
       <!-- Bienvenida: mismo gradiente/estructura que #v2-welcome en dashboard-v2
            (pharis-api). Saludo con jerarquía menor, estadística destacada con
-           tipografía mayor. En vez de una ilustración a la derecha, van las
-           tarjetas de curso (datos reales de /academy/courses). -->
+           tipografía mayor. Las tarjetas verticales llevan a las 2 categorías
+           (Para profesores / Para alumnos) — temáticas, no restrictivas:
+           cualquier usuario puede entrar a cualquiera de las 2. -->
       <section class="wf-hero" id="heroSection">
         <div class="wf-hero-greeting">
           <div class="hello" id="helloMsg">Hola</div>
           <div class="stat" id="statCoursesLabel">Tienes – cursos por explorar</div>
         </div>
         <div class="wf-hero-cards" id="heroCourseCards">
-          <div class="wf-hero-card"><div class="tag">Cargando…</div></div>
+          <div class="wf-hero-card"><div class="wf-hero-card-illustration"><i class="ph ph-circle-notch"></i></div></div>
         </div>
       </section>
 
@@ -139,22 +140,25 @@
 
         grid.innerHTML = data.courses.map(c => `
           <a class="course-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
-            <span class="course-tag">Curso</span>
+            <span class="course-tag"><i class="ph ph-book-open"></i> Curso</span>
             <h2>${c.titulo}</h2>
             <p>${c.descripcion || ''}</p>
             <span class="btn btn-primary">Entrar al curso</span>
           </a>
         `).join('');
 
-        // Hero: hasta 2 cursos destacados. No hay progreso real todavía
-        // (requiere GET /academy/mis-entregas) — se muestra el curso sin barra.
-        heroCards.innerHTML = data.courses.slice(0, 2).map(c => `
-          <a class="wf-hero-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
-            <div>
-              <div class="tag"><i class="ph ph-book-open"></i> Curso</div>
-              <h3>${c.titulo}</h3>
+        // Hero: una tarjeta por categoría (Para profesores / Para alumnos),
+        // no por curso individual — cada una lleva a categoria.html con sus
+        // 2 cursos. Barra de progreso en 0%: a futuro se medirá por % de
+        // slides revisadas (no hay ese dato todavía).
+        heroCards.innerHTML = (data.categorias || []).map(cat => `
+          <a class="wf-hero-card" href="categoria.html?slug=${encodeURIComponent(cat.slug)}">
+            <div class="wf-hero-card-illustration"><i class="ph ph-image"></i></div>
+            <div class="wf-hero-card-body">
+              <div class="tag"><i class="ph ph-books"></i> Categoría</div>
+              <h3>${cat.titulo}</h3>
+              <div class="wf-progress-bar"><span style="width:0%"></span></div>
             </div>
-            <span class="hero-card-cta">Entrar <i class="ph ph-arrow-right"></i></span>
           </a>
         `).join('');
       } catch (err) {
