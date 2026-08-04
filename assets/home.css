@@ -49,13 +49,13 @@ body { display: flex; min-height: 100vh; }
    Ahí el hueco derecho lo llena una ilustración; aquí van las tarjetas de
    curso en su lugar, así que el layout es flex en vez de grid con imagen.
    Más alto que el original de dashboard-v2 (168px) para dar espacio a
-   tarjetas de curso más grandes — las tarjetas ocupan el resto del ancho
+   tarjetas de curso más altas — las tarjetas ocupan el resto del ancho
    disponible (flex:1 en .wf-hero-cards) hasta el borde derecho. */
 .wf-hero {
   display: flex;
   align-items: center;
   gap: 28px;
-  min-height: 260px;
+  min-height: 340px;
   background: linear-gradient(135deg, #1f6fe0 0%, var(--accent) 45%, #6aa8ff 100%);
   border-radius: var(--radius);
   padding: 28px 32px;
@@ -104,11 +104,13 @@ body { display: flex; min-height: 100vh; }
   transition: background 0.15s var(--ease);
 }
 .hero-see-all:hover { background: rgba(255, 255, 255, 0.22); }
-/* flex:1 — ocupa todo el ancho restante del hero, hasta el borde derecho.
-   Las tarjetas usan flex:1 cada una (no un ancho fijo) para repartirse ese
-   espacio; min-width evita que se aplasten si hay más de 2. */
+/* flex:1 — ocupa todo el ancho restante del hero. Las tarjetas tienen ancho
+   fijo (angosto, ver .wf-hero-card), así que justify-content:flex-end las
+   empuja al borde derecho del hero — el espacio libre queda entre el
+   saludo y las tarjetas, no después de ellas. */
 .wf-hero-cards {
   display: flex;
+  justify-content: flex-end;
   gap: 16px;
   flex: 1;
   min-width: 0;
@@ -117,15 +119,15 @@ body { display: flex; min-height: 100vh; }
 }
 /* Vertical: mitad superior reservada para una ilustración (placeholder por
    ahora), mitad inferior con nombre + barra de progreso (a futuro: % de
-   slides revisadas). */
+   slides revisadas). Más angosta que alta a propósito — flex-grow:0 evita
+   que .wf-hero-cards (flex:1) las estire de más; el espacio sobrante del
+   hero queda vacío en vez de ensanchar las tarjetas. */
 .wf-hero-card {
   background: var(--panel);
   border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
-  flex: 1;
-  min-width: 220px;
-  height: 204px;
-  flex-shrink: 0;
+  flex: 0 0 168px;
+  height: 284px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
