@@ -74,7 +74,6 @@
 
         grid.innerHTML = cursos.map(c => `
           <a class="course-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
-            <span class="course-tag"><i class="ph ph-book-open"></i> Curso</span>
             <h2>${c.titulo}</h2>
             <p>${c.descripcion || ''}</p>
             <span class="btn btn-primary">Entrar al curso</span>

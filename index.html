@@ -154,7 +154,6 @@
           <a class="wf-hero-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
             <div class="wf-hero-card-illustration"><i class="ph ph-image"></i></div>
             <div class="wf-hero-card-body">
-              <div class="tag"><i class="ph ph-book-open"></i> Curso</div>
               <h3>${c.titulo}</h3>
               <div class="wf-progress-bar"><span style="width:0%"></span></div>
             </div>
@@ -165,7 +164,6 @@
         // Para alumnos), cada una lleva a categoria.html con sus 2 cursos.
         categoriaGrid.innerHTML = (data.categorias || []).map(cat => `
           <a class="course-card" href="categoria.html?slug=${encodeURIComponent(cat.slug)}">
-            <span class="course-tag"><i class="ph ph-books"></i> Categoría</span>
             <h2>${cat.titulo}</h2>
             <p>Cursos para ${cat.titulo.toLowerCase().replace('para ', '')}.</p>
             <span class="btn btn-primary">Ver cursos</span>

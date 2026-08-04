@@ -240,16 +240,6 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   transition: border-color 0.15s var(--ease), transform 0.15s var(--ease);
 }
 .course-card:hover { border-color: var(--rule-strong); transform: translateY(-2px); }
-.course-tag {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--accent-bright);
-  font-weight: 600;
-}
 .course-card h2 { font-size: 1.15rem; margin-bottom: 4px; }
 .course-card p { font-size: 0.88rem; margin-bottom: 0; flex: 1; }
 .course-card .btn { margin-top: 8px; }
