@@ -186,11 +186,15 @@
 
         // "Todos los cursos": una tarjeta por categoría (Para profesores /
         // Para alumnos), cada una lleva a categoria.html con sus 2 cursos.
+        const DESCRIPCION_CATEGORIA = {
+          profesores: 'Cursos para mejorar y agilizar el proceso de docencia por medio de la implementación de nuevas tecnologías.',
+          alumnos: 'Cursos para incrementar la cantidad de información retenida por medio de la implementación de la inteligencia artificial.',
+        };
         categoriaGrid.innerHTML = (data.categorias || []).map(cat => `
           <a class="course-card" href="categoria.html?slug=${encodeURIComponent(cat.slug)}">
             <h2>${cat.titulo}</h2>
-            <p>Cursos para ${cat.titulo.toLowerCase().replace('para ', '')}.</p>
-            <span class="btn btn-primary">Ver cursos</span>
+            <p>${DESCRIPCION_CATEGORIA[cat.slug] || ''}</p>
+            <span class="btn btn-primary btn-small">Ver cursos</span>
           </a>
         `).join('');
       } catch (err) {

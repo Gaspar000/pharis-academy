@@ -200,6 +200,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .btn-primary { background: var(--accent); color: #051023; }
 .btn-primary:hover { background: var(--accent-bright); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+/* Notoriamente más chico que .btn — solo para "Ver cursos" en las
+   tarjetas de categoría de "Todos los cursos". */
+.btn-small { width: fit-content; padding: 4px 12px; font-size: 0.72rem; }
 .btn-secondary {
   background: transparent;
   border-color: var(--rule);
