@@ -238,7 +238,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 18px;
-  padding: 24px 0 60px;
+  padding: 8px 0 60px;
 }
 .course-card {
   background: var(--panel);
