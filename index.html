@@ -57,21 +57,17 @@
         </div>
       </section>
 
-      <!-- Stat tiles — cursos disponibles es real; el resto es ilustrativo hasta
-           que exista GET /academy/mis-entregas y un sistema de puntos/racha. -->
-      <div class="wf-stats-row">
-        <div class="wf-stat"><div class="num" id="statCourses">–</div><div class="lbl">Cursos disponibles</div></div>
-        <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Actividades enviadas <span class="mock-tag">ejemplo</span></div></div>
-        <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Completadas <span class="mock-tag">ejemplo</span></div></div>
-        <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Días de racha <span class="mock-tag">ejemplo</span></div></div>
-      </div>
-
-      <div class="wf-grid-2col" id="cursos">
-        <!-- Todos los cursos, agrupados por categoría (Para profesores / Para alumnos) -->
+      <!-- Estadísticas (angosta, izq.) + Leaderboard (der.), misma fila.
+           Cursos disponibles es real; el resto de las stats es ilustrativo
+           hasta que exista GET /academy/mis-entregas y un sistema de puntos. -->
+      <div class="wf-grid-stats-leaders">
         <div>
-          <div class="wf-section-title">Todos los cursos</div>
-          <div class="course-grid" id="categoriaGrid">
-            <div class="empty-state">Cargando categorías...</div>
+          <div class="wf-section-title">Estadísticas</div>
+          <div class="wf-stats-row">
+            <div class="wf-stat"><div class="num" id="statCourses">–</div><div class="lbl">Cursos disponibles</div></div>
+            <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Actividades enviadas <span class="mock-tag">ejemplo</span></div></div>
+            <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Completadas <span class="mock-tag">ejemplo</span></div></div>
+            <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Días de racha <span class="mock-tag">ejemplo</span></div></div>
           </div>
         </div>
 
@@ -109,6 +105,14 @@
               <div class="pts">265 pts</div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Todos los cursos, agrupados por categoría (Para profesores / Para alumnos) — ancho completo -->
+      <div id="cursos">
+        <div class="wf-section-title">Todos los cursos</div>
+        <div class="course-grid" id="categoriaGrid">
+          <div class="empty-state">Cargando categorías...</div>
         </div>
       </div>
     </div>

@@ -183,16 +183,19 @@ body { display: flex; min-height: 100vh; }
    curso — ver comentario en index.html donde se genera este markup. */
 .wf-progress-label { font-size: 0.72rem; color: var(--text-faint); }
 
-.wf-grid-2col { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
+/* Estadísticas angosta a la izquierda, Leaderboard ocupa el resto a la
+   derecha — proporción inversa a un grid de contenido normal porque
+   Estadísticas es un grid 2x2 compacto, no una lista que necesite ancho. */
+.wf-grid-stats-leaders { display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; align-items: start; margin-bottom: 32px; }
 
 .wf-section-title { font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
 .wf-section-title .see-all { font-size: 0.82rem; color: var(--accent-bright); font-weight: 500; }
 
+/* 2x2 (no 1x4) — la columna de Estadísticas es angosta, ver .wf-grid-stats-leaders. */
 .wf-stats-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 14px;
-  margin-bottom: 28px;
 }
 .wf-stat {
   background: var(--panel);
@@ -248,6 +251,5 @@ body { display: flex; min-height: 100vh; }
 @media (max-width: 900px) {
   .wf-sidebar { display: none; }
   .wf-hero { grid-template-columns: 1fr; }
-  .wf-grid-2col { grid-template-columns: 1fr; }
-  .wf-stats-row { grid-template-columns: repeat(2, 1fr); }
+  .wf-grid-stats-leaders { grid-template-columns: 1fr; }
 }

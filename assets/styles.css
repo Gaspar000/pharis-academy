@@ -34,6 +34,14 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
+/* Scroll personalizado — mismo patrón que #app en dashboard-v2
+   (pharis-api): delgado, sin flechas, con --panel-2 como thumb
+   (equivalente a --surface4 ahí). Aplica al scroll de toda la página. */
+html::-webkit-scrollbar { width: 8px; }
+html::-webkit-scrollbar-track { background: transparent; }
+html::-webkit-scrollbar-thumb { background: var(--panel-2); border-radius: 4px; }
+html::-webkit-scrollbar-thumb:hover { background: var(--rule-strong); }
+html { scrollbar-width: thin; scrollbar-color: var(--panel-2) transparent; }
 body {
   margin: 0;
   background: var(--bg);
