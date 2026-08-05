@@ -183,8 +183,9 @@ body { display: flex; min-height: 100vh; }
    curso — ver comentario en index.html donde se genera este markup. */
 .wf-progress-label { font-size: 0.72rem; color: var(--text-faint); }
 
-/* Mitad exacta: Estadísticas a la izquierda, Leaderboard a la derecha. */
-.wf-grid-stats-leaders { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; margin-bottom: 32px; }
+/* Estadísticas a la izquierda, Leaderboard a la derecha — Leaderboard
+   120px más angosto que la mitad exacta (60px menos por lado del reparto). */
+.wf-grid-stats-leaders { display: grid; grid-template-columns: calc(50% + 60px) calc(50% - 60px); gap: 24px; align-items: start; margin-bottom: 20px; }
 
 .wf-section-title { font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
 .wf-section-title .see-all { font-size: 0.82rem; color: var(--accent-bright); font-weight: 500; }
@@ -223,7 +224,6 @@ body { display: flex; min-height: 100vh; }
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   padding: 20px;
-  margin-bottom: 24px;
 }
 
 .wf-avatar {
