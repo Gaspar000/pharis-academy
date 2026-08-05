@@ -13,6 +13,9 @@
   <link href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" rel="stylesheet" />
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="stylesheet" href="assets/home.css" />
+  <!-- Antes del cierre de <head>: aplica el tema guardado antes del primer
+       paint, para no mostrar un flash del tema incorrecto. -->
+  <script src="assets/theme.js"></script>
 </head>
 <body>
   <aside class="wf-sidebar">
@@ -28,7 +31,10 @@
       <a href="index.html#cursos"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="dashboard.html" id="navDashboard" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard</a>
     </nav>
-    <button class="btn btn-secondary" style="margin-top:auto; width:100%;" onclick="AcademyAuth.logout()"><i class="ph ph-sign-out"></i> Salir</button>
+    <button class="wf-toggle" style="margin-top:auto;" data-theme-toggle>
+      <i class="ph ph-moon icon"></i> <span data-theme-label>Modo oscuro</span>
+    </button>
+    <button class="btn btn-secondary" style="width:100%;" onclick="AcademyAuth.logout()"><i class="ph ph-sign-out"></i> Salir</button>
   </aside>
 
   <div class="wf-main">

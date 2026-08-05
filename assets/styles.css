@@ -1,6 +1,18 @@
 /* ============================================================
-   Pharis Academy — tokens compartidos
-   Brand law: ground #020617, accent #508ff8, Manrope + Fira Sans.
+   Pharis Academy — tokens compartidos, modo oscuro y claro.
+   Brand law: ground #020617 (oscuro) / #f6f8fc (claro), acento
+   #508ff8 (oscuro) / #2f6fe0 (claro), Manrope + Fira Sans.
+
+   3 capas, en orden de prioridad creciente:
+   1. :root          — oscuro, valor por defecto (comportamiento actual).
+   2. @media (prefers-color-scheme: light) — sigue el SO si el usuario
+      nunca tocó el toggle manual.
+   3. :root[data-theme="dark"|"light"] — el toggle de assets/theme.js
+      estampa este atributo y SIEMPRE gana, en ambas direcciones,
+      sobre el media query.
+   Los componentes se estilizan solo a través de estas variables, nunca
+   con colores directos dentro de un media query — así toda la cascada
+   se resuelve consistente sin impotar cuál capa ganó.
    ============================================================ */
 :root {
   --bg: #020617;
@@ -21,15 +33,92 @@
 
   --green: #34d399;
   --green-soft: rgba(52, 211, 153, 0.14);
+  --green-text: #86e8c4;
   --amber: #f0a35a;
   --amber-soft: rgba(240, 163, 90, 0.14);
+  --amber-text: #f5c78e;
   --red: #f0665a;
   --red-soft: rgba(240, 102, 90, 0.14);
+  --red-text: #ffb3ab;
+
+  /* Gradiente de marca del hero — mismo ángulo/estructura en ambos temas,
+     tonos propios por tema (ver overrides abajo) para que el texto blanco
+     encima siga teniendo contraste suficiente. */
+  --hero-gradient: linear-gradient(135deg, #1f6fe0 0%, #508ff8 45%, #6aa8ff 100%);
 
   --radius: 12px;
   --radius-sm: 8px;
   --maxw: 1120px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Claro, capa 2: sigue el SO si no hay elección manual ── */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    --bg: #f6f8fc;
+    --bg-deep: #eef2f9;
+    --panel: #ffffff;
+    --panel-2: #eef2f9;
+    --rule: rgba(15, 23, 42, 0.09);
+    --rule-strong: rgba(37, 99, 235, 0.28);
+
+    --accent: #2f6fe0;
+    --accent-bright: #1d56c0;
+    --accent-soft: rgba(47, 111, 224, 0.10);
+    --accent-soft-2: rgba(47, 111, 224, 0.16);
+
+    --text: #0f1b2d;
+    --text-muted: #52607a;
+    --text-faint: #8592a8;
+
+    /* Oscuros y saturados (no el pastel claro del tema oscuro) — sobre
+       fondo -soft claro, texto claro perdería casi todo el contraste. */
+    --green-text: #0d7d54;
+    --amber-text: #a15a06;
+    --red-text: #b3261e;
+
+    --hero-gradient: linear-gradient(135deg, #1a4fb8 0%, #2f6fe0 45%, #5b8ff0 100%);
+  }
+}
+
+/* ── Capa 3: el toggle manual (assets/theme.js) siempre gana ── */
+:root[data-theme="dark"] {
+  --bg: #020617;
+  --bg-deep: #010410;
+  --panel: #0a1324;
+  --panel-2: #0e1a30;
+  --rule: rgba(231, 238, 247, 0.09);
+  --rule-strong: rgba(80, 143, 248, 0.30);
+  --accent: #508ff8;
+  --accent-bright: #74a6fb;
+  --accent-soft: rgba(80, 143, 248, 0.12);
+  --accent-soft-2: rgba(80, 143, 248, 0.18);
+  --text: #e8eef7;
+  --text-muted: #9aa8bd;
+  --text-faint: #64748b;
+  --green-text: #86e8c4;
+  --amber-text: #f5c78e;
+  --red-text: #ffb3ab;
+  --hero-gradient: linear-gradient(135deg, #1f6fe0 0%, #508ff8 45%, #6aa8ff 100%);
+}
+:root[data-theme="light"] {
+  --bg: #f6f8fc;
+  --bg-deep: #eef2f9;
+  --panel: #ffffff;
+  --panel-2: #eef2f9;
+  --rule: rgba(15, 23, 42, 0.09);
+  --rule-strong: rgba(37, 99, 235, 0.28);
+  --accent: #2f6fe0;
+  --accent-bright: #1d56c0;
+  --accent-soft: rgba(47, 111, 224, 0.10);
+  --accent-soft-2: rgba(47, 111, 224, 0.16);
+  --text: #0f1b2d;
+  --text-muted: #52607a;
+  --text-faint: #8592a8;
+  --green-text: #0d7d54;
+  --amber-text: #a15a06;
+  --red-text: #b3261e;
+  --hero-gradient: linear-gradient(135deg, #1a4fb8 0%, #2f6fe0 45%, #5b8ff0 100%);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -108,15 +197,34 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   border: 1px solid var(--rule);
   border-radius: 999px;
 }
+/* Toggle de tema — botón circular tipo ícono, para topbar/páginas de auth.
+   Ver .wf-toggle en home.css para la variante de fila del sidebar. */
+.theme-toggle {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 1rem;
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+.theme-toggle:hover { color: var(--accent-bright); border-color: var(--rule-strong); }
 
 /* ── Auth pages ── */
 .auth-page {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
 }
+.auth-page .theme-toggle { position: absolute; top: 20px; right: 20px; }
 .auth-card {
   width: 100%;
   max-width: 420px;
@@ -222,7 +330,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .error-box {
   background: var(--red-soft);
   border: 1px solid rgba(240, 102, 90, 0.35);
-  color: #ffb3ab;
+  color: var(--red-text);
   padding: 10px 14px;
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
@@ -297,9 +405,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   display: none;
 }
 .upload-status.visible { display: block; }
-.upload-status.ok { background: var(--green-soft); color: #86e8c4; }
-.upload-status.warn { background: var(--amber-soft); color: #f5c78e; }
-.upload-status.err { background: var(--red-soft); color: #ffb3ab; }
+.upload-status.ok { background: var(--green-soft); color: var(--green-text); }
+.upload-status.warn { background: var(--amber-soft); color: var(--amber-text); }
+.upload-status.err { background: var(--red-soft); color: var(--red-text); }
 
 .submission-history { margin-top: 20px; }
 .submission-item {
@@ -325,9 +433,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   font-weight: 600;
   white-space: nowrap;
 }
-.badge-completado { background: var(--green-soft); color: #86e8c4; }
-.badge-mejoras { background: var(--amber-soft); color: #f5c78e; }
-.badge-incompleto { background: var(--red-soft); color: #ffb3ab; }
+.badge-completado { background: var(--green-soft); color: var(--green-text); }
+.badge-mejoras { background: var(--amber-soft); color: var(--amber-text); }
+.badge-incompleto { background: var(--red-soft); color: var(--red-text); }
 .badge-pendiente { background: var(--accent-soft); color: var(--accent-bright); }
 
 /* ── Dashboard ── */

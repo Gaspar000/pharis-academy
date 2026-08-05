@@ -33,6 +33,25 @@ body { display: flex; min-height: 100vh; }
 .wf-nav a.active { background: var(--accent-soft); color: var(--accent-bright); }
 .wf-nav .icon { width: 18px; text-align: center; flex-shrink: 0; font-size: 1.05rem; }
 
+/* Toggle de tema — fila propia en el sidebar, encima de "Salir".
+   Mismo patrón visual que .wf-nav a pero como <button>, no <a>. */
+.wf-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--rule);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+.wf-toggle:hover { color: var(--text); border-color: var(--rule-strong); }
+.wf-toggle .icon { width: 18px; text-align: center; flex-shrink: 0; font-size: 1.05rem; }
+
 .wf-main { flex: 1; min-width: 0; }
 .wf-topbar {
   display: flex;
@@ -56,7 +75,7 @@ body { display: flex; min-height: 100vh; }
   align-items: stretch;
   gap: 28px;
   min-height: 340px;
-  background: linear-gradient(135deg, #1f6fe0 0%, var(--accent) 45%, #6aa8ff 100%);
+  background: var(--hero-gradient);
   border-radius: var(--radius);
   padding: 28px 32px;
   margin-bottom: 28px;
