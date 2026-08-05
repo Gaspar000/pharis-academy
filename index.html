@@ -57,7 +57,10 @@
         </div>
       </section>
 
-      <!-- Estadísticas (angosta, izq.) + Leaderboard (der.), misma fila.
+      <!-- Columna izquierda: Estadísticas + Todos los cursos apilados.
+           Columna derecha: Leaderboard solo. Gap horizontal grande entre
+           ambas (ver .wf-grid-stats-leaders) — mismo patrón que
+           Statistics+My Assignments vs Leaders en la referencia visual.
            Cursos disponibles es real; el resto de las stats es ilustrativo
            hasta que exista GET /academy/mis-entregas y un sistema de puntos. -->
       <div class="wf-grid-stats-leaders">
@@ -68,6 +71,14 @@
             <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Actividades enviadas <span class="mock-tag">ejemplo</span></div></div>
             <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Completadas <span class="mock-tag">ejemplo</span></div></div>
             <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Días de racha <span class="mock-tag">ejemplo</span></div></div>
+          </div>
+
+          <!-- Todos los cursos, agrupados por categoría (Para profesores / Para alumnos) -->
+          <div id="cursos">
+            <div class="wf-section-title">Todos los cursos</div>
+            <div class="course-grid" id="categoriaGrid">
+              <div class="empty-state">Cargando categorías...</div>
+            </div>
           </div>
         </div>
 
@@ -105,14 +116,6 @@
               <div class="pts">265 pts</div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Todos los cursos, agrupados por categoría (Para profesores / Para alumnos) — ancho completo -->
-      <div id="cursos">
-        <div class="wf-section-title">Todos los cursos</div>
-        <div class="course-grid" id="categoriaGrid">
-          <div class="empty-state">Cargando categorías...</div>
         </div>
       </div>
     </div>

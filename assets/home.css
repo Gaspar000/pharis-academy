@@ -183,18 +183,24 @@ body { display: flex; min-height: 100vh; }
    curso — ver comentario en index.html donde se genera este markup. */
 .wf-progress-label { font-size: 0.72rem; color: var(--text-faint); }
 
-/* Estadísticas a la izquierda, Leaderboard a la derecha — Leaderboard
-   120px más angosto que la mitad exacta (60px menos por lado del reparto). */
-.wf-grid-stats-leaders { display: grid; grid-template-columns: calc(50% + 60px) calc(50% - 60px); gap: 24px; align-items: start; margin-bottom: 20px; }
+/* Columna izquierda (Estadísticas + Todos los cursos) y columna derecha
+   (Leaderboard) — Leaderboard 120px más angosto que la mitad exacta (60px
+   menos por lado del reparto). gap:90px separa ambas columnas para que
+   "respire" el diseño (mismo patrón que Statistics+My Assignments vs
+   Leaders en la referencia visual). */
+.wf-grid-stats-leaders { display: grid; grid-template-columns: calc(50% + 60px) calc(50% - 60px); gap: 90px; align-items: start; margin-bottom: 20px; }
 
 .wf-section-title { font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
 .wf-section-title .see-all { font-size: 0.82rem; color: var(--accent-bright); font-weight: 500; }
 
-/* Una sola fila de 4, dentro de la mitad izquierda del grid. */
+/* Una sola fila de 4, dentro de la columna izquierda del grid.
+   margin-bottom separa de "Todos los cursos", que ahora vive apilado
+   justo debajo dentro de esta misma columna. */
 .wf-stats-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
+  margin-bottom: 24px;
 }
 .wf-stat {
   background: var(--panel);
