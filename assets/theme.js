@@ -57,7 +57,14 @@ AcademyTheme.apply();
 // DOMContentLoaded sin causar flash (el color de fondo ya quedó bien).
 document.addEventListener('DOMContentLoaded', () => {
   AcademyTheme.syncToggleUI();
-  document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
-    btn.addEventListener('click', () => AcademyTheme.toggle());
-  });
+});
+
+// Delegación de eventos en `document`, no listeners por botón: cubre tanto
+// los [data-theme-toggle] estáticos del HTML (login/register) como los
+// que AcademyAuth.renderUserMenu() (api.js) inyecta dinámicamente después
+// — sin esto, el botón del dropdown de usuario quedaba con 2 listeners
+// (uno de acá + uno agregado a mano en renderUserMenu), y cada click
+// disparaba toggle() dos veces, cancelándose entre sí cada 2 clicks.
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-theme-toggle]')) AcademyTheme.toggle();
 });

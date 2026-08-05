@@ -25,9 +25,7 @@
         Pharis Academy
       </a>
       <div class="topbar-actions">
-        <span class="user-chip" id="userChip"></span>
-        <button class="theme-toggle" data-theme-toggle aria-label="Cambiar tema"><i class="ph ph-moon"></i></button>
-        <button class="btn btn-secondary" style="width:auto; padding:8px 16px;" onclick="AcademyAuth.logout()">Salir</button>
+        <div id="userMenu"></div>
       </div>
     </div>
   </header>
@@ -48,7 +46,7 @@
     AcademyAuth.requireAuth();
 
     const user = AcademyAuth.getUser();
-    document.getElementById('userChip').textContent = `${user.nombre} · ${user.rol}`;
+    AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
 
     const params = new URLSearchParams(window.location.search);
     const categoriaSlug = params.get('slug');

@@ -42,6 +42,62 @@ const AcademyAuth = {
     this.clearSession();
     window.location.href = 'login.html';
   },
+
+  /**
+   * Dibuja el chip de usuario + dropdown (nombre/correo, modo oscuro,
+   * salir) dentro de `container`. Único lugar del sitio con esas 2
+   * acciones — antes vivían sueltas en sidebar/topbar de cada página.
+   * Requiere sesión activa (llamar después de requireAuth()).
+   */
+  renderUserMenu(container) {
+    const user = this.getUser();
+    if (!user || !container) return;
+
+    container.className = 'user-menu';
+    container.innerHTML = `
+      <button class="user-chip" id="userMenuTrigger">
+        ${user.nombre} · ${user.rol} <i class="ph ph-caret-down"></i>
+      </button>
+      <div class="user-dropdown">
+        <div class="user-dropdown-header">
+          <div class="user-dropdown-name">${user.nombre}</div>
+          <div class="user-dropdown-email">${user.email}</div>
+        </div>
+        <button class="user-dropdown-item" data-theme-toggle>
+          <i class="ph ph-moon"></i> <span data-theme-label>Modo oscuro</span>
+        </button>
+        <button class="user-dropdown-item danger" id="userMenuLogout">
+          <i class="ph ph-sign-out"></i> Salir
+        </button>
+      </div>
+    `;
+
+    const trigger = container.querySelector('#userMenuTrigger');
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      container.classList.toggle('open');
+    });
+    container.querySelector('#userMenuLogout').addEventListener('click', () => this.logout());
+
+    // Cierra al hacer click fuera — un solo listener global por menú
+    // renderizado, no por página (evita duplicarlo si esto se llama más
+    // de una vez en el futuro).
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target)) container.classList.remove('open');
+    });
+
+    // El click del botón de tema lo maneja la delegación global de
+    // theme.js (document.addEventListener('click', ...)) — no hace falta
+    // engancharlo acá aparte, eso duplicaba el toggle (2 clicks lógicos
+    // por 1 click real, y el tema quedaba sin cambiar la mitad de las
+    // veces). Solo hay que sincronizar el ícono/label del botón recién
+    // creado con el tema actual. typeof-check en vez de `window.`:
+    // AcademyTheme es un `const` de script clásico, no queda colgado de
+    // `window` (a diferencia de una declaración con `var`).
+    if (typeof AcademyTheme !== 'undefined') {
+      AcademyTheme.syncToggleUI();
+    }
+  },
 };
 
 /**

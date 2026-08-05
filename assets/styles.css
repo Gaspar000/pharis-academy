@@ -164,7 +164,12 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .topbar {
   border-bottom: 1px solid var(--rule);
-  background: rgba(2, 6, 23, 0.85);
+  /* var(--bg) con transparencia — antes era rgba(2,6,23,...) fijo (el
+     --bg del oscuro sin variable), así que en modo claro la topbar de
+     curso/categoria/dashboard.html se quedaba con fondo oscuro aunque el
+     resto de la página ya hubiera cambiado a claro. color-mix() calcula
+     la mezcla en tiempo real contra el --bg vigente en cada tema. */
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
   backdrop-filter: blur(8px);
   position: sticky;
   top: 0;
@@ -190,15 +195,63 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .brand-mark { width: 22px; height: 18px; flex-shrink: 0; }
 .topbar-actions { display: flex; align-items: center; gap: 12px; }
+
+/* Menú de usuario — el chip es el trigger de un dropdown con nombre/correo
+   completo, el toggle de tema, y Salir. Único lugar del sitio con esas 2
+   acciones (antes vivían sueltas en sidebar/topbar de cada página). */
+.user-menu { position: relative; }
 .user-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.85rem;
   color: var(--text-muted);
   padding: 6px 12px;
   border: 1px solid var(--rule);
   border-radius: 999px;
+  background: transparent;
+  transition: border-color 0.15s var(--ease), color 0.15s var(--ease);
 }
-/* Toggle de tema — botón circular tipo ícono, para topbar/páginas de auth.
-   Ver .wf-toggle en home.css para la variante de fila del sidebar. */
+.user-chip:hover { border-color: var(--rule-strong); color: var(--text); }
+.user-chip .ph-caret-down { font-size: 0.7rem; transition: transform 0.15s var(--ease); }
+.user-menu.open .user-chip .ph-caret-down { transform: rotate(180deg); }
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 20;
+  display: none;
+}
+.user-menu.open .user-dropdown { display: block; }
+
+.user-dropdown-header { padding: 10px 12px 12px; border-bottom: 1px solid var(--rule); margin-bottom: 6px; }
+.user-dropdown-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.user-dropdown-email { font-size: 0.78rem; color: var(--text-faint); margin-top: 2px; word-break: break-all; }
+
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.86rem;
+  color: var(--text-muted);
+  background: transparent;
+  text-align: left;
+}
+.user-dropdown-item:hover { background: var(--accent-soft); color: var(--text); }
+.user-dropdown-item.danger:hover { background: var(--red-soft); color: var(--red-text); }
+
+/* Toggle de tema — botón circular tipo ícono, para topbar/páginas de auth
+   sin sesión (login/register, donde no hay menú de usuario). */
 .theme-toggle {
   width: 34px;
   height: 34px;

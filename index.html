@@ -31,16 +31,12 @@
       <a href="index.html#cursos"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="dashboard.html" id="navDashboard" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard</a>
     </nav>
-    <button class="wf-toggle" style="margin-top:auto;" data-theme-toggle>
-      <i class="ph ph-moon icon"></i> <span data-theme-label>Modo oscuro</span>
-    </button>
-    <button class="btn btn-secondary" style="width:100%;" onclick="AcademyAuth.logout()"><i class="ph ph-sign-out"></i> Salir</button>
   </aside>
 
   <div class="wf-main">
     <div class="wf-topbar">
       <h1>Overview</h1>
-      <span class="user-chip" id="userChip"></span>
+      <div id="userMenu"></div>
     </div>
 
     <div class="wf-content">
@@ -146,7 +142,7 @@
     AcademyAuth.requireAuth();
 
     const user = AcademyAuth.getUser();
-    document.getElementById('userChip').textContent = `${user.nombre} · ${user.rol}`;
+    AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
     document.getElementById('helloMsg').textContent = `Hola, ${user.nombre.split(' ')[0]}!`;
     if (user.rol === 'profesor') {
       document.getElementById('navDashboard').style.display = 'flex';
