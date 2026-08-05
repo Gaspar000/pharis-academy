@@ -25,6 +25,7 @@
         Pharis Academy
       </a>
       <div class="topbar-actions">
+        <div id="notifMenu"></div>
         <div id="userMenu"></div>
       </div>
     </div>
@@ -46,6 +47,7 @@
     AcademyAuth.requireAuth();
 
     const user = AcademyAuth.getUser();
+    AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
 
     const params = new URLSearchParams(window.location.search);

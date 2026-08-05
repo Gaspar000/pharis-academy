@@ -36,7 +36,10 @@
   <div class="wf-main">
     <div class="wf-topbar">
       <h1>Overview</h1>
-      <div id="userMenu"></div>
+      <div class="topbar-actions">
+        <div id="notifMenu"></div>
+        <div id="userMenu"></div>
+      </div>
     </div>
 
     <div class="wf-content">
@@ -142,6 +145,7 @@
     AcademyAuth.requireAuth();
 
     const user = AcademyAuth.getUser();
+    AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
     document.getElementById('helloMsg').textContent = `Hola, ${user.nombre.split(' ')[0]}!`;
     if (user.rol === 'profesor') {

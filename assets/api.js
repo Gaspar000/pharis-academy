@@ -56,11 +56,14 @@ const AcademyAuth = {
     container.className = 'user-menu';
     container.innerHTML = `
       <button class="user-chip" id="userMenuTrigger">
-        ${user.nombre} · ${user.rol} <i class="ph ph-caret-down"></i>
+        ${user.nombre} <i class="ph ph-caret-down"></i>
       </button>
       <div class="user-dropdown">
         <div class="user-dropdown-header">
-          <div class="user-dropdown-name">${user.nombre}</div>
+          <div class="user-dropdown-name-row">
+            <div class="user-dropdown-name">${user.nombre}</div>
+            <span class="role-chip">${user.rol}</span>
+          </div>
           <div class="user-dropdown-email">${user.email}</div>
         </div>
         <button class="user-dropdown-item" data-theme-toggle>
@@ -97,6 +100,35 @@ const AcademyAuth = {
     if (typeof AcademyTheme !== 'undefined') {
       AcademyTheme.syncToggleUI();
     }
+  },
+
+  /**
+   * Dibuja el botón de notificaciones (campana) + panel desplegable
+   * dentro de `container`. No hay sistema de notificaciones real
+   * todavía — mismo enfoque que el Leaderboard: visible e interactivo,
+   * con contenido de ejemplo/vacío en vez de datos de backend.
+   */
+  renderNotifMenu(container) {
+    if (!container) return;
+
+    container.className = 'notif-menu';
+    container.innerHTML = `
+      <button class="notif-trigger" id="notifMenuTrigger" aria-label="Notificaciones">
+        <i class="ph ph-bell"></i>
+      </button>
+      <div class="notif-dropdown">
+        <div class="notif-dropdown-title">Notificaciones</div>
+        <div class="notif-dropdown-empty">Sin notificaciones por el momento.</div>
+      </div>
+    `;
+
+    container.querySelector('#notifMenuTrigger').addEventListener('click', (e) => {
+      e.stopPropagation();
+      container.classList.toggle('open');
+    });
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target)) container.classList.remove('open');
+    });
   },
 };
 

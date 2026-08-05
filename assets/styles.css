@@ -232,8 +232,23 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .user-menu.open .user-dropdown { display: block; }
 
 .user-dropdown-header { padding: 10px 12px 12px; border-bottom: 1px solid var(--rule); margin-bottom: 6px; }
+.user-dropdown-name-row { display: flex; align-items: center; gap: 8px; }
 .user-dropdown-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
 .user-dropdown-email { font-size: 0.78rem; color: var(--text-faint); margin-top: 2px; word-break: break-all; }
+/* Chip de rol — mismo componente visual que .badge, pero sin semántica de
+   estado (no es éxito/error/advertencia, solo distingue estudiante/profesor),
+   así que usa el acento en vez de las variantes verde/ámbar/rojo. */
+.role-chip {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+  flex-shrink: 0;
+}
 
 .user-dropdown-item {
   display: flex;
@@ -267,6 +282,47 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   transition: color 0.15s var(--ease), border-color 0.15s var(--ease);
 }
 .theme-toggle:hover { color: var(--accent-bright); border-color: var(--rule-strong); }
+
+/* Notificaciones — mismo botón circular que .theme-toggle, con panel
+   desplegable propio (no hay sistema de notificaciones real todavía;
+   mismo enfoque mock que el Leaderboard: visible e interactivo, sin
+   datos de backend). */
+.notif-menu { position: relative; }
+.notif-trigger {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  color: var(--text-muted);
+  font-size: 1rem;
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+.notif-trigger:hover { color: var(--accent-bright); border-color: var(--rule-strong); }
+
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  /* right, no left: el trigger vive pegado al borde derecho del topbar
+     (justo a la izquierda del chip de usuario) — anclado por la izquierda,
+     los 280px de ancho se salían del viewport por la derecha. */
+  right: 0;
+  width: 280px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 20;
+  display: none;
+}
+.notif-menu.open .notif-dropdown { display: block; }
+.notif-dropdown-title { font-size: 0.86rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.notif-dropdown-empty { font-size: 0.82rem; color: var(--text-faint); text-align: center; padding: 16px 4px; }
 
 /* ── Auth pages ── */
 .auth-page {
