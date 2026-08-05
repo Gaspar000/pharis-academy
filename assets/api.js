@@ -66,9 +66,12 @@ const AcademyAuth = {
           </div>
           <div class="user-dropdown-email">${user.email}</div>
         </div>
-        <button class="user-dropdown-item" data-theme-toggle>
-          <i class="ph ph-moon"></i> <span data-theme-label>Modo oscuro</span>
-        </button>
+        <div class="user-dropdown-item theme-row">
+          <span data-theme-label>Modo oscuro</span>
+          <button class="theme-switch" data-theme-toggle aria-label="Cambiar tema">
+            <span class="theme-switch-thumb"></span>
+          </button>
+        </div>
         <button class="user-dropdown-item danger" id="userMenuLogout">
           <i class="ph ph-sign-out"></i> Salir
         </button>

@@ -36,15 +36,23 @@ const AcademyTheme = {
     this.syncToggleUI();
   },
 
-  /** Actualiza el ícono/texto de cualquier botón con [data-theme-toggle]
-   * presente en la página actual. Se llama tras aplicar el tema inicial
-   * y tras cada toggle. */
+  /** Actualiza cualquier [data-theme-toggle] de la página actual: el
+   * ícono luna/sol de los botones circulares (.theme-toggle, en topbar/
+   * páginas de auth), la posición del thumb en el switch del dropdown
+   * (.theme-switch), y el label de texto compartido por ambos. Se llama
+   * tras aplicar el tema inicial y tras cada toggle. */
   syncToggleUI() {
     const isLight = this.current() === 'light';
     document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
       const icon = btn.querySelector('i');
       if (icon) icon.className = isLight ? 'ph ph-sun' : 'ph ph-moon';
-      const label = btn.querySelector('[data-theme-label]');
+      btn.classList.toggle('is-light', isLight);
+      // El label vive en el <button> mismo para .theme-toggle circular,
+      // pero en el <div class="theme-row"> hermano para .theme-switch
+      // (el switch no tiene espacio propio para texto) — se busca en
+      // ambos lugares.
+      const label = btn.querySelector('[data-theme-label]')
+        || btn.closest('.theme-row')?.querySelector('[data-theme-label]');
       if (label) label.textContent = isLight ? 'Modo claro' : 'Modo oscuro';
     });
   },

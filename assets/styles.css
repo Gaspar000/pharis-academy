@@ -253,17 +253,64 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .user-dropdown-item {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  padding: 9px 12px;
+  /* Antes 9px 12px — el borde nativo del <button> (nunca reseteado
+     globalmente, solo font/color/cursor) se leía como un hitbox grande
+     y "duro"; con border:none explícito acá y padding más chico el
+     botón queda visualmente más liviano. */
+  padding: 6px 10px;
+  border: none;
   border-radius: var(--radius-sm);
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   background: transparent;
   text-align: left;
 }
 .user-dropdown-item:hover { background: var(--accent-soft); color: var(--text); }
 .user-dropdown-item.danger:hover { background: var(--red-soft); color: var(--red-text); }
+
+/* Fila del switch de tema — label a la izquierda, switch a la derecha.
+   No es clickeable como fila completa (a diferencia de los demás
+   .user-dropdown-item): el switch mismo es el control. */
+.theme-row { justify-content: space-between; cursor: default; }
+.theme-row:hover { background: transparent; }
+
+/* Switch estilo iOS. El thumb usa el mismo glow de 3 capas que el orbe
+   que sigue al cursor en la app de escritorio (src/overlay.html #orb,
+   #4f8ef7 + box-shadow 8px/16px/28px) — referencia visual pedida por el
+   usuario en vez de un thumb blanco liso. */
+.theme-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  /* --panel-2, no --rule-strong: ese ya lleva ~30% de tinte de acento
+     (rgba con el mismo azul), así que el track "apagado" se leía casi
+     igual de brillante que el "encendido" — imposible distinguir el
+     estado de un vistazo. --panel-2 es neutro (superficie, sin tinte
+     de marca), reservando el azul solo para el estado "on". */
+  background: var(--panel-2);
+  transition: background 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.theme-switch.is-light { background: var(--accent); border-color: var(--accent); }
+.theme-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4f8ef7;
+  box-shadow:
+    0 0 8px rgba(79, 142, 247, 0.9),
+    0 0 16px rgba(79, 142, 247, 0.6),
+    0 0 28px rgba(79, 142, 247, 0.3);
+  transition: left 0.2s var(--ease);
+}
+.theme-switch.is-light .theme-switch-thumb { left: 21px; }
 
 /* Toggle de tema — botón circular tipo ícono, para topbar/páginas de auth
    sin sesión (login/register, donde no hay menú de usuario). */
