@@ -134,16 +134,15 @@ body { display: flex; min-height: 100vh; }
    hero queda vacío en vez de ensanchar las tarjetas. */
 .wf-hero-card {
   background: var(--panel);
-  border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
   flex: 0 0 228px;
   height: 284px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: border-color 0.15s var(--ease), transform 0.15s var(--ease);
+  transition: transform 0.15s var(--ease);
 }
-.wf-hero-card:hover { border-color: var(--rule-strong); transform: translateY(-2px); }
+.wf-hero-card:hover { transform: translateY(-2px); }
 .wf-hero-card-illustration {
   flex: 1;
   background: var(--panel-2);
@@ -207,7 +206,6 @@ body { display: flex; min-height: 100vh; }
 }
 .wf-stat {
   background: var(--panel);
-  border: 1px solid var(--rule);
   border-radius: var(--radius);
   padding: 18px;
 }
@@ -230,7 +228,6 @@ body { display: flex; min-height: 100vh; }
 
 .wf-panel {
   background: var(--panel);
-  border: 1px solid var(--rule);
   border-radius: var(--radius);
   padding: 20px;
 }
@@ -249,7 +246,6 @@ body { display: flex; min-height: 100vh; }
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  border-color: var(--rule-strong);
   background: var(--accent-soft);
   margin-bottom: 14px;
 }
