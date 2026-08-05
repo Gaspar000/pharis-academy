@@ -239,6 +239,34 @@ body { display: flex; min-height: 100vh; }
   font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
 }
 
+/* Card de "tu posición" — encima del ranking general, con acento propio
+   para distinguirla como el bloque personal del usuario. */
+.wf-leader-you-panel {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  border-color: var(--rule-strong);
+  background: var(--accent-soft);
+  margin-bottom: 14px;
+}
+.wf-leader-you-avatar { width: 44px; height: 44px; font-size: 0.95rem; }
+.wf-leader-you-rank { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+.wf-leader-you-label { font-size: 0.78rem; color: var(--text-faint); }
+.wf-leader-you-chips { display: flex; gap: 8px; margin-left: auto; }
+.wf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 .wf-leader-row {
   display: flex;
   align-items: center;
