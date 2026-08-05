@@ -185,10 +185,13 @@ body { display: flex; min-height: 100vh; }
 
 /* Columna izquierda (Estadísticas + Todos los cursos) y columna derecha
    (Leaderboard) — Leaderboard 120px más angosto que la mitad exacta (60px
-   menos por lado del reparto). gap:90px separa ambas columnas para que
-   "respire" el diseño (mismo patrón que Statistics+My Assignments vs
-   Leaders en la referencia visual). */
-.wf-grid-stats-leaders { display: grid; grid-template-columns: calc(50% + 60px) calc(50% - 60px); gap: 90px; align-items: start; margin-bottom: 20px; }
+   menos por lado del reparto). gap:90px separa ambas columnas.
+   Con columnas en % fijo, el gap se suma APARTE del 100% del contenedor
+   (a diferencia de fr, donde el gap se resta antes de repartir) — eso
+   desbordaba el grid 90px más allá de .wf-hero. Se resta la mitad del
+   gap (45px) a cada columna para compensar y que el ancho total (columnas
+   + gap) vuelva a sumar exactamente 100%. */
+.wf-grid-stats-leaders { display: grid; grid-template-columns: calc(50% + 60px - 45px) calc(50% - 60px - 45px); gap: 90px; align-items: start; margin-bottom: 20px; }
 
 .wf-section-title { font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
 .wf-section-title .see-all { font-size: 0.82rem; color: var(--accent-bright); font-weight: 500; }
