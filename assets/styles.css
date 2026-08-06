@@ -647,6 +647,69 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .embed-frame iframe { width: 100%; height: 100%; border: 0; }
 
+.embed-frame img,
+.embed-frame .slide-viewer { width: 100%; height: 100%; }
+.slide-viewer { position: relative; }
+#slideImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Flechas de navegación del visor ──
+   Mismo lenguaje visual que .theme-toggle / .notif-trigger / .remove-btn
+   (circular, 34px, border --rule → --rule-strong en hover) — superpuestas
+   sobre la imagen con position:absolute, semi-transparentes para no tapar
+   el contenido. */
+.slide-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  background: rgba(2, 6, 23, 0.55);
+  color: #fff;
+  font-size: 1.1rem;
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.slide-nav:hover { color: var(--accent-bright); border-color: var(--rule-strong); background: rgba(2, 6, 23, 0.75); }
+.slide-nav:disabled { opacity: 0.35; cursor: not-allowed; }
+.slide-nav:disabled:hover { color: #fff; border-color: var(--rule); background: rgba(2, 6, 23, 0.55); }
+.slide-nav-prev { left: 12px; }
+.slide-nav-next { right: 12px; }
+
+.slide-counter {
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.6);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.slide-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-faint); font-size: 0.9rem; background: var(--panel); }
+
+/* ── Capítulos: ahora clickeables, con estado activo ──
+   Mismo lenguaje que .social-btn.is-active (accent-soft + accent-bright). */
+.chapter-item {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s var(--ease), color 0.15s var(--ease);
+}
+.chapter-item:hover { background: var(--panel-2); }
+.chapter-item.is-current { background: var(--accent-soft); }
+.chapter-item.is-current .chapter-time,
+.chapter-item.is-current .chapter-label { color: var(--accent-bright); }
+
 /* ── Course view: metadata (tags + autor) ──
    Fila entre el header y "Presentación". Wrap en mobile. */
 .course-meta-row {

@@ -76,7 +76,21 @@
     <section class="course-section">
       <h2>Presentación</h2>
       <div class="course-watch-grid">
-        <div class="embed-frame" id="embedFrame">Las diapositivas se agregarán próximamente.</div>
+        <div class="embed-frame" id="embedFrame">
+          <span id="embedPlaceholder">Las diapositivas se agregarán próximamente.</span>
+
+          <!-- Visor real — oculto por defecto, se muestra solo si course.slides existe. -->
+          <div class="slide-viewer" id="slideViewer" style="display:none;">
+            <img id="slideImage" alt="" />
+            <button class="slide-nav slide-nav-prev" id="slidePrevBtn" type="button" aria-label="Diapositiva anterior">
+              <i class="ph ph-caret-left"></i>
+            </button>
+            <button class="slide-nav slide-nav-next" id="slideNextBtn" type="button" aria-label="Diapositiva siguiente">
+              <i class="ph ph-caret-right"></i>
+            </button>
+            <div class="slide-counter" id="slideCounter"></div>
+          </div>
+        </div>
 
         <!-- Capítulos mock — no navegan el embed real (no existe todavía).
              Marcado con .mock-tag igual que "Logros" en perfil.html. -->
@@ -210,9 +224,21 @@
       document.getElementById('courseDesc').textContent = course.descripcion || '';
       document.getElementById('breadcrumbCurrent').textContent = course.titulo;
 
-      const embedFrame = document.getElementById('embedFrame');
-      if (course.slidesEmbedUrl) {
-        embedFrame.innerHTML = `<iframe src="${course.slidesEmbedUrl}" allowfullscreen></iframe>`;
+      if (course.slides && course.slides.length) {
+        document.getElementById('embedPlaceholder').style.display = 'none';
+        document.getElementById('slideViewer').style.display = 'block';
+        currentSlides = course.slides;
+        renderChapters(course.slides);
+        goToSlide(0);
+      } else if (course.slidesEmbedUrl) {
+        // Compatibilidad con el mecanismo anterior (iframe) para cursos que
+        // algún día usen ese camino en vez de imágenes — no aplica hoy a
+        // ninguno de los 4 cursos actuales, pero no se rompe si se usa después.
+        document.getElementById('embedPlaceholder').outerHTML = `<iframe src="${course.slidesEmbedUrl}" allowfullscreen></iframe>`;
+      } else {
+        // Sin slides ni slidesEmbedUrl (los otros 3 cursos hoy) — placeholder
+        // actual, sin cambios de comportamiento.
+        renderChapters(MOCK_CHAPTERS_FALLBACK);
       }
 
       // Tag de categoría — título legible desde data.categorias, no el slug crudo.
@@ -235,23 +261,75 @@
       }
     }
 
-    // Capítulos mock — genéricos, no dependen de ningún curso real todavía
-    // (no existe visor de diapositivas con tracking de progreso).
-    const MOCK_CHAPTERS = [
-      { time: '00:00', label: 'Introducción' },
-      { time: '04:12', label: 'Conceptos clave' },
-      { time: '11:35', label: 'Ejemplo práctico' },
-      { time: '18:50', label: 'Cierre y siguientes pasos' },
+    // Capítulos mock — fallback para cursos sin diapositivas reales todavía
+    // (mismo texto que el mock original, solo con la clave `titulo` en vez
+    // de `label` para calzar con el shape real de renderChapters()). No
+    // corresponden a ninguna diapositiva, así que no llevan data-index útil
+    // — se listan igual pero el click no navega nada.
+    const MOCK_CHAPTERS_FALLBACK = [
+      { titulo: 'Introducción' },
+      { titulo: 'Conceptos clave' },
+      { titulo: 'Ejemplo práctico' },
+      { titulo: 'Cierre y siguientes pasos' },
     ];
 
-    function renderChapters() {
-      document.getElementById('chaptersList').innerHTML = MOCK_CHAPTERS.map(ch => `
-        <li class="chapter-item">
-          <span class="chapter-time">${ch.time}</span>
-          <span class="chapter-label">${ch.label}</span>
+    let currentSlideIndex = 0;
+    let currentSlides = [];
+
+    function renderChapters(slides) {
+      const listEl = document.getElementById('chaptersList');
+      listEl.innerHTML = slides.map((s, i) => `
+        <li class="chapter-item" data-index="${i}">
+          <span class="chapter-time">${String(i + 1).padStart(2, '0')}</span>
+          <span class="chapter-label">${s.titulo}</span>
         </li>
       `).join('');
+
+      listEl.querySelectorAll('.chapter-item').forEach(item => {
+        item.addEventListener('click', () => goToSlide(Number(item.dataset.index)));
+      });
     }
+
+    function updateChapterActiveState() {
+      document.querySelectorAll('#chaptersList .chapter-item').forEach(item => {
+        item.classList.toggle('is-current', Number(item.dataset.index) === currentSlideIndex);
+      });
+    }
+
+    function goToSlide(index) {
+      if (index < 0 || index >= currentSlides.length) return;
+      currentSlideIndex = index;
+
+      const slide = currentSlides[currentSlideIndex];
+      const img = document.getElementById('slideImage');
+      img.alt = slide.titulo;
+      img.src = slide.url;
+
+      document.getElementById('slideCounter').textContent = `${currentSlideIndex + 1} / ${currentSlides.length}`;
+      document.getElementById('slidePrevBtn').disabled = currentSlideIndex === 0;
+      document.getElementById('slideNextBtn').disabled = currentSlideIndex === currentSlides.length - 1;
+      updateChapterActiveState();
+    }
+
+    // Manejo de error de imagen — sin precedente en el proyecto, tratamiento
+    // simple: si la URL de GCS falla (placeholder sin reemplazar, 404, etc.),
+    // se ve un texto claro en vez de un ícono roto de navegador.
+    document.getElementById('slideImage').addEventListener('error', (e) => {
+      e.target.style.display = 'none';
+      const viewer = document.getElementById('slideViewer');
+      if (!viewer.querySelector('.slide-error')) {
+        viewer.insertAdjacentHTML('beforeend', '<div class="slide-error">No se pudo cargar esta diapositiva.</div>');
+      }
+    });
+
+    document.getElementById('slidePrevBtn').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
+    document.getElementById('slideNextBtn').addEventListener('click', () => goToSlide(currentSlideIndex + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (!currentSlides.length) return;
+      if (e.key === 'ArrowLeft') goToSlide(currentSlideIndex - 1);
+      if (e.key === 'ArrowRight') goToSlide(currentSlideIndex + 1);
+    });
 
     function renderSuggested(allCourses, currentCourse) {
       const suggested = allCourses.filter(c => c.categoria === currentCourse.categoria && c.slug !== currentCourse.slug);
@@ -484,7 +562,6 @@
       }
     });
 
-    renderChapters();
     loadCourse();
     loadResources();
   </script>
