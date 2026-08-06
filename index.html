@@ -28,7 +28,7 @@
     </div>
     <nav class="wf-nav">
       <a href="index.html" class="active"><i class="ph ph-squares-four icon"></i> Overview</a>
-      <a href="index.html#cursos"><i class="ph ph-books icon"></i> Cursos</a>
+      <a href="index.html#cursos" id="navCursos"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="dashboard.html" id="navDashboard" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard</a>
       <!-- Recordatorio de desarrollo, no un link real — sin href a
            propósito, para que no genere expectativa de que lleva a algo. -->
@@ -172,6 +172,24 @@
     const statCourses = document.getElementById('statCourses');
     const statCoursesLabel = document.getElementById('statCoursesLabel');
 
+    // El link "Cursos" del sidebar, estando ya en index.html, no debe
+    // depender del anchor nativo del navegador: #cursos crece recién
+    // cuando loadCourses() resuelve, así que un salto de hash disparado
+    // antes de eso aterriza en una posición que el layout corre después
+    // (se siente como que "no hizo nada"). scrollIntoView manual, igual
+    // que "Ver todos" en el hero (más abajo), evita ese problema.
+    document.getElementById('navCursos').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('cursos').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Si se llegó desde otra página vía index.html?scrollTo=cursos (mismo
+    // link "Cursos" del sidebar, pero apuntando afuera de index.html), el
+    // scroll se hace recién cuando loadCourses() termina de renderizar
+    // #categoriaGrid — antes de eso el contenedor #cursos todavía es chico
+    // y el salto quedaría mal ubicado.
+    const scrollToParam = new URLSearchParams(window.location.search).get('scrollTo');
+
     async function loadCourses() {
       try {
         const data = await academyFetch('/academy/courses');
@@ -221,6 +239,14 @@
       } catch (err) {
         categoriaGrid.innerHTML = `<div class="empty-state">${err.message}</div>`;
         heroCards.innerHTML = '';
+      }
+
+      // Recién acá #cursos tiene su tamaño final (ver comentario junto a
+      // scrollToParam más arriba) — se ejecuta tanto si loadCourses()
+      // tuvo éxito como si falló, en ambos casos el contenedor ya dejó de
+      // crecer.
+      if (scrollToParam === 'cursos') {
+        document.getElementById('cursos').scrollIntoView({ behavior: 'smooth' });
       }
     }
 
