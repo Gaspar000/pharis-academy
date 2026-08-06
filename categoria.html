@@ -26,7 +26,7 @@
     </div>
     <nav class="wf-nav">
       <a href="index.html"><i class="ph ph-squares-four icon"></i> Overview</a>
-      <a href="index.html?scrollTo=cursos"><i class="ph ph-books icon"></i> Cursos</a>
+      <a href="categoria.html" class="active"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="dashboard.html" id="navDashboard" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard</a>
       <!-- Recordatorio de desarrollo, no un link real — sin href a
            propósito, para que no genere expectativa de que lleva a algo. -->
@@ -36,7 +36,7 @@
 
   <div class="wf-main">
     <div class="wf-topbar">
-      <h1>Categoría</h1>
+      <h1>Cursos</h1>
       <div class="topbar-actions">
         <div id="notifMenu"></div>
         <div id="userMenu"></div>
@@ -49,7 +49,14 @@
       <p>Cualquier alumno o profesor puede tomar cualquiera de estos cursos.</p>
     </div>
 
-    <div class="course-grid" id="courseGrid">
+    <!-- Invitación cruzada a la otra categoría — no oculta, solo promociona.
+         Oculto hasta que loadCategoria() resuelva cuál es la "opuesta". -->
+    <a class="wf-panel categoria-crosslink" id="crosslinkBanner" style="display:none;">
+      <div class="categoria-crosslink-text" id="crosslinkText"></div>
+      <span class="btn btn-primary btn-small">Ver cursos <i class="ph ph-arrow-right"></i></span>
+    </a>
+
+    <div id="courseSections">
       <div class="empty-state">Cargando cursos...</div>
     </div>
     </main>
@@ -67,40 +74,94 @@
       document.getElementById('navDashboard').style.display = 'flex';
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const categoriaSlug = params.get('slug');
-    if (!categoriaSlug) window.location.href = 'index.html';
+    // Sin #slug= explícito: usa la categoría preferida del usuario
+    // (categoriaPreferida, elegida en el registro — puramente clasificatorio,
+    // NO es user.rol). Con #slug= explícito (p. ej. viniendo de una tarjeta
+    // de "Todos los cursos" en index.html), se respeta tal cual.
+    // Va en el hash (#slug=X), no en el query string (?slug=X): el hash
+    // nunca se envía al servidor, así que ningún servidor estático con
+    // "clean URLs" (ej. npx serve en desarrollo local) puede perderlo en
+    // un redirect — a diferencia del query string, que sí se pierde ahí.
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const categoriaSlug = params.get('slug') || user.categoriaPreferida || 'alumnos';
 
-    const grid = document.getElementById('courseGrid');
+    const sectionsEl = document.getElementById('courseSections');
     const titleEl = document.getElementById('categoriaTitle');
+    const crosslinkBanner = document.getElementById('crosslinkBanner');
+    const crosslinkText = document.getElementById('crosslinkText');
+
+    function renderCrosslink(categoria, categorias) {
+      const otra = categorias.find(c => c.slug !== categoria.slug);
+      if (!otra) { crosslinkBanner.style.display = 'none'; return; }
+
+      crosslinkBanner.href = `categoria.html#slug=${encodeURIComponent(otra.slug)}`;
+      crosslinkText.innerHTML = `¿Buscas algo distinto? También tenemos <strong>${otra.titulo}</strong>.`;
+      crosslinkBanner.style.display = 'flex';
+    }
+
+    // Agrupa los cursos de la categoría actual por tema, preservando el
+    // orden que manda el backend en `temas`. Cursos sin tema conocido
+    // (defensivo, no debería pasar con el catálogo actual) caen en un
+    // grupo final "Otros" para no perderlos silenciosamente.
+    function agruparPorTema(cursos, temas) {
+      const grupos = temas.map(t => ({ tema: t, cursos: cursos.filter(c => c.tema === t.slug) }))
+        .filter(g => g.cursos.length);
+
+      const sinTema = cursos.filter(c => !temas.some(t => t.slug === c.tema));
+      if (sinTema.length) {
+        grupos.push({ tema: { slug: '_otros', titulo: 'Otros' }, cursos: sinTema });
+      }
+      return grupos;
+    }
+
+    function renderCourseCard(c) {
+      return `
+        <a class="course-card" href="curso.html#slug=${encodeURIComponent(c.slug)}">
+          <h2>${c.titulo}</h2>
+          <p>${c.descripcion || ''}</p>
+          <span class="btn btn-primary">Entrar al curso</span>
+        </a>
+      `;
+    }
+
+    function renderGrupos(grupos) {
+      sectionsEl.innerHTML = grupos.map(g => `
+        <div class="tema-section">
+          <div class="wf-section-title">${g.tema.titulo}</div>
+          <div class="course-grid">
+            ${g.cursos.map(renderCourseCard).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
 
     async function loadCategoria() {
       try {
         const data = await academyFetch('/academy/courses');
-        const categoria = (data.categorias || []).find(c => c.slug === categoriaSlug);
+        const categorias = data.categorias || [];
+        const temas = data.temas || [];
+
+        const categoria = categorias.find(c => c.slug === categoriaSlug);
         if (!categoria) {
           titleEl.textContent = 'Categoría no encontrada';
-          grid.innerHTML = '';
+          sectionsEl.innerHTML = '';
+          crosslinkBanner.style.display = 'none';
           return;
         }
         titleEl.textContent = categoria.titulo;
+        renderCrosslink(categoria, categorias);
 
         const cursos = data.courses.filter(c => c.categoria === categoriaSlug);
         if (!cursos.length) {
-          grid.innerHTML = '<div class="empty-state">No hay cursos en esta categoría todavía.</div>';
+          sectionsEl.innerHTML = '<div class="empty-state">No hay cursos en esta categoría todavía.</div>';
           return;
         }
 
-        grid.innerHTML = cursos.map(c => `
-          <a class="course-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
-            <h2>${c.titulo}</h2>
-            <p>${c.descripcion || ''}</p>
-            <span class="btn btn-primary">Entrar al curso</span>
-          </a>
-        `).join('');
+        renderGrupos(agruparPorTema(cursos, temas));
       } catch (err) {
         titleEl.textContent = 'Error al cargar';
-        grid.innerHTML = `<div class="empty-state">${err.message}</div>`;
+        sectionsEl.innerHTML = `<div class="empty-state">${err.message}</div>`;
+        crosslinkBanner.style.display = 'none';
       }
     }
 

@@ -70,6 +70,15 @@ Si `NODE_ENV=production` en Railway, agrega el origen de GitHub Pages a `ALLOWED
 ALLOWED_ORIGINS=https://gaspar000.github.io,...
 ```
 
+Para probar el frontend local contra el backend real de Railway (en vez de mockear
+`/academy/*`), agrega también `http://localhost:3000` — y sirve siempre con ese
+puerto fijo (`npx serve -l 3000` desde `pharis-academy`, no `npx serve` a secas):
+la comparación de origen es un string exacto, así que un puerto aleatorio (el que
+`serve` elige por defecto si 3000 está ocupado) nunca va a matchear.
+```
+ALLOWED_ORIGINS=https://gaspar000.github.io,http://localhost:3000
+```
+
 ### 4. Rutas nuevas
 
 Todas bajo `pharis-api/src/routes/academy.js`, montadas en `src/index.js`:

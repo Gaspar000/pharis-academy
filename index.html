@@ -28,7 +28,7 @@
     </div>
     <nav class="wf-nav">
       <a href="index.html" class="active"><i class="ph ph-squares-four icon"></i> Overview</a>
-      <a href="index.html#cursos" id="navCursos"><i class="ph ph-books icon"></i> Cursos</a>
+      <a href="categoria.html"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="dashboard.html" id="navDashboard" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard</a>
       <!-- Recordatorio de desarrollo, no un link real — sin href a
            propósito, para que no genere expectativa de que lleva a algo. -->
@@ -152,9 +152,36 @@
     </div>
   </div>
 
+  <!-- Modal de bienvenida — solo aparece tras login/registro exitoso, ver
+       sessionStorage 'academy_just_authenticated' en login.html/register.html. -->
+  <div class="welcome-modal-backdrop" id="welcomeModalBackdrop" style="display:none;">
+    <div class="welcome-modal">
+      <h2>Pharis ya conoce tu plataforma</h2>
+      <p>
+        Pharis Academy replica el funcionamiento de la plataforma estudiantil que usa tu
+        universidad. Así demostramos cómo Pharis puede leer el contexto en tiempo real de tu
+        LMS, ya sea Moodle, Canvas, Blackboard o cualquier otro, para acompañarte mientras
+        estudias o calificas.
+      </p>
+      <button class="btn btn-primary" id="welcomeModalClose" style="width:auto; padding:10px 24px;">Entendido</button>
+    </div>
+  </div>
+
   <script src="assets/api.js"></script>
   <script>
     AcademyAuth.requireAuth();
+
+    // Modal de bienvenida — solo tras login/registro exitoso (flag seteado en
+    // login.html/register.html justo antes del redirect). Se borra apenas se
+    // lee para que un F5 posterior en Overview no lo vuelva a mostrar.
+    if (sessionStorage.getItem('academy_just_authenticated')) {
+      sessionStorage.removeItem('academy_just_authenticated');
+      document.getElementById('welcomeModalBackdrop').style.display = 'flex';
+    }
+
+    document.getElementById('welcomeModalClose').addEventListener('click', () => {
+      document.getElementById('welcomeModalBackdrop').style.display = 'none';
+    });
 
     const user = AcademyAuth.getUser();
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
@@ -171,24 +198,6 @@
     const heroCards = document.getElementById('heroCourseCards');
     const statCourses = document.getElementById('statCourses');
     const statCoursesLabel = document.getElementById('statCoursesLabel');
-
-    // El link "Cursos" del sidebar, estando ya en index.html, no debe
-    // depender del anchor nativo del navegador: #cursos crece recién
-    // cuando loadCourses() resuelve, así que un salto de hash disparado
-    // antes de eso aterriza en una posición que el layout corre después
-    // (se siente como que "no hizo nada"). scrollIntoView manual, igual
-    // que "Ver todos" en el hero (más abajo), evita ese problema.
-    document.getElementById('navCursos').addEventListener('click', (e) => {
-      e.preventDefault();
-      document.getElementById('cursos').scrollIntoView({ behavior: 'smooth' });
-    });
-
-    // Si se llegó desde otra página vía index.html?scrollTo=cursos (mismo
-    // link "Cursos" del sidebar, pero apuntando afuera de index.html), el
-    // scroll se hace recién cuando loadCourses() termina de renderizar
-    // #categoriaGrid — antes de eso el contenedor #cursos todavía es chico
-    // y el salto quedaría mal ubicado.
-    const scrollToParam = new URLSearchParams(window.location.search).get('scrollTo');
 
     async function loadCourses() {
       try {
@@ -213,7 +222,7 @@
         const cursosParaHero = cursosDestacados.length ? cursosDestacados : data.courses.slice(0, 2);
 
         heroCards.innerHTML = cursosParaHero.map(c => `
-          <a class="wf-hero-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
+          <a class="wf-hero-card" href="curso.html#slug=${encodeURIComponent(c.slug)}">
             <div class="wf-hero-card-illustration"><i class="ph ph-image"></i></div>
             <div class="wf-hero-card-body">
               <h3>${c.titulo}</h3>
@@ -230,7 +239,7 @@
           alumnos: 'Cursos para incrementar la cantidad de información retenida por medio de la implementación de la inteligencia artificial.',
         };
         categoriaGrid.innerHTML = (data.categorias || []).map(cat => `
-          <a class="course-card" href="categoria.html?slug=${encodeURIComponent(cat.slug)}">
+          <a class="course-card" href="categoria.html#slug=${encodeURIComponent(cat.slug)}">
             <h2>${cat.titulo}</h2>
             <p>${DESCRIPCION_CATEGORIA[cat.slug] || ''}</p>
             <span class="btn btn-primary btn-small">Ver cursos</span>
@@ -239,14 +248,6 @@
       } catch (err) {
         categoriaGrid.innerHTML = `<div class="empty-state">${err.message}</div>`;
         heroCards.innerHTML = '';
-      }
-
-      // Recién acá #cursos tiene su tamaño final (ver comentario junto a
-      // scrollToParam más arriba) — se ejecuta tanto si loadCourses()
-      // tuvo éxito como si falló, en ambos casos el contenedor ya dejó de
-      // crecer.
-      if (scrollToParam === 'cursos') {
-        document.getElementById('cursos').scrollIntoView({ behavior: 'smooth' });
       }
     }
 

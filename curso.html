@@ -27,7 +27,7 @@
     </div>
     <nav class="wf-nav">
       <a href="index.html"><i class="ph ph-squares-four icon"></i> Overview</a>
-      <a href="index.html?scrollTo=cursos"><i class="ph ph-books icon"></i> Cursos</a>
+      <a href="categoria.html"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="dashboard.html" id="navDashboard" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard</a>
       <!-- Recordatorio de desarrollo, no un link real — sin href a
            propósito, para que no genere expectativa de que lleva a algo. -->
@@ -79,10 +79,13 @@
         </aside>
       </div>
 
-      <!-- Acciones sociales — mock visual, sin persistencia. -->
+      <!-- Acciones sociales — "Me gusta" sigue siendo mock puro (sin backend
+           ni acción real). "Compartir" copia la URL al portapapeles (real).
+           "Guardar" persiste en el backend (real) — ver academy_saved_courses. -->
       <div class="course-social-row">
         <button class="social-btn" id="likeBtn" type="button" aria-pressed="false">
           <i class="ph ph-heart"></i> <span class="social-btn-label">Me gusta</span>
+          <span class="mock-tag social-mock-tag">ejemplo, no persiste</span>
         </button>
         <button class="social-btn" id="shareBtn" type="button">
           <i class="ph ph-share-network"></i> <span class="social-btn-label">Compartir</span>
@@ -90,7 +93,33 @@
         <button class="social-btn" id="saveBtn" type="button" aria-pressed="false">
           <i class="ph ph-bookmark-simple"></i> <span class="social-btn-label">Guardar</span>
         </button>
-        <span class="mock-tag social-mock-tag">ejemplo, no persiste</span>
+      </div>
+    </section>
+
+    <!-- Recursos del curso — visible para todos (ver/descargar), la subida
+         es admin-only (ver academy_users.es_admin / JWT esAdmin). -->
+    <section class="course-section">
+      <h2>Recursos del curso</h2>
+      <div id="resourcesList">
+        <div class="empty-state" style="padding:20px 8px;" id="resourcesEmpty">
+          Todavía no hay recursos para este curso.
+        </div>
+      </div>
+
+      <!-- Oculto por defecto — solo se muestra si user.esAdmin === true. -->
+      <div class="upload-box" id="resourceUploadBox" style="display:none;">
+        <div class="field" style="margin-bottom:10px;">
+          <input type="text" id="resourceTitulo" placeholder="Título del recurso (ej. Lista de cotejo)" style="width:100%; background:var(--bg-deep); border:1px solid var(--rule); border-radius:var(--radius-sm); padding:11px 13px; color:var(--text); font-size:0.9rem;" />
+        </div>
+        <div class="file-picker">
+          <input type="file" id="resourceFileInput" accept="application/pdf" class="file-picker-input" />
+          <label for="resourceFileInput" class="file-picker-btn">
+            <i class="ph ph-paperclip"></i>
+            <span id="resourceFilePickerLabel">Seleccionar archivo</span>
+          </label>
+        </div>
+        <button class="btn btn-primary" id="resourceUploadBtn" style="width:auto; padding:10px 20px;">Subir recurso</button>
+        <div class="upload-status" id="resourceUploadStatus"></div>
       </div>
     </section>
 
@@ -99,7 +128,13 @@
       <p>Sube tu actividad en PDF o imagen (JPG/PNG). Pharis la revisará automáticamente contra la rúbrica del curso.</p>
 
       <div class="upload-box">
-        <input type="file" id="fileInput" accept="application/pdf,image/png,image/jpeg" />
+        <div class="file-picker">
+          <input type="file" id="fileInput" accept="application/pdf,image/png,image/jpeg" class="file-picker-input" />
+          <label for="fileInput" class="file-picker-btn">
+            <i class="ph ph-paperclip"></i>
+            <span id="filePickerLabel">Seleccionar archivo</span>
+          </label>
+        </div>
         <button class="btn btn-primary" id="uploadBtn">Subir actividad</button>
         <div class="upload-status" id="uploadStatus"></div>
       </div>
@@ -129,7 +164,15 @@
       document.getElementById('navDashboard').style.display = 'flex';
     }
 
-    const params = new URLSearchParams(window.location.search);
+    if (user.esAdmin) {
+      document.getElementById('resourceUploadBox').style.display = 'block';
+    }
+
+    // Va en el hash (#slug=X), no en el query string (?slug=X): el hash
+    // nunca se envía al servidor, así que ningún servidor estático con
+    // "clean URLs" (ej. npx serve en desarrollo local) puede perderlo en
+    // un redirect — a diferencia del query string, que sí se pierde ahí.
+    const params = new URLSearchParams(window.location.hash.slice(1));
     const slug = params.get('slug');
     if (!slug) window.location.href = 'index.html';
 
@@ -139,31 +182,44 @@
     const localHistory = [];
 
     async function loadCourse() {
-      try {
-        const data = await academyFetch('/academy/courses');
-        const course = data.courses.find(c => c.slug === slug);
-        if (!course) {
-          document.getElementById('courseTitle').textContent = 'Curso no encontrado';
-          return;
-        }
-        document.getElementById('courseTitle').textContent = course.titulo;
-        document.getElementById('courseDesc').textContent = course.descripcion || '';
+      const [coursesResult, meResult] = await Promise.allSettled([
+        academyFetch('/academy/courses'),
+        academyFetch('/academy/me'),
+      ]);
 
-        const embedFrame = document.getElementById('embedFrame');
-        if (course.slidesEmbedUrl) {
-          embedFrame.innerHTML = `<iframe src="${course.slidesEmbedUrl}" allowfullscreen></iframe>`;
-        }
-
-        // Tag de categoría — título legible desde data.categorias, no el slug crudo.
-        const categoria = (data.categorias || []).find(c => c.slug === course.categoria);
-        document.getElementById('courseTags').innerHTML = `
-          <span class="wf-chip"><i class="ph ph-tag"></i> ${categoria ? categoria.titulo : course.categoria}</span>
-        `;
-
-        renderSuggested(data.courses, course);
-      } catch (err) {
+      if (coursesResult.status === 'rejected') {
         document.getElementById('courseTitle').textContent = 'Error al cargar el curso';
-        document.getElementById('courseDesc').textContent = err.message;
+        document.getElementById('courseDesc').textContent = coursesResult.reason.message;
+        return;
+      }
+      const data = coursesResult.value;
+
+      const course = data.courses.find(c => c.slug === slug);
+      if (!course) {
+        document.getElementById('courseTitle').textContent = 'Curso no encontrado';
+        return;
+      }
+      document.getElementById('courseTitle').textContent = course.titulo;
+      document.getElementById('courseDesc').textContent = course.descripcion || '';
+
+      const embedFrame = document.getElementById('embedFrame');
+      if (course.slidesEmbedUrl) {
+        embedFrame.innerHTML = `<iframe src="${course.slidesEmbedUrl}" allowfullscreen></iframe>`;
+      }
+
+      // Tag de categoría — título legible desde data.categorias, no el slug crudo.
+      const categoria = (data.categorias || []).find(c => c.slug === course.categoria);
+      document.getElementById('courseTags').innerHTML = `
+        <span class="wf-chip"><i class="ph ph-tag"></i> ${categoria ? categoria.titulo : course.categoria}</span>
+      `;
+
+      renderSuggested(data.courses, course);
+
+      // Estado inicial de "Guardar" — si /academy/me falló, saveBtn se
+      // queda en su estado por defecto en vez de bloquear la carga del curso.
+      if (meResult.status === 'fulfilled') {
+        const guardados = meResult.value.user.cursosGuardados || [];
+        setSaveBtnActive(guardados.includes(slug));
       }
     }
 
@@ -192,7 +248,7 @@
 
       section.style.display = '';
       document.getElementById('suggestedGrid').innerHTML = suggested.map(c => `
-        <a class="course-card" href="curso.html?slug=${encodeURIComponent(c.slug)}">
+        <a class="course-card" href="curso.html#slug=${encodeURIComponent(c.slug)}">
           <h2>${c.titulo}</h2>
           <p>${c.descripcion || ''}</p>
           <span class="btn btn-primary">Entrar al curso</span>
@@ -200,7 +256,11 @@
       `).join('');
     }
 
-    // ── Acciones sociales (mock, sin backend, sin persistencia) ──
+    // ── Acciones sociales ──
+    // likeBtn: mock puro, sin backend (ver mock-tag en el HTML).
+    // saveBtn: persiste de verdad contra POST /academy/courses/:slug/guardar
+    //   — handler async, espera la respuesta del backend antes de aplicar
+    //   el efecto visual (a diferencia de likeBtn, que es síncrono).
     const likeBtn = document.getElementById('likeBtn');
     const saveBtn = document.getElementById('saveBtn');
     const shareBtn = document.getElementById('shareBtn');
@@ -212,8 +272,30 @@
       icon.className = active ? `ph ${iconFilled}` : `ph ${iconOutline}`;
     }
 
+    // Fija el valor exacto que llega del backend (no alterna a ciegas como
+    // toggleSocialBtn) — se usa tanto al cargar la página (estado inicial)
+    // como tras cada respuesta del toggle.
+    function setSaveBtnActive(active) {
+      saveBtn.classList.toggle('is-active', active);
+      saveBtn.setAttribute('aria-pressed', String(active));
+      saveBtn.querySelector('i').className = active ? 'ph ph-bookmark-simple-fill' : 'ph ph-bookmark-simple';
+    }
+
     likeBtn.addEventListener('click', () => toggleSocialBtn(likeBtn, 'ph-heart', 'ph-heart-fill'));
-    saveBtn.addEventListener('click', () => toggleSocialBtn(saveBtn, 'ph-bookmark-simple', 'ph-bookmark-simple-fill'));
+
+    saveBtn.addEventListener('click', async () => {
+      saveBtn.disabled = true;
+      try {
+        const data = await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/guardar`, {
+          method: 'POST',
+        });
+        setSaveBtnActive(data.guardado);
+      } catch {
+        // No-bloqueante: si falla, el botón simplemente no cambia de estado.
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
 
     shareBtn.addEventListener('click', async () => {
       const label = shareBtn.querySelector('.social-btn-label');
@@ -321,8 +403,76 @@
       }
     });
 
+    document.getElementById('fileInput').addEventListener('change', (e) => {
+      document.getElementById('filePickerLabel').textContent = e.target.files[0] ? e.target.files[0].name : 'Seleccionar archivo';
+    });
+    document.getElementById('resourceFileInput').addEventListener('change', (e) => {
+      document.getElementById('resourceFilePickerLabel').textContent = e.target.files[0] ? e.target.files[0].name : 'Seleccionar archivo';
+    });
+
+    function renderResources(recursos) {
+      const listEl = document.getElementById('resourcesList');
+      if (!recursos.length) {
+        listEl.innerHTML = '<div class="empty-state" style="padding:20px 8px;" id="resourcesEmpty">Todavía no hay recursos para este curso.</div>';
+        return;
+      }
+      listEl.innerHTML = recursos.map(r => `
+        <div class="resource-item">
+          <span class="titulo">${r.titulo}</span>
+          <a class="btn btn-secondary" href="${r.archivoUrl}" download="${r.archivoNombre || r.titulo}">Descargar</a>
+        </div>
+      `).join('');
+    }
+
+    async function loadResources() {
+      try {
+        const data = await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/recursos`);
+        renderResources(data.recursos);
+      } catch {
+        // No-bloqueante, mismo criterio que el resto de fetches secundarios de esta página.
+      }
+    }
+
+    const resourceUploadBtn = document.getElementById('resourceUploadBtn');
+    resourceUploadBtn.addEventListener('click', async () => {
+      const tituloInput = document.getElementById('resourceTitulo');
+      const resourceFileInput = document.getElementById('resourceFileInput');
+      const resourceStatusBox = document.getElementById('resourceUploadStatus');
+      const showResourceStatus = (kind, msg) => {
+        resourceStatusBox.className = `upload-status visible ${kind}`;
+        resourceStatusBox.textContent = msg;
+      };
+
+      const titulo = tituloInput.value.trim();
+      const file = resourceFileInput.files[0];
+      if (!titulo) { showResourceStatus('warn', 'Escribe un título para el recurso.'); return; }
+      if (!file) { showResourceStatus('warn', 'Selecciona un archivo primero.'); return; }
+      if (file.size > MAX_FILE_BYTES) { showResourceStatus('err', 'El archivo supera el límite de 10MB.'); return; }
+
+      resourceUploadBtn.disabled = true;
+      resourceUploadBtn.textContent = 'Subiendo...';
+      try {
+        const dataUrl = await fileToBase64(file);
+        await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/recursos`, {
+          method: 'POST',
+          body: JSON.stringify({ titulo, archivoBase64: dataUrl, archivoNombre: file.name }),
+        });
+        showResourceStatus('ok', 'Recurso subido correctamente.');
+        tituloInput.value = '';
+        resourceFileInput.value = '';
+        document.getElementById('resourceFilePickerLabel').textContent = 'Seleccionar archivo';
+        loadResources();
+      } catch (err) {
+        showResourceStatus('err', err.message);
+      } finally {
+        resourceUploadBtn.disabled = false;
+        resourceUploadBtn.textContent = 'Subir recurso';
+      }
+    });
+
     renderChapters();
     loadCourse();
+    loadResources();
   </script>
 </body>
 </html>

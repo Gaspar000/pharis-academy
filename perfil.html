@@ -26,7 +26,7 @@
     </div>
     <nav class="wf-nav">
       <a href="index.html"><i class="ph ph-squares-four icon"></i> Overview</a>
-      <a href="index.html?scrollTo=cursos"><i class="ph ph-books icon"></i> Cursos</a>
+      <a href="categoria.html"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="dashboard.html" id="navDashboard" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard</a>
       <!-- Recordatorio de desarrollo, no un link real — sin href a
            propósito, para que no genere expectativa de que lleva a algo. -->
@@ -120,6 +120,15 @@
           <span class="wf-chip"><i class="ph ph-trophy"></i> Curso completado</span>
           <span class="wf-chip"><i class="ph ph-fire"></i> Racha de 5+ días</span>
         </div>
+
+        <!-- Cursos guardados — dato real, viene de GET /academy/me/cursos-guardados -->
+        <div class="wf-section-title">Cursos guardados</div>
+        <div class="wf-panel" id="savedCoursesPanel">
+          <div class="empty-state" style="padding:20px 8px;" id="savedCoursesEmpty">
+            Todavía no guardaste ningún curso.
+          </div>
+          <div id="savedCoursesList"></div>
+        </div>
       </div>
     </div>
     </main>
@@ -173,6 +182,59 @@
         streakNum.textContent = data.user.streakCount ?? 0;
       } catch { /* se queda con los datos de localStorage — no bloquea la página */ }
     }
+
+    // ── Cursos guardados ─────────────────────────────────────────────────────
+    const savedCoursesPanel = document.getElementById('savedCoursesPanel');
+    const savedCoursesEmpty = document.getElementById('savedCoursesEmpty');
+    const savedCoursesList = document.getElementById('savedCoursesList');
+
+    function renderSavedCourses(cursos) {
+      if (!cursos.length) {
+        savedCoursesEmpty.style.display = '';
+        savedCoursesList.innerHTML = '';
+        return;
+      }
+      savedCoursesEmpty.style.display = 'none';
+      savedCoursesList.innerHTML = cursos.map(c => `
+        <div class="saved-course-row" data-slug="${c.slug}">
+          <div class="info">
+            <div class="titulo">${c.titulo}</div>
+            <div class="descripcion">${c.descripcion || ''}</div>
+          </div>
+          <button class="remove-btn" type="button" data-slug="${c.slug}" aria-label="Quitar ${c.titulo} de guardados">
+            <i class="ph ph-x"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    async function loadCursosGuardados() {
+      try {
+        const data = await academyFetch('/academy/me/cursos-guardados');
+        renderSavedCourses(data.cursos);
+      } catch {
+        // No-bloqueante, mismo criterio que loadPerfil().
+      }
+    }
+
+    // Delegación de eventos: las filas se re-renderizan por completo en
+    // cada loadCursosGuardados(), un listener por botón se perdería en cada
+    // refresco — delegar en el contenedor padre (que nunca se reemplaza)
+    // evita tener que re-enganchar listeners.
+    savedCoursesList.addEventListener('click', async (e) => {
+      const btn = e.target.closest('.remove-btn');
+      if (!btn) return;
+      const slug = btn.dataset.slug;
+      btn.disabled = true;
+      try {
+        await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/guardar`, {
+          method: 'POST',
+        });
+        await loadCursosGuardados(); // refresca la lista completa tras quitar
+      } catch {
+        btn.disabled = false;
+      }
+    });
 
     perfilForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -242,6 +304,7 @@
     });
 
     loadPerfil();
+    loadCursosGuardados();
   </script>
 </body>
 </html>

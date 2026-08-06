@@ -101,6 +101,7 @@
           body: JSON.stringify({ nombre, email, password, codigo, categoriaPreferida }),
         });
         AcademyAuth.setSession(data.token, data.user);
+        sessionStorage.setItem('academy_just_authenticated', '1');
         window.location.href = 'index.html';
       } catch (err) {
         showError(err.message);

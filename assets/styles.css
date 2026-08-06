@@ -571,6 +571,32 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-card p { font-size: 0.88rem; margin-bottom: 0; flex: 1; }
 .course-card .btn { margin-top: 8px; }
 
+/* ── Categoría: banner de invitación cruzada ──
+   Invita a ver la OTRA categoría (alumnos↔profesores) sin ocultarla.
+   Monta sobre .wf-panel (mismo patrón que .wf-leader-you-panel). */
+.categoria-crosslink {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.categoria-crosslink-text { font-size: 0.9rem; color: var(--text-muted); }
+.categoria-crosslink-text strong { color: var(--text); }
+.categoria-crosslink .btn { flex-shrink: 0; }
+
+/* ── Categoría: agrupación por tema ──
+   Título (.wf-section-title, reusado tal cual) + su propio .course-grid,
+   apiladas — mismo patrón que "Estadísticas" + "Todos los cursos" en
+   index.html, no un grid único con separadores. */
+.tema-section { margin-bottom: 8px; }
+.tema-section + .tema-section { margin-top: 8px; }
+
+@media (max-width: 640px) {
+  .categoria-crosslink { flex-direction: column; align-items: flex-start; }
+}
+
 /* ── Course view ── */
 .course-section {
   padding: 32px 0;
@@ -649,6 +675,49 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .chapter-item .chapter-label { color: var(--text-muted); }
 
+/* ── Perfil: cursos guardados ──
+   Mismo patrón "fila con separador top, sin borde en la primera" que
+   .chapter-item / .wf-leader-row / .news-item. Slot de acción a la derecha
+   vía margin-left:auto en .remove-btn, mismo truco que .wf-leader-row .pts. */
+.saved-course-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 2px;
+  border-top: 1px solid var(--rule);
+}
+.saved-course-row:first-child { border-top: none; padding-top: 0; }
+.saved-course-row .info { min-width: 0; }
+.saved-course-row .info .titulo {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.saved-course-row .info .descripcion {
+  font-size: 0.74rem;
+  color: var(--text-faint);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.saved-course-row .remove-btn {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px;
+  border-radius: 999px;
+  color: var(--text-faint);
+  background: transparent;
+  border: 1px solid transparent;
+  transition: border-color 0.15s var(--ease), color 0.15s var(--ease);
+}
+.saved-course-row .remove-btn:hover { border-color: var(--rule-strong); color: var(--text); }
+.saved-course-row .remove-btn i { font-size: 1rem; }
+
 /* ── Course view: acciones sociales ──
    Fila de botones tipo .wf-chip pero interactivos, con estado .is-active. */
 .course-social-row {
@@ -699,6 +768,56 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   font-size: 0.85rem;
   color: var(--text-muted);
 }
+
+/* ── Selector de archivo personalizado ──
+   El <input type="file"> real queda oculto visualmente (no display:none,
+   para no romper el foco por teclado) — el <label> asociado es el
+   disparador visual real, dispara el picker nativo del navegador vía la
+   asociación for/id estándar de HTML, sin JS. */
+.file-picker { display: flex; align-items: center; margin-bottom: 14px; }
+.file-picker-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.file-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--rule);
+  background: var(--panel-2);
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s var(--ease), color 0.15s var(--ease);
+}
+.file-picker-btn:hover { border-color: var(--rule-strong); color: var(--text); }
+.file-picker-input:focus-visible + .file-picker-btn { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Recursos del curso ──
+   Fila por recurso: título + botón de descarga a la derecha. Reusa el
+   mismo lenguaje visual que .upload-box (panel con borde punteado) para
+   el bloque de subida admin-only. */
+.resource-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 2px;
+  border-top: 1px solid var(--rule);
+}
+.resource-item:first-child { border-top: none; }
+.resource-item .titulo { font-size: 0.86rem; font-weight: 600; flex: 1; }
+.resource-item .btn { width: auto; margin-left: auto; padding: 6px 14px; font-size: 0.78rem; }
+
 .upload-status {
   margin-top: 14px;
   font-size: 0.88rem;
@@ -794,6 +913,40 @@ tbody tr:hover { background: rgba(231, 238, 247, 0.02); }
   text-align: center;
   padding: 60px 20px;
   color: var(--text-faint);
+}
+
+/* ── Modal de bienvenida (post-login/registro) ──
+   Primer modal centrado con backdrop del proyecto — los dropdowns de
+   usuario/notificaciones son position:absolute anclados a un botón, sin
+   backdrop. z-index 30, por encima de esos dropdowns (z-index:20) por si
+   quedara alguno abierto (no debería pasar en la práctica). */
+.welcome-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  padding: 20px;
+}
+.welcome-modal {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  padding: 28px;
+  max-width: 440px;
+  width: 100%;
+}
+.welcome-modal h2 {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+.welcome-modal p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 20px;
 }
 
 /* ── Responsive ── */
