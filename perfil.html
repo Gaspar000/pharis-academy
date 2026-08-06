@@ -229,6 +229,7 @@
       try {
         await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/guardar`, {
           method: 'POST',
+          body: '{}',
         });
         await loadCursosGuardados(); // refresca la lista completa tras quitar
       } catch {

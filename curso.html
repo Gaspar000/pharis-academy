@@ -288,6 +288,7 @@
       try {
         const data = await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/guardar`, {
           method: 'POST',
+          body: '{}',
         });
         setSaveBtnActive(data.guardado);
       } catch {

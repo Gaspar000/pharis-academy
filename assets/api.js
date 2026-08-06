@@ -152,7 +152,10 @@ const AcademyAuth = {
  */
 async function academyFetch(path, options = {}) {
   const token = AcademyAuth.getToken();
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  // Content-Type solo si hay body: Fastify rechaza con
+  // FST_ERR_CTP_EMPTY_JSON_BODY un POST sin cuerpo que igual declara
+  // application/json (ej. el toggle de /academy/courses/:slug/guardar).
+  const headers = { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.headers || {}) };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   let res;
