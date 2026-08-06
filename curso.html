@@ -38,6 +38,15 @@
   <div class="wf-main">
     <div class="wf-topbar">
       <h1>Curso</h1>
+      <nav class="breadcrumb" aria-label="Ruta de navegación">
+        <a href="index.html">Overview</a>
+        <span>/</span>
+        <a href="categoria.html">Cursos</a>
+        <span>/</span>
+        <a href="categoria.html" id="breadcrumbCategoria">…</a>
+        <span>/</span>
+        <span class="current" id="breadcrumbCurrent">Cargando…</span>
+      </nav>
       <div class="topbar-actions">
         <div id="notifMenu"></div>
         <div id="userMenu"></div>
@@ -45,15 +54,6 @@
     </div>
 
     <main class="shell" style="padding-top:28px;">
-    <nav class="breadcrumb" aria-label="Ruta de navegación">
-      <a href="index.html">Overview</a>
-      <span>/</span>
-      <a href="categoria.html">Cursos</a>
-      <span>/</span>
-      <a href="categoria.html" id="breadcrumbCategoria">…</a>
-      <span>/</span>
-      <span class="current" id="breadcrumbCurrent">Cargando…</span>
-    </nav>
     <div class="page-header">
       <h1 id="courseTitle">Cargando curso...</h1>
       <p id="courseDesc"></p>

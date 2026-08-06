@@ -194,7 +194,12 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   letter-spacing: -0.01em;
 }
 .brand-mark { width: 22px; height: 18px; flex-shrink: 0; }
-.topbar-actions { display: flex; align-items: center; gap: 12px; }
+/* margin-left:auto — antes bastaba con justify-content:space-between del
+   padre (.wf-topbar/.topbar-inner) porque .topbar-actions era el único
+   otro hijo además del <h1>/logo. Con el breadcrumb como tercer hijo
+   (curso.html/categoria.html), esto sigue empujándolo al extremo derecho
+   sin depender de cuántos hermanos tenga antes. */
+.topbar-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 
 /* Menú de usuario — el chip es el trigger de un dropdown con nombre/correo
    completo, el toggle de tema, y Salir. Único lugar del sitio con esas 2
@@ -553,15 +558,21 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .page-header h1 { font-size: 1.8rem; }
 
 /* ── Breadcrumb ──
-   Ruta de navegación arriba del título — todos los niveles en gris tenue
-   salvo el actual (último, sin link), que usa --text para leerse en color
-   entero (blanco en dark, casi negro en light). Separadores "/" con el
-   mismo gris que los niveles intermedios, nunca resaltados. */
+   Ruta de navegación en la topbar, a la derecha del título de la sección
+   (mismo renglón que notificaciones/usuario) — no centrado por el
+   space-between del padre (.wf-topbar): margin-left lo pega al <h1>, y
+   .topbar-actions lleva su propio margin-left:auto para seguir quedando
+   pegado al extremo derecho con 3 hijos en vez de 2. Todos los niveles en
+   gris tenue salvo el actual (último, sin link), que usa --text para
+   leerse en color entero (blanco en dark, casi negro en light).
+   Separadores "/" con el mismo gris que los niveles intermedios, nunca
+   resaltados. */
 .breadcrumb {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
+  margin-left: 16px;
   font-size: 0.8rem;
   color: var(--text-faint);
 }
