@@ -551,6 +551,23 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 /* ── Home / course list ── */
 .page-header { padding: 40px 0 8px; }
 .page-header h1 { font-size: 1.8rem; }
+
+/* ── Breadcrumb ──
+   Ruta de navegación arriba del título — todos los niveles en gris tenue
+   salvo el actual (último, sin link), que usa --text para leerse en color
+   entero (blanco en dark, casi negro en light). Separadores "/" con el
+   mismo gris que los niveles intermedios, nunca resaltados. */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-faint);
+}
+.breadcrumb a { color: var(--text-faint); transition: color 0.15s var(--ease); }
+.breadcrumb a:hover { color: var(--text-muted); }
+.breadcrumb .current { color: var(--text); font-weight: 500; }
 .course-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

@@ -45,6 +45,15 @@
     </div>
 
     <main class="shell" style="padding-top:28px;">
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <a href="index.html">Overview</a>
+      <span>/</span>
+      <a href="categoria.html">Cursos</a>
+      <span>/</span>
+      <a href="categoria.html" id="breadcrumbCategoria">…</a>
+      <span>/</span>
+      <span class="current" id="breadcrumbCurrent">Cargando…</span>
+    </nav>
     <div class="page-header">
       <h1 id="courseTitle">Cargando curso...</h1>
       <p id="courseDesc"></p>
@@ -97,14 +106,12 @@
     </section>
 
     <!-- Recursos del curso — visible para todos (ver/descargar), la subida
-         es admin-only (ver academy_users.es_admin / JWT esAdmin). -->
-    <section class="course-section">
+         es admin-only (ver academy_users.es_admin / JWT esAdmin). Sección
+         oculta por completo (para todos, incluido admin) si no hay ningún
+         recurso subido todavía — ver renderResources() en el script. -->
+    <section class="course-section" id="resourcesSection" style="display:none;">
       <h2>Recursos del curso</h2>
-      <div id="resourcesList">
-        <div class="empty-state" style="padding:20px 8px;" id="resourcesEmpty">
-          Todavía no hay recursos para este curso.
-        </div>
-      </div>
+      <div id="resourcesList"></div>
 
       <!-- Oculto por defecto — solo se muestra si user.esAdmin === true. -->
       <div class="upload-box" id="resourceUploadBox" style="display:none;">
@@ -201,6 +208,7 @@
       }
       document.getElementById('courseTitle').textContent = course.titulo;
       document.getElementById('courseDesc').textContent = course.descripcion || '';
+      document.getElementById('breadcrumbCurrent').textContent = course.titulo;
 
       const embedFrame = document.getElementById('embedFrame');
       if (course.slidesEmbedUrl) {
@@ -212,6 +220,10 @@
       document.getElementById('courseTags').innerHTML = `
         <span class="wf-chip"><i class="ph ph-tag"></i> ${categoria ? categoria.titulo : course.categoria}</span>
       `;
+
+      const breadcrumbCategoria = document.getElementById('breadcrumbCategoria');
+      breadcrumbCategoria.textContent = categoria ? categoria.titulo : course.categoria;
+      breadcrumbCategoria.href = `categoria.html#slug=${encodeURIComponent(course.categoria)}`;
 
       renderSuggested(data.courses, course);
 
@@ -412,12 +424,13 @@
     });
 
     function renderResources(recursos) {
-      const listEl = document.getElementById('resourcesList');
+      const sectionEl = document.getElementById('resourcesSection');
       if (!recursos.length) {
-        listEl.innerHTML = '<div class="empty-state" style="padding:20px 8px;" id="resourcesEmpty">Todavía no hay recursos para este curso.</div>';
+        sectionEl.style.display = 'none';
         return;
       }
-      listEl.innerHTML = recursos.map(r => `
+      sectionEl.style.display = '';
+      document.getElementById('resourcesList').innerHTML = recursos.map(r => `
         <div class="resource-item">
           <span class="titulo">${r.titulo}</span>
           <a class="btn btn-secondary" href="${r.archivoUrl}" download="${r.archivoNombre || r.titulo}">Descargar</a>

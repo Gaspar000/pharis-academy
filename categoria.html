@@ -44,6 +44,13 @@
     </div>
 
     <main class="shell" style="padding-top:28px;">
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <a href="index.html">Overview</a>
+      <span>/</span>
+      <a href="categoria.html">Cursos</a>
+      <span>/</span>
+      <span class="current" id="breadcrumbCurrent">Cargando…</span>
+    </nav>
     <div class="page-header">
       <h1 id="categoriaTitle">Cargando…</h1>
       <p>Cualquier alumno o profesor puede tomar cualquiera de estos cursos.</p>
@@ -144,11 +151,13 @@
         const categoria = categorias.find(c => c.slug === categoriaSlug);
         if (!categoria) {
           titleEl.textContent = 'Categoría no encontrada';
+          document.getElementById('breadcrumbCurrent').textContent = 'Categoría no encontrada';
           sectionsEl.innerHTML = '';
           crosslinkBanner.style.display = 'none';
           return;
         }
         titleEl.textContent = categoria.titulo;
+        document.getElementById('breadcrumbCurrent').textContent = categoria.titulo;
         renderCrosslink(categoria, categorias);
 
         const cursos = data.courses.filter(c => c.categoria === categoriaSlug);
