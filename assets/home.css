@@ -225,9 +225,6 @@ body { display: flex; min-height: 100vh; }
    + gap) vuelva a sumar exactamente 100%. */
 .wf-grid-stats-leaders { display: grid; grid-template-columns: calc(50% + 60px - 45px) calc(50% - 60px - 45px); gap: 90px; align-items: start; margin-bottom: 20px; }
 
-.wf-section-title { font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
-.wf-section-title .see-all { font-size: 0.82rem; color: var(--accent-bright); font-weight: 500; }
-
 /* Una sola fila de 4, dentro de la columna izquierda del grid.
    margin-bottom separa de "Todos los cursos", que ahora vive apilado
    justo debajo dentro de esta misma columna. */
@@ -245,25 +242,6 @@ body { display: flex; min-height: 100vh; }
 .wf-stat .num { font-family: "Manrope", sans-serif; font-size: 1.7rem; font-weight: 700; }
 .wf-stat .lbl { font-size: 0.8rem; color: var(--text-faint); margin-top: 2px; }
 .wf-stat-mock { opacity: 0.6; }
-
-.mock-tag {
-  display: inline-block;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-faint);
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  padding: 1px 7px;
-  margin-left: 4px;
-  vertical-align: middle;
-}
-
-.wf-panel {
-  background: var(--panel);
-  border-radius: var(--radius);
-  padding: 20px;
-}
 
 .wf-avatar {
   width: 36px; height: 36px; border-radius: 50%;
@@ -286,18 +264,6 @@ body { display: flex; min-height: 100vh; }
 .wf-leader-you-rank { font-size: 0.95rem; font-weight: 700; color: var(--text); }
 .wf-leader-you-label { font-size: 0.78rem; color: var(--text-faint); }
 .wf-leader-you-chips { display: flex; gap: 8px; margin-left: auto; }
-.wf-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  background: var(--panel);
-  border: 1px solid var(--rule);
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
 
 .wf-leader-row {
   display: flex;

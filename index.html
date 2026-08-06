@@ -65,12 +65,22 @@
         </div>
       </section>
 
+      <!-- Noticias — publicadas por CLI (scripts/academy-news.js en
+           pharis-api), sin panel de admin. Ancho completo, entre el hero y
+           la fila de Estadísticas/Leaderboard. Sección "opcional": si falla
+           el fetch no bloquea el resto del Overview (ver loadNews más abajo). -->
+      <div id="newsSection" style="margin-bottom:28px;">
+        <div class="wf-section-title">Noticias</div>
+        <div id="newsList" class="empty-state">Cargando noticias...</div>
+      </div>
+
       <!-- Columna izquierda: Estadísticas + Todos los cursos apilados.
            Columna derecha: Leaderboard solo. Gap horizontal grande entre
            ambas (ver .wf-grid-stats-leaders) — mismo patrón que
            Statistics+My Assignments vs Leaders en la referencia visual.
-           Cursos disponibles es real; el resto de las stats es ilustrativo
-           hasta que exista GET /academy/mis-entregas y un sistema de puntos. -->
+           Cursos disponibles y días de racha son datos reales; el resto de
+           las stats es ilustrativo hasta que exista GET /academy/mis-entregas
+           y un sistema de puntos. -->
       <div class="wf-grid-stats-leaders">
         <div>
           <div class="wf-section-title">Estadísticas</div>
@@ -78,7 +88,7 @@
             <div class="wf-stat"><div class="num" id="statCourses">–</div><div class="lbl">Cursos disponibles</div></div>
             <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Actividades enviadas <span class="mock-tag">ejemplo</span></div></div>
             <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Completadas <span class="mock-tag">ejemplo</span></div></div>
-            <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Días de racha <span class="mock-tag">ejemplo</span></div></div>
+            <div class="wf-stat"><div class="num" id="statStreak">–</div><div class="lbl">Días de racha</div></div>
           </div>
 
           <!-- Todos los cursos, agrupados por categoría (Para profesores / Para alumnos) -->
@@ -151,6 +161,9 @@
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
     document.getElementById('helloMsg').textContent = `Hola, ${user.nombre.split(' ')[0]}!`;
+    // Ya viene en localStorage desde el último login (POST /academy/login
+    // ahora devuelve streakCount) — no hace falta un fetch aparte para esto.
+    document.getElementById('statStreak').textContent = user.streakCount ?? 0;
     if (user.rol === 'profesor') {
       document.getElementById('navDashboard').style.display = 'flex';
     }
@@ -212,7 +225,36 @@
       }
     }
 
+    // Noticias — sección "opcional": si falla el fetch, se muestra el
+    // mensaje de error ahí mismo pero no bloquea el resto del Overview
+    // (Estadísticas/Leaderboard/Cursos ya cargan con su propio try/catch
+    // independiente en loadCourses).
+    async function loadNews() {
+      const newsList = document.getElementById('newsList');
+      try {
+        const data = await academyFetch('/academy/news');
+        if (!data.news.length) {
+          newsList.innerHTML = '<div class="empty-state">Sin noticias por el momento.</div>';
+          return;
+        }
+        newsList.className = '';
+        newsList.style.display = 'flex';
+        newsList.style.flexDirection = 'column';
+        newsList.style.gap = '10px';
+        newsList.innerHTML = data.news.map(n => `
+          <div class="wf-panel">
+            <h3 style="font-size:0.95rem; margin-bottom:4px;">${n.titulo}</h3>
+            <p style="font-size:0.85rem; margin-bottom:6px;">${n.contenido}</p>
+            <div style="font-size:0.74rem; color:var(--text-faint);">${new Date(n.createdAt).toLocaleString('es-MX')}</div>
+          </div>
+        `).join('');
+      } catch (err) {
+        newsList.innerHTML = `<div class="empty-state">${err.message}</div>`;
+      }
+    }
+
     loadCourses();
+    loadNews();
   </script>
 </body>
 </html>

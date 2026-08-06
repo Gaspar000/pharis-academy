@@ -495,6 +495,59 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .error-box.visible { display: block; }
 
+/* Variante de éxito — mismo patrón que .error-box, usada donde el flujo
+   NO redirige tras completarse (ej. guardar cambios de perfil), así que
+   necesita confirmar en la misma página en vez de solo limpiar el error. */
+.success-box {
+  background: var(--green-soft);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  color: var(--green-text);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+  display: none;
+}
+.success-box.visible { display: block; }
+
+/* ── Tarjeta/chip genéricos (antes en home.css) ──
+   Movidos acá porque no dependen del layout de sidebar de home.css
+   (body{display:flex}) — perfil.html los necesita sin cargar ese archivo,
+   que rompería su propio layout de topbar+main. Las variantes específicas
+   del Leaderboard (.wf-stat, .wf-avatar, .wf-leader-*) se quedan en
+   home.css, esas sí son propias del layout de index.html. */
+.wf-section-title { font-size: 1.05rem; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.wf-section-title .see-all { font-size: 0.82rem; color: var(--accent-bright); font-weight: 500; }
+.mock-tag {
+  display: inline-block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 1px 7px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+.wf-panel {
+  background: var(--panel);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+.wf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 /* ── Home / course list ── */
 .page-header { padding: 40px 0 8px; }
 .page-header h1 { font-size: 1.8rem; }

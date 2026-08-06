@@ -42,6 +42,14 @@ const AcademyAuth = {
     this.clearSession();
     window.location.href = 'login.html';
   },
+  /** Mergea `partial` sobre el user guardado y refresca localStorage sin
+   * pedir un nuevo login — usado tras PATCH /academy/me, ya que el JWT
+   * solo lleva id/email/rol y nunca se re-emite en este flujo. */
+  updateUser(partial) {
+    const current = this.getUser();
+    if (!current) return;
+    this.setSession(this.getToken(), { ...current, ...partial });
+  },
 
   /**
    * Dibuja el chip de usuario + dropdown (nombre/correo, modo oscuro,
@@ -72,6 +80,9 @@ const AcademyAuth = {
             <span class="theme-switch-thumb"></span>
           </button>
         </div>
+        <a class="user-dropdown-item" href="perfil.html">
+          <i class="ph ph-user"></i> Ver perfil
+        </a>
         <button class="user-dropdown-item danger" id="userMenuLogout">
           <i class="ph ph-sign-out"></i> Salir
         </button>
