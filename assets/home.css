@@ -32,6 +32,20 @@ body { display: flex; min-height: 100vh; }
 .wf-nav a:hover { background: var(--accent-soft); color: var(--text); }
 .wf-nav a.active { background: var(--accent-soft); color: var(--accent-bright); }
 .wf-nav .icon { width: 18px; text-align: center; flex-shrink: 0; font-size: 1.05rem; }
+/* Recordatorio de desarrollo, no un link — mismo layout que .wf-nav a,
+   pero atenuado y sin hover interactivo (cursor:default) para que no se
+   lea como algo clickeable. */
+.wf-nav-todo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: var(--text-faint);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-style: italic;
+  cursor: default;
+}
 
 /* Toggle de tema — fila propia en el sidebar, encima de "Salir".
    Mismo patrón visual que .wf-nav a pero como <button>, no <a>. */
