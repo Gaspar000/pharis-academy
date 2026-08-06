@@ -65,15 +65,6 @@
         </div>
       </section>
 
-      <!-- Noticias — publicadas por CLI (scripts/academy-news.js en
-           pharis-api), sin panel de admin. Ancho completo, entre el hero y
-           la fila de Estadísticas/Leaderboard. Sección "opcional": si falla
-           el fetch no bloquea el resto del Overview (ver loadNews más abajo). -->
-      <div id="newsSection" style="margin-bottom:28px;">
-        <div class="wf-section-title">Noticias</div>
-        <div id="newsList" class="empty-state">Cargando noticias...</div>
-      </div>
-
       <!-- Columna izquierda: Estadísticas + Todos los cursos apilados.
            Columna derecha: Leaderboard solo. Gap horizontal grande entre
            ambas (ver .wf-grid-stats-leaders) — mismo patrón que
@@ -148,6 +139,14 @@
               <div class="pts">265 pts</div>
             </div>
           </div>
+
+          <!-- Noticias — publicadas por CLI (scripts/academy-news.js en
+               pharis-api), sin panel de admin. Card chico, debajo del
+               Leaderboard, alineado en la misma columna derecha. Sección
+               "opcional": si falla el fetch no bloquea el resto del
+               Overview (ver loadNews más abajo). -->
+          <div class="wf-section-title" style="margin-top:24px;">Noticias</div>
+          <div id="newsList" class="wf-panel empty-state" style="padding:16px;">Cargando noticias...</div>
         </div>
       </div>
     </div>
@@ -230,26 +229,28 @@
     // (Estadísticas/Leaderboard/Cursos ya cargan con su propio try/catch
     // independiente en loadCourses).
     async function loadNews() {
+      // #newsList YA es .wf-panel (definido en el HTML) — acá solo se
+      // rellena su contenido, sin reconfigurar el contenedor por JS.
       const newsList = document.getElementById('newsList');
       try {
         const data = await academyFetch('/academy/news');
         if (!data.news.length) {
-          newsList.innerHTML = '<div class="empty-state">Sin noticias por el momento.</div>';
+          newsList.innerHTML = '<div class="empty-state" style="padding:8px 0;">Sin noticias por el momento.</div>';
           return;
         }
-        newsList.className = '';
-        newsList.style.display = 'flex';
-        newsList.style.flexDirection = 'column';
-        newsList.style.gap = '10px';
+        // Quita empty-state (fijo en el HTML como estado inicial de
+        // "Cargando...") — si se queda, su text-align:center centra todo
+        // el contenido real de las noticias, no solo el mensaje de carga.
+        newsList.classList.remove('empty-state');
         newsList.innerHTML = data.news.map(n => `
-          <div class="wf-panel">
-            <h3 style="font-size:0.95rem; margin-bottom:4px;">${n.titulo}</h3>
-            <p style="font-size:0.85rem; margin-bottom:6px;">${n.contenido}</p>
-            <div style="font-size:0.74rem; color:var(--text-faint);">${new Date(n.createdAt).toLocaleString('es-MX')}</div>
+          <div class="news-item">
+            <h3>${n.titulo}</h3>
+            <p>${n.contenido}</p>
+            <div class="date">${new Date(n.createdAt).toLocaleString('es-MX')}</div>
           </div>
         `).join('');
       } catch (err) {
-        newsList.innerHTML = `<div class="empty-state">${err.message}</div>`;
+        newsList.innerHTML = `<div class="empty-state" style="padding:8px 0;">${err.message}</div>`;
       }
     }
 
