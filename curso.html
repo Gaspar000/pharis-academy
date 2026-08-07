@@ -54,27 +54,7 @@
     </div>
 
     <main class="shell course-shell" style="padding-top:28px;">
-    <div class="page-header">
-      <h1 id="courseTitle">Cargando curso...</h1>
-      <p id="courseDesc"></p>
-    </div>
-
-    <!-- Tags de categoría + autor — autor es mock fijo (no existe ese campo
-         en el curso, ver README). La categoría se resuelve en loadCourse()
-         contra data.categorias. -->
-    <div class="course-meta-row">
-      <div class="course-meta-tags" id="courseTags"></div>
-      <div class="course-author">
-        <div class="wf-avatar course-author-avatar">EP</div>
-        <div>
-          <div class="course-author-name">Equipo Pharis</div>
-          <div class="course-author-role">Instructor</div>
-        </div>
-      </div>
-    </div>
-
     <section class="course-section">
-      <h2>Presentación</h2>
       <div class="course-watch-grid">
         <div class="embed-frame" id="embedFrame">
           <span id="embedPlaceholder">Las diapositivas se agregarán próximamente.</span>
@@ -102,20 +82,39 @@
         </aside>
       </div>
 
-      <!-- Acciones sociales — "Me gusta" sigue siendo mock puro (sin backend
-           ni acción real). "Compartir" copia la URL al portapapeles (real).
-           "Guardar" persiste en el backend (real) — ver academy_saved_courses. -->
-      <div class="course-social-row">
-        <button class="social-btn" id="likeBtn" type="button" aria-pressed="false">
-          <i class="ph ph-heart"></i> <span class="social-btn-label">Me gusta</span>
-          <span class="mock-tag social-mock-tag">ejemplo, no persiste</span>
-        </button>
-        <button class="social-btn" id="shareBtn" type="button">
-          <i class="ph ph-share-network"></i> <span class="social-btn-label">Compartir</span>
-        </button>
-        <button class="social-btn" id="saveBtn" type="button" aria-pressed="false">
-          <i class="ph ph-bookmark-simple"></i> <span class="social-btn-label">Guardar</span>
-        </button>
+      <!-- Tags de categoría — la categoría se resuelve en loadCourse()
+           contra data.categorias. -->
+      <div class="course-meta-tags" id="courseTags"></div>
+
+      <div class="page-header">
+        <h1 id="courseTitle">Cargando curso...</h1>
+      </div>
+
+      <!-- Autor (mock fijo, no existe ese campo en el curso, ver README) +
+           acciones sociales en la misma fila. "Me gusta" sigue siendo mock
+           puro (sin backend ni acción real). "Compartir" copia la URL al
+           portapapeles (real). "Guardar" persiste en el backend (real) —
+           ver academy_saved_courses. -->
+      <div class="course-meta-row">
+        <div class="course-author">
+          <div class="wf-avatar course-author-avatar">EP</div>
+          <div>
+            <div class="course-author-name">Equipo Pharis</div>
+            <div class="course-author-role">Instructor</div>
+          </div>
+        </div>
+        <div class="course-social-row">
+          <button class="social-btn" id="likeBtn" type="button" aria-pressed="false">
+            <i class="ph ph-heart"></i> <span class="social-btn-label">Me gusta</span>
+            <span class="mock-tag social-mock-tag">ejemplo, no persiste</span>
+          </button>
+          <button class="social-btn" id="shareBtn" type="button">
+            <i class="ph ph-share-network"></i> <span class="social-btn-label">Compartir</span>
+          </button>
+          <button class="social-btn" id="saveBtn" type="button" aria-pressed="false">
+            <i class="ph ph-bookmark-simple"></i> <span class="social-btn-label">Guardar</span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -209,8 +208,7 @@
       ]);
 
       if (coursesResult.status === 'rejected') {
-        document.getElementById('courseTitle').textContent = 'Error al cargar el curso';
-        document.getElementById('courseDesc').textContent = coursesResult.reason.message;
+        document.getElementById('courseTitle').textContent = `Error al cargar el curso: ${coursesResult.reason.message}`;
         return;
       }
       const data = coursesResult.value;
@@ -221,7 +219,6 @@
         return;
       }
       document.getElementById('courseTitle').textContent = course.titulo;
-      document.getElementById('courseDesc').textContent = course.descripcion || '';
       document.getElementById('breadcrumbCurrent').textContent = course.titulo;
 
       if (course.slides && course.slides.length) {

@@ -717,19 +717,23 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .chapter-item.is-current .chapter-time,
 .chapter-item.is-current .chapter-label { color: var(--accent-bright); }
 
-/* ── Course view: metadata (tags + autor) ──
-   Fila entre el header y "Presentación". Wrap en mobile. */
+/* ── Course view: metadata (tags + título + autor/acciones) ──
+   Debajo del visor: tags sueltas, después .page-header (título), después
+   esta fila con el autor a la izquierda y Me gusta/Compartir/Guardar a la
+   derecha. Wrap en mobile. */
+.course-meta-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+/* .page-header trae padding-top:40px pensado para ser lo primero de la
+   página (home.css) — acá vive después del visor y las tags, así que ese
+   aire de arriba sobra. */
+.course-section .page-header { padding-top: 12px; }
 .course-meta-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding-bottom: 20px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--rule);
+  margin-top: 12px;
 }
-.course-meta-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .course-author { display: flex; align-items: center; gap: 10px; }
 .course-author-avatar { width: 34px; height: 34px; font-size: 0.78rem; }
 .course-author-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
@@ -819,13 +823,14 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .saved-course-row .remove-btn i { font-size: 1rem; }
 
 /* ── Course view: acciones sociales ──
-   Fila de botones tipo .wf-chip pero interactivos, con estado .is-active. */
+   Fila de botones tipo .wf-chip pero interactivos, con estado .is-active.
+   Vive dentro de .course-meta-row, a la derecha del autor — sin margin
+   propio, el espaciado entre filas ya lo da .page-header/.course-meta-tags. */
 .course-social-row {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
-  margin-top: 20px;
 }
 .social-btn {
   display: inline-flex;
