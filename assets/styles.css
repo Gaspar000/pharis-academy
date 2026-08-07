@@ -729,10 +729,12 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-author-role { font-size: 0.74rem; color: var(--text-faint); }
 
 /* ── Course view: embed + capítulos, lado a lado ──
-   320px fijo para el panel de capítulos, el embed toma el resto. */
+   260px fijo para el panel de capítulos, el embed toma el resto —
+   angostado desde 320px para darle más ancho relativo al visor de
+   diapositivas. */
 .course-watch-grid {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr 260px;
   gap: 20px;
   align-items: start;
 }
