@@ -774,6 +774,10 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   font-family: "Manrope", sans-serif;
   font-weight: 600;
   font-size: 0.74rem;
+  /* Manrope tiene un line-height más alto que la Fira Sans heredada de
+     .chapter-label — sin esto, el número se ve corrido hacia arriba
+     aunque align-items:center ya centre las cajas correctamente. */
+  line-height: 1;
   color: var(--accent-bright);
   min-width: 38px;
 }
