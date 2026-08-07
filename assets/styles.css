@@ -162,6 +162,13 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   margin: 0 auto;
   padding: 0 24px;
 }
+/* curso.html: ocupa todo el ancho de .wf-main en vez de centrarse con un
+   tope fijo — con margin:0 auto + max-width:1120px sobraba espacio tanto
+   a la izquierda (contra el sidebar) como a la derecha en viewports
+   anchos. Acá se saca el tope y el margin automático para que el
+   contenido use el espacio disponible completo, sin hueco de ningún
+   lado. */
+.course-shell { max-width: none; margin-left: 0; margin-right: 0; }
 .topbar {
   border-bottom: 1px solid var(--rule);
   /* var(--bg) con transparencia — antes era rgba(2,6,23,...) fijo (el
