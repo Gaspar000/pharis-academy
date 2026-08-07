@@ -768,7 +768,10 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   border-top: 1px solid var(--rule);
   font-size: 0.82rem;
 }
-.chapter-item:first-child { border-top: none; padding-top: 0; }
+/* Solo se anula el borde, no el padding-top — con padding-top:0 el primer
+   item quedaba con la mitad de alto que el resto, y su texto se veía
+   corrido hacia arriba dentro de la franja de selección/hover. */
+.chapter-item:first-child { border-top: none; }
 .chapter-item .chapter-time {
   flex-shrink: 0;
   font-family: "Manrope", sans-serif;
