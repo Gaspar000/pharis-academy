@@ -762,9 +762,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
    vive en styles.css por ser específico de curso.html. */
 .chapter-item {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 10px;
-  padding: 9px 2px;
+  padding: 9px 12px;
   border-top: 1px solid var(--rule);
   font-size: 0.82rem;
 }
