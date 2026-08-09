@@ -652,6 +652,11 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .course-section:last-child { border-bottom: none; }
 .course-section h2 { font-size: 1.3rem; }
+/* "Subir actividad": mismo ancho que la columna del visor en
+   .course-watch-grid (resta los 260px fijos del panel de Capítulos +
+   su gap de 20px) — no vive dentro del grid (está en otra sección más
+   abajo en la página), así que se replica el cálculo a mano. */
+.course-section-narrow .upload-box { max-width: calc(100% - 260px - 20px); }
 .embed-frame {
   position: relative;
   width: 100%;
@@ -930,6 +935,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 @media (max-width: 640px) {
   .course-watch-grid { grid-template-columns: 1fr; }
   .course-meta-row { align-items: flex-start; }
+  .course-section-narrow .upload-box { max-width: none; }
 }
 
 .upload-box {
@@ -979,6 +985,30 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .file-picker-btn:hover { border-color: var(--rule-strong); color: var(--text); }
 .file-picker-input:focus-visible + .file-picker-btn { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Dropzone ("Subir actividad") ──
+   El <label for> completo es clickeable (abre el picker nativo sin JS) y
+   además recibe drop real de arrastrar-y-soltar (ver JS). El <input>
+   sigue usando .file-picker-input para quedar oculto-pero-focuseable. */
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 40px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--rule-strong);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s var(--ease), background 0.15s var(--ease);
+}
+.dropzone:hover,
+.dropzone.is-dragover { border-color: var(--accent-bright); background: var(--accent-soft); }
+.file-picker-input:focus-visible + .dropzone-icon { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 50%; }
+.dropzone-icon { font-size: 1.8rem; color: var(--accent-bright); }
+.dropzone-text { font-size: 0.92rem; color: var(--text); margin: 0; }
+.dropzone-link { color: var(--accent-bright); font-weight: 600; text-decoration: underline; }
+.dropzone-hint { font-size: 0.76rem; color: var(--text-faint); margin: 0; }
 
 /* ── Recursos del curso ──
    Fila por recurso: título + botón de descarga a la derecha. Reusa el

@@ -176,18 +176,21 @@
       </div>
     </section>
 
-    <section class="course-section">
+    <section class="course-section course-section-narrow">
       <h2>Subir actividad</h2>
       <p>Sube tu actividad en PDF o imagen (JPG/PNG). Pharis la revisará automáticamente contra la rúbrica del curso.</p>
 
       <div class="upload-box">
-        <div class="file-picker">
+        <!-- Dropzone: arrastrar-y-soltar real (ver JS — DataTransfer arma
+             una FileList sintética para #fileInput y dispara 'change', así
+             reusa la misma validación/lectura que ya usa uploadBtn) más
+             click para abrir el picker nativo, vía <label for>. -->
+        <label for="fileInput" class="dropzone" id="dropzone">
           <input type="file" id="fileInput" accept="application/pdf,image/png,image/jpeg" class="file-picker-input" />
-          <label for="fileInput" class="file-picker-btn">
-            <i class="ph ph-paperclip"></i>
-            <span id="filePickerLabel">Seleccionar archivo</span>
-          </label>
-        </div>
+          <i class="ph ph-upload-simple dropzone-icon"></i>
+          <p class="dropzone-text" id="dropzoneText">Suelta tu archivo aquí, o <span class="dropzone-link">haz clic para subir</span></p>
+          <p class="dropzone-hint">PDF, JPG o PNG — hasta 10MB</p>
+        </label>
         <button class="btn btn-primary" id="uploadBtn">Subir actividad</button>
         <div class="upload-status" id="uploadStatus"></div>
       </div>
@@ -549,9 +552,39 @@
       }
     });
 
+    const dropzone = document.getElementById('dropzone');
+    const dropzoneText = document.getElementById('dropzoneText');
+    const dropzoneDefaultText = dropzoneText.innerHTML;
+
     document.getElementById('fileInput').addEventListener('change', (e) => {
-      document.getElementById('filePickerLabel').textContent = e.target.files[0] ? e.target.files[0].name : 'Seleccionar archivo';
+      dropzoneText.textContent = e.target.files[0] ? e.target.files[0].name : '';
+      if (!e.target.files[0]) dropzoneText.innerHTML = dropzoneDefaultText;
     });
+
+    // Arrastrar-y-soltar real: DataTransfer arma una FileList sintética
+    // para el <input> oculto y dispara 'change' — reusa la misma
+    // validación/lectura que ya corre para la selección por click.
+    ['dragenter', 'dragover'].forEach(evt => {
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropzone.classList.add('is-dragover');
+      });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      dropzone.addEventListener(evt, (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('is-dragover');
+      });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      document.getElementById('fileInput').files = dt.files;
+      document.getElementById('fileInput').dispatchEvent(new Event('change'));
+    });
+
     document.getElementById('resourceFileInput').addEventListener('change', (e) => {
       document.getElementById('resourceFilePickerLabel').textContent = e.target.files[0] ? e.target.files[0].name : 'Seleccionar archivo';
     });
