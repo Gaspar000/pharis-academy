@@ -653,6 +653,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-section:last-child { border-bottom: none; }
 .course-section h2 { font-size: 1.3rem; }
 .embed-frame {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   background: var(--panel);
@@ -678,25 +679,50 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 
 /* ── Barra de controles del visor ──
-   Fuera de .embed-frame (que es 16:9 + overflow:hidden), así no se
-   superpone sobre la imagen — vive debajo, como en un reproductor de
-   video. .viewer-shell es el target de requestFullscreen(). */
+   Superpuesta sobre la imagen dentro de .embed-frame (position:relative
+   la contiene), oculta por defecto — aparece con hover/foco sobre el
+   frame, para no estorbar la lectura de la diapositiva cuando el cursor
+   no está encima. Fondo semitransparente fijo (no var(--panel)): va
+   sobre una imagen de contenido variable, necesita contraste garantizado
+   en ambos temas, no el mismo que el resto de la UI (mismo criterio que
+   ya usaban las flechas originales). .viewer-shell es el target de
+   requestFullscreen(). */
 .viewer-shell:fullscreen { display: flex; flex-direction: column; background: #000; }
 .viewer-shell:fullscreen .embed-frame { flex: 1; aspect-ratio: unset; border-radius: 0; border: 0; }
 
 .viewer-controls {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
   align-items: center;
   gap: 10px;
-  margin-top: 10px;
   padding: 8px 10px;
   border-radius: var(--radius);
-  border: 1px solid var(--rule);
-  background: var(--panel);
+  background: rgba(2, 6, 23, 0.65);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
+  pointer-events: none;
+}
+.embed-frame:hover .viewer-controls,
+.embed-frame:focus-within .viewer-controls {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+/* Sin hover posible (touch) los controles quedan siempre visibles — el
+   auto-hide es una comodidad de mouse, no debe esconder la única forma
+   de navegar en pantallas táctiles. */
+@media (hover: none) {
+  .viewer-controls { opacity: 1; transform: none; pointer-events: auto; }
 }
 
 /* Mismo lenguaje visual que .theme-toggle / .notif-trigger / .remove-btn
-   (circular, border --rule → --rule-strong en hover), ahora en el flujo
-   normal de la barra en vez de superpuesto sobre la imagen. */
+   (circular, border --rule → --rule-strong en hover). Colores fijos
+   (blanco sobre el fondo oscuro semitransparente de la barra), igual
+   que las flechas superpuestas originales. */
 .viewer-btn {
   flex-shrink: 0;
   width: 30px;
@@ -705,19 +731,19 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  border: 1px solid var(--rule);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   background: transparent;
-  color: var(--text-muted);
+  color: #fff;
   font-size: 1rem;
   transition: color 0.15s var(--ease), border-color 0.15s var(--ease), background 0.15s var(--ease);
 }
-.viewer-btn:hover { color: var(--accent-bright); border-color: var(--rule-strong); background: var(--panel-2); }
+.viewer-btn:hover { color: var(--accent-bright); border-color: rgba(255, 255, 255, 0.55); background: rgba(255, 255, 255, 0.12); }
 .viewer-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.viewer-btn:disabled:hover { color: var(--text-muted); border-color: var(--rule); background: transparent; }
+.viewer-btn:disabled:hover { color: #fff; border-color: rgba(255, 255, 255, 0.3); background: transparent; }
 
 .viewer-progress { flex: 1; padding: 10px 0; cursor: pointer; }
 .viewer-progress:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; border-radius: 999px; }
-.viewer-progress-track { position: relative; height: 4px; border-radius: 999px; background: var(--rule-strong); }
+.viewer-progress-track { position: relative; height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.3); }
 .viewer-progress-fill {
   position: absolute;
   top: 0; left: 0; height: 100%;
@@ -731,7 +757,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   font-size: 0.72rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  color: var(--text-muted);
+  color: #fff;
 }
 
 .slide-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-faint); font-size: 0.9rem; background: var(--panel); }

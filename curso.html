@@ -70,27 +70,29 @@
               <div class="slide-viewer" id="slideViewer" style="display:none;">
                 <img id="slideImage" alt="" />
               </div>
-            </div>
 
-            <!-- Barra de controles — fuera de .embed-frame (que es 16:9 y
-                 overflow:hidden), para no superponerse sobre la imagen.
-                 Oculta hasta que haya diapositivas reales cargadas. -->
-            <div class="viewer-controls" id="viewerControls" style="display:none;">
-              <button class="viewer-btn" id="slidePrevBtn" type="button" aria-label="Diapositiva anterior">
-                <i class="ph ph-caret-left"></i>
-              </button>
-              <div class="viewer-progress" id="viewerProgress" role="slider" aria-label="Progreso de diapositivas" tabindex="0">
-                <div class="viewer-progress-track">
-                  <div class="viewer-progress-fill" id="viewerProgressFill"></div>
+              <!-- Barra de controles — superpuesta sobre la imagen, dentro
+                   de .embed-frame (position:absolute). Oculta por defecto,
+                   aparece con hover/foco sobre el frame (ver CSS) — así no
+                   tapa la imagen cuando el cursor no está encima. Oculta
+                   también hasta que haya diapositivas reales cargadas. -->
+              <div class="viewer-controls" id="viewerControls" style="display:none;">
+                <button class="viewer-btn" id="slidePrevBtn" type="button" aria-label="Diapositiva anterior">
+                  <i class="ph ph-caret-left"></i>
+                </button>
+                <div class="viewer-progress" id="viewerProgress" role="slider" aria-label="Progreso de diapositivas" tabindex="0">
+                  <div class="viewer-progress-track">
+                    <div class="viewer-progress-fill" id="viewerProgressFill"></div>
+                  </div>
                 </div>
+                <div class="slide-counter" id="slideCounter"></div>
+                <button class="viewer-btn" id="slideNextBtn" type="button" aria-label="Diapositiva siguiente">
+                  <i class="ph ph-caret-right"></i>
+                </button>
+                <button class="viewer-btn" id="fullscreenBtn" type="button" aria-label="Pantalla completa">
+                  <i class="ph ph-corners-out"></i>
+                </button>
               </div>
-              <div class="slide-counter" id="slideCounter"></div>
-              <button class="viewer-btn" id="slideNextBtn" type="button" aria-label="Diapositiva siguiente">
-                <i class="ph ph-caret-right"></i>
-              </button>
-              <button class="viewer-btn" id="fullscreenBtn" type="button" aria-label="Pantalla completa">
-                <i class="ph ph-corners-out"></i>
-              </button>
             </div>
           </div>
 
