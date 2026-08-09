@@ -75,6 +75,15 @@
         <aside class="chapters-panel wf-panel">
           <div class="chapters-panel-title">Capítulos</div>
           <ol class="chapters-list" id="chaptersList"></ol>
+
+          <!-- Curso sugerido — datos reales de GET /academy/courses, misma
+               categoría, excluyendo el actual. Solo se muestra el primero
+               (el panel es angosto, no un grid). Oculto por completo si no
+               hay otros cursos en la categoría. -->
+          <div class="suggested-course" id="suggestedSection" style="display:none;">
+            <div class="chapters-panel-title">Curso sugerido</div>
+            <div id="suggestedGrid"></div>
+          </div>
         </aside>
       </div>
 
@@ -156,14 +165,6 @@
       </div>
 
       <div class="submission-history" id="submissionHistory"></div>
-    </section>
-
-    <!-- Cursos sugeridos — datos reales de GET /academy/courses, misma
-         categoría, excluyendo el actual. Sección oculta por completo si no
-         hay otros cursos en la categoría. -->
-    <section class="course-section" id="suggestedSection" style="display:none;">
-      <h2>Cursos sugeridos</h2>
-      <div class="course-grid" id="suggestedGrid"></div>
     </section>
     </main>
   </div>
@@ -325,14 +326,18 @@
     });
 
     function renderSuggested(allCourses, currentCourse) {
-      const suggested = allCourses.filter(c => c.categoria === currentCourse.categoria && c.slug !== currentCourse.slug);
+      // Solo el primero — el panel de Capítulos es angosto (260px), no un
+      // grid, así que no tiene sentido apilar más de una tarjeta ahí.
+      const suggested = allCourses
+        .filter(c => c.categoria === currentCourse.categoria && c.slug !== currentCourse.slug)
+        .slice(0, 1);
       const section = document.getElementById('suggestedSection');
       if (!suggested.length) { section.style.display = 'none'; return; }
 
       section.style.display = '';
       document.getElementById('suggestedGrid').innerHTML = suggested.map(c => `
-        <a class="course-card" href="curso.html#slug=${encodeURIComponent(c.slug)}">
-          <h2>${c.titulo}</h2>
+        <a class="course-card course-card-compact" href="curso.html#slug=${encodeURIComponent(c.slug)}">
+          <p class="course-card-compact-title">${c.titulo}</p>
           <p>${c.descripcion || ''}</p>
           <span class="btn btn-primary">Entrar al curso</span>
         </a>

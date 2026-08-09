@@ -606,6 +606,19 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-card p { font-size: 0.88rem; margin-bottom: 0; flex: 1; }
 .course-card .btn { margin-top: 8px; }
 
+/* ── Curso sugerido dentro del panel de Capítulos (curso.html) ──
+   Mismo .course-card, pero comprimido: el panel es 260px fijos, no un
+   grid con columnas de 280px+ como .course-grid. */
+.suggested-course {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+}
+.course-card-compact { padding: 16px; gap: 6px; }
+.course-card-compact-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.course-card-compact p { font-size: 0.78rem; }
+.course-card-compact .btn { padding: 8px 12px; font-size: 0.8rem; }
+
 /* ── Categoría: banner de invitación cruzada ──
    Invita a ver la OTRA categoría (alumnos↔profesores) sin ocultarla.
    Monta sobre .wf-panel (mismo patrón que .wf-leader-you-panel). */
