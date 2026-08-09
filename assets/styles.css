@@ -733,6 +733,11 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   gap: 16px;
   flex-wrap: wrap;
   margin-top: 12px;
+  /* Mismo ancho que la columna 1fr de .course-watch-grid (resta los
+     260px fijos del panel de Capítulos + su gap de 20px) — así los
+     botones de acción no se extienden más allá del borde derecho del
+     visor de diapositivas. */
+  max-width: calc(100% - 260px - 20px);
 }
 .course-author { display: flex; align-items: center; gap: 10px; }
 .course-author-avatar { width: 34px; height: 34px; font-size: 0.78rem; }
@@ -864,7 +869,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .course-watch-grid { grid-template-columns: 1fr; }
-  .course-meta-row { align-items: flex-start; }
+  /* El panel de Capítulos pasa a su propia fila (grid de 1 columna), así
+     que ya no hay que restarle su ancho a .course-meta-row. */
+  .course-meta-row { align-items: flex-start; max-width: none; }
 }
 
 .upload-box {
