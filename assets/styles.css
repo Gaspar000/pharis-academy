@@ -606,15 +606,15 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-card p { font-size: 0.88rem; margin-bottom: 0; flex: 1; }
 .course-card .btn { margin-top: 8px; }
 
-/* ── Curso sugerido dentro del panel de Capítulos (curso.html) ──
-   Mismo .course-card, pero comprimido: el panel es 260px fijos, no un
-   grid con columnas de 280px+ como .course-grid. */
-.suggested-course {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--rule);
-}
-.course-card-compact { padding: 16px; gap: 6px; }
+/* ── Course view: panel de Capítulos + card de Curso sugerido ──
+   Dos .wf-panel independientes, apilados con gap — antes compartían un
+   único panel con un border-top como separador. */
+.side-panels { display: flex; flex-direction: column; gap: 20px; }
+
+/* Curso sugerido: mismo .course-card, pero comprimido — el panel es
+   260px fijos, no un grid con columnas de 280px+ como .course-grid. Sin
+   padding propio: ya lo aporta el .wf-panel que lo envuelve. */
+.course-card-compact { padding: 0; gap: 6px; }
 .course-card-compact-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
 .course-card-compact p { font-size: 0.78rem; }
 .course-card-compact .btn { padding: 8px 12px; font-size: 0.8rem; }
@@ -734,7 +734,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
    Debajo del visor: tags sueltas, después .page-header (título), después
    esta fila con el autor a la izquierda y Me gusta/Compartir/Guardar a la
    derecha. Wrap en mobile. */
-.course-meta-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.course-meta-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 /* .page-header trae padding-top:40px pensado para ser lo primero de la
    página (home.css) — acá vive después del visor y las tags, así que ese
    aire de arriba sobra. */

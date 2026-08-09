@@ -72,19 +72,22 @@
           </div>
         </div>
 
-        <aside class="chapters-panel wf-panel">
-          <div class="chapters-panel-title">Capítulos</div>
-          <ol class="chapters-list" id="chaptersList"></ol>
+        <div class="side-panels">
+          <aside class="chapters-panel wf-panel">
+            <div class="chapters-panel-title">Capítulos</div>
+            <ol class="chapters-list" id="chaptersList"></ol>
+          </aside>
 
           <!-- Curso sugerido — datos reales de GET /academy/courses, misma
                categoría, excluyendo el actual. Solo se muestra el primero
                (el panel es angosto, no un grid). Oculto por completo si no
-               hay otros cursos en la categoría. -->
-          <div class="suggested-course" id="suggestedSection" style="display:none;">
+               hay otros cursos en la categoría. Card propia, separada de
+               Capítulos. -->
+          <aside class="wf-panel" id="suggestedSection" style="display:none;">
             <div class="chapters-panel-title">Curso sugerido</div>
             <div id="suggestedGrid"></div>
-          </div>
-        </aside>
+          </aside>
+        </div>
       </div>
 
       <!-- Tags de categoría — la categoría se resuelve en loadCourse()
