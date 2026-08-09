@@ -62,19 +62,35 @@
              del grid (que antes se igualaba a .side-panels cuando este
              era más alto que el visor, dejando un hueco vacío debajo). -->
         <div class="watch-main-col">
-          <div class="embed-frame" id="embedFrame">
-            <span id="embedPlaceholder">Las diapositivas se agregarán próximamente.</span>
+          <div class="viewer-shell" id="viewerShell">
+            <div class="embed-frame" id="embedFrame">
+              <span id="embedPlaceholder">Las diapositivas se agregarán próximamente.</span>
 
-            <!-- Visor real — oculto por defecto, se muestra solo si course.slides existe. -->
-            <div class="slide-viewer" id="slideViewer" style="display:none;">
-              <img id="slideImage" alt="" />
-              <button class="slide-nav slide-nav-prev" id="slidePrevBtn" type="button" aria-label="Diapositiva anterior">
+              <!-- Visor real — oculto por defecto, se muestra solo si course.slides existe. -->
+              <div class="slide-viewer" id="slideViewer" style="display:none;">
+                <img id="slideImage" alt="" />
+              </div>
+            </div>
+
+            <!-- Barra de controles — fuera de .embed-frame (que es 16:9 y
+                 overflow:hidden), para no superponerse sobre la imagen.
+                 Oculta hasta que haya diapositivas reales cargadas. -->
+            <div class="viewer-controls" id="viewerControls" style="display:none;">
+              <button class="viewer-btn" id="slidePrevBtn" type="button" aria-label="Diapositiva anterior">
                 <i class="ph ph-caret-left"></i>
               </button>
-              <button class="slide-nav slide-nav-next" id="slideNextBtn" type="button" aria-label="Diapositiva siguiente">
+              <div class="viewer-progress" id="viewerProgress" role="slider" aria-label="Progreso de diapositivas" tabindex="0">
+                <div class="viewer-progress-track">
+                  <div class="viewer-progress-fill" id="viewerProgressFill"></div>
+                </div>
+              </div>
+              <div class="slide-counter" id="slideCounter"></div>
+              <button class="viewer-btn" id="slideNextBtn" type="button" aria-label="Diapositiva siguiente">
                 <i class="ph ph-caret-right"></i>
               </button>
-              <div class="slide-counter" id="slideCounter"></div>
+              <button class="viewer-btn" id="fullscreenBtn" type="button" aria-label="Pantalla completa">
+                <i class="ph ph-corners-out"></i>
+              </button>
             </div>
           </div>
 
@@ -231,6 +247,7 @@
       if (course.slides && course.slides.length) {
         document.getElementById('embedPlaceholder').style.display = 'none';
         document.getElementById('slideViewer').style.display = 'block';
+        document.getElementById('viewerControls').style.display = 'flex';
         currentSlides = course.slides;
         renderChapters(course.slides);
         goToSlide(0);
@@ -312,8 +329,36 @@
       document.getElementById('slideCounter').textContent = `${currentSlideIndex + 1} / ${currentSlides.length}`;
       document.getElementById('slidePrevBtn').disabled = currentSlideIndex === 0;
       document.getElementById('slideNextBtn').disabled = currentSlideIndex === currentSlides.length - 1;
+      // Progreso = diapositivas completadas, no "posición actual" — en la
+      // 1 de 7 arranca en 0%, en la 7 de 7 llega a 100%.
+      const progress = currentSlides.length > 1 ? (currentSlideIndex / (currentSlides.length - 1)) * 100 : 100;
+      document.getElementById('viewerProgressFill').style.width = `${progress}%`;
       updateChapterActiveState();
     }
+
+    // Click/drag en la barra de progreso — salta a la diapositiva más
+    // cercana a la posición horizontal del click, mapeando el % de ancho
+    // a un índice entero.
+    function seekToProgressPosition(clientX) {
+      if (!currentSlides.length) return;
+      const track = document.querySelector('.viewer-progress-track');
+      const rect = track.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+      goToSlide(Math.round(ratio * (currentSlides.length - 1)));
+    }
+    // El foco por teclado (ArrowLeft/ArrowRight) ya lo cubre el listener
+    // global de document más abajo — no se duplica acá para evitar que,
+    // con foco en la barra, una flecha dispare goToSlide() dos veces.
+    document.getElementById('viewerProgress').addEventListener('click', (e) => seekToProgressPosition(e.clientX));
+
+    document.getElementById('fullscreenBtn').addEventListener('click', () => {
+      const shell = document.getElementById('viewerShell');
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        shell.requestFullscreen();
+      }
+    });
 
     // Manejo de error de imagen — sin precedente en el proyecto, tratamiento
     // simple: si la URL de GCS falla (placeholder sin reemplazar, 404, etc.),

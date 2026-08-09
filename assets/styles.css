@@ -677,43 +677,61 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   display: block;
 }
 
-/* ── Flechas de navegación del visor ──
-   Mismo lenguaje visual que .theme-toggle / .notif-trigger / .remove-btn
-   (circular, 34px, border --rule → --rule-strong en hover) — superpuestas
-   sobre la imagen con position:absolute, semi-transparentes para no tapar
-   el contenido. */
-.slide-nav {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 34px;
-  height: 34px;
+/* ── Barra de controles del visor ──
+   Fuera de .embed-frame (que es 16:9 + overflow:hidden), así no se
+   superpone sobre la imagen — vive debajo, como en un reproductor de
+   video. .viewer-shell es el target de requestFullscreen(). */
+.viewer-shell:fullscreen { display: flex; flex-direction: column; background: #000; }
+.viewer-shell:fullscreen .embed-frame { flex: 1; aspect-ratio: unset; border-radius: 0; border: 0; }
+
+.viewer-controls {
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  border: 1px solid var(--rule);
+  background: var(--panel);
+}
+
+/* Mismo lenguaje visual que .theme-toggle / .notif-trigger / .remove-btn
+   (circular, border --rule → --rule-strong en hover), ahora en el flujo
+   normal de la barra en vez de superpuesto sobre la imagen. */
+.viewer-btn {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 50%;
   border: 1px solid var(--rule);
-  background: rgba(2, 6, 23, 0.55);
-  color: #fff;
-  font-size: 1.1rem;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
   transition: color 0.15s var(--ease), border-color 0.15s var(--ease), background 0.15s var(--ease);
 }
-.slide-nav:hover { color: var(--accent-bright); border-color: var(--rule-strong); background: rgba(2, 6, 23, 0.75); }
-.slide-nav:disabled { opacity: 0.35; cursor: not-allowed; }
-.slide-nav:disabled:hover { color: #fff; border-color: var(--rule); background: rgba(2, 6, 23, 0.55); }
-.slide-nav-prev { left: 12px; }
-.slide-nav-next { right: 12px; }
+.viewer-btn:hover { color: var(--accent-bright); border-color: var(--rule-strong); background: var(--panel-2); }
+.viewer-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.viewer-btn:disabled:hover { color: var(--text-muted); border-color: var(--rule); background: transparent; }
+
+.viewer-progress { flex: 1; padding: 10px 0; cursor: pointer; }
+.viewer-progress:focus-visible { outline: 2px solid var(--accent-bright); outline-offset: 2px; border-radius: 999px; }
+.viewer-progress-track { position: relative; height: 4px; border-radius: 999px; background: var(--rule-strong); }
+.viewer-progress-fill {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  border-radius: 999px;
+  background: var(--accent-bright);
+  transition: width 0.15s var(--ease);
+}
 
 .slide-counter {
-  position: absolute;
-  bottom: 10px;
-  right: 12px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(2, 6, 23, 0.6);
-  color: #fff;
+  flex-shrink: 0;
   font-size: 0.72rem;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
 }
 
 .slide-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-faint); font-size: 0.9rem; background: var(--panel); }
