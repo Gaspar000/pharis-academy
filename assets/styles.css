@@ -779,17 +779,19 @@ p { margin: 0 0 1em; color: var(--text-muted); }
    esta fila con el autor a la izquierda y Me gusta/Compartir/Guardar a la
    derecha. Wrap en mobile. */
 .course-meta-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
-/* .page-header trae padding-top:40px pensado para ser lo primero de la
+/* .page-header trae padding:40px 0 8px pensado para ser lo primero de la
    página (home.css) — acá vive después del visor y las tags, así que ese
-   aire de arriba sobra. */
-.course-section .page-header { padding-top: 12px; }
+   aire de arriba sobra, y el padding-bottom se anula del todo: el gap
+   real hasta .course-meta-row lo da únicamente el margin-top de esa
+   fila (evita sumar dos valores en dos lugares distintos). */
+.course-section .page-header { padding: 12px 0 0; }
 .course-meta-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  margin-top: 12px;
+  margin-top: 8px;
   /* Sin max-width propio: .watch-main-col ya es el único hijo de la
      columna 1fr de .course-watch-grid, así que hereda su ancho real sin
      necesidad de calcularlo a mano. */
