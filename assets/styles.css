@@ -803,6 +803,10 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .course-author { display: flex; align-items: center; gap: 10px; }
 .course-author-avatar { width: 34px; height: 34px; font-size: 0.78rem; }
+/* Mismo SVG del logo que .brand-mark (sidebar), en blanco en vez de azul
+   de marca — el fondo del avatar (var(--accent)) ya es ese mismo azul,
+   así que el logo necesita el contraste inverso para no perderse. */
+.course-author-avatar-mark { width: 16px; height: 13px; }
 .course-author-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
 .course-author-role { font-size: 0.74rem; color: var(--text-faint); }
 
