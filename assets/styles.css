@@ -734,7 +734,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
    Debajo del visor: tags sueltas, después .page-header (título), después
    esta fila con el autor a la izquierda y Me gusta/Compartir/Guardar a la
    derecha. Wrap en mobile. */
-.course-meta-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.course-meta-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
 /* .page-header trae padding-top:40px pensado para ser lo primero de la
    página (home.css) — acá vive después del visor y las tags, así que ese
    aire de arriba sobra. */
@@ -746,11 +746,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   gap: 16px;
   flex-wrap: wrap;
   margin-top: 12px;
-  /* Mismo ancho que la columna 1fr de .course-watch-grid (resta los
-     260px fijos del panel de Capítulos + su gap de 20px) — así los
-     botones de acción no se extienden más allá del borde derecho del
-     visor de diapositivas. */
-  max-width: calc(100% - 260px - 20px);
+  /* Sin max-width propio: .watch-main-col ya es el único hijo de la
+     columna 1fr de .course-watch-grid, así que hereda su ancho real sin
+     necesidad de calcularlo a mano. */
 }
 .course-author { display: flex; align-items: center; gap: 10px; }
 .course-author-avatar { width: 34px; height: 34px; font-size: 0.78rem; }
@@ -767,6 +765,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   gap: 20px;
   align-items: start;
 }
+/* Único hijo de la columna 1fr — evita que el grid item se desborde si
+   algún contenido interno (ej. texto largo) pide más ancho del disponible. */
+.watch-main-col { min-width: 0; }
 .chapters-panel { display: flex; flex-direction: column; gap: 2px; max-height: 100%; }
 .chapters-panel-title {
   font-size: 0.86rem;
@@ -882,9 +883,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 /* ── Responsive ── */
 @media (max-width: 640px) {
   .course-watch-grid { grid-template-columns: 1fr; }
-  /* El panel de Capítulos pasa a su propia fila (grid de 1 columna), así
-     que ya no hay que restarle su ancho a .course-meta-row. */
-  .course-meta-row { align-items: flex-start; max-width: none; }
+  .course-meta-row { align-items: flex-start; }
 }
 
 .upload-box {

@@ -56,19 +56,61 @@
     <main class="shell course-shell" style="padding-top:4px;">
     <section class="course-section">
       <div class="course-watch-grid">
-        <div class="embed-frame" id="embedFrame">
-          <span id="embedPlaceholder">Las diapositivas se agregarán próximamente.</span>
+        <!-- Visor + info del curso (tags/título/autor) van juntos, como
+             único hijo de la columna 1fr — así su posición depende del
+             flujo real de esta columna, no de la altura total de la fila
+             del grid (que antes se igualaba a .side-panels cuando este
+             era más alto que el visor, dejando un hueco vacío debajo). -->
+        <div class="watch-main-col">
+          <div class="embed-frame" id="embedFrame">
+            <span id="embedPlaceholder">Las diapositivas se agregarán próximamente.</span>
 
-          <!-- Visor real — oculto por defecto, se muestra solo si course.slides existe. -->
-          <div class="slide-viewer" id="slideViewer" style="display:none;">
-            <img id="slideImage" alt="" />
-            <button class="slide-nav slide-nav-prev" id="slidePrevBtn" type="button" aria-label="Diapositiva anterior">
-              <i class="ph ph-caret-left"></i>
-            </button>
-            <button class="slide-nav slide-nav-next" id="slideNextBtn" type="button" aria-label="Diapositiva siguiente">
-              <i class="ph ph-caret-right"></i>
-            </button>
-            <div class="slide-counter" id="slideCounter"></div>
+            <!-- Visor real — oculto por defecto, se muestra solo si course.slides existe. -->
+            <div class="slide-viewer" id="slideViewer" style="display:none;">
+              <img id="slideImage" alt="" />
+              <button class="slide-nav slide-nav-prev" id="slidePrevBtn" type="button" aria-label="Diapositiva anterior">
+                <i class="ph ph-caret-left"></i>
+              </button>
+              <button class="slide-nav slide-nav-next" id="slideNextBtn" type="button" aria-label="Diapositiva siguiente">
+                <i class="ph ph-caret-right"></i>
+              </button>
+              <div class="slide-counter" id="slideCounter"></div>
+            </div>
+          </div>
+
+          <!-- Tags de categoría — la categoría se resuelve en loadCourse()
+               contra data.categorias. -->
+          <div class="course-meta-tags" id="courseTags"></div>
+
+          <div class="page-header">
+            <h1 id="courseTitle">Cargando curso...</h1>
+          </div>
+
+          <!-- Autor (mock fijo, no existe ese campo en el curso, ver README) +
+               acciones sociales en la misma fila. "Me gusta" sigue siendo mock
+               puro (sin backend ni acción real). "Compartir" copia la URL al
+               portapapeles (real). "Guardar" persiste en el backend (real) —
+               ver academy_saved_courses. -->
+          <div class="course-meta-row">
+            <div class="course-author">
+              <div class="wf-avatar course-author-avatar">EP</div>
+              <div>
+                <div class="course-author-name">Equipo Pharis</div>
+                <div class="course-author-role">Instructor</div>
+              </div>
+            </div>
+            <div class="course-social-row">
+              <button class="social-btn" id="likeBtn" type="button" aria-pressed="false">
+                <i class="ph ph-heart"></i> <span class="social-btn-label">Me gusta</span>
+                <span class="mock-tag social-mock-tag">ejemplo, no persiste</span>
+              </button>
+              <button class="social-btn" id="shareBtn" type="button">
+                <i class="ph ph-share-network"></i> <span class="social-btn-label">Compartir</span>
+              </button>
+              <button class="social-btn" id="saveBtn" type="button" aria-pressed="false">
+                <i class="ph ph-bookmark-simple"></i> <span class="social-btn-label">Guardar</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -87,41 +129,6 @@
             <div class="chapters-panel-title">Curso sugerido</div>
             <div id="suggestedGrid"></div>
           </aside>
-        </div>
-      </div>
-
-      <!-- Tags de categoría — la categoría se resuelve en loadCourse()
-           contra data.categorias. -->
-      <div class="course-meta-tags" id="courseTags"></div>
-
-      <div class="page-header">
-        <h1 id="courseTitle">Cargando curso...</h1>
-      </div>
-
-      <!-- Autor (mock fijo, no existe ese campo en el curso, ver README) +
-           acciones sociales en la misma fila. "Me gusta" sigue siendo mock
-           puro (sin backend ni acción real). "Compartir" copia la URL al
-           portapapeles (real). "Guardar" persiste en el backend (real) —
-           ver academy_saved_courses. -->
-      <div class="course-meta-row">
-        <div class="course-author">
-          <div class="wf-avatar course-author-avatar">EP</div>
-          <div>
-            <div class="course-author-name">Equipo Pharis</div>
-            <div class="course-author-role">Instructor</div>
-          </div>
-        </div>
-        <div class="course-social-row">
-          <button class="social-btn" id="likeBtn" type="button" aria-pressed="false">
-            <i class="ph ph-heart"></i> <span class="social-btn-label">Me gusta</span>
-            <span class="mock-tag social-mock-tag">ejemplo, no persiste</span>
-          </button>
-          <button class="social-btn" id="shareBtn" type="button">
-            <i class="ph ph-share-network"></i> <span class="social-btn-label">Compartir</span>
-          </button>
-          <button class="social-btn" id="saveBtn" type="button" aria-pressed="false">
-            <i class="ph ph-bookmark-simple"></i> <span class="social-btn-label">Guardar</span>
-          </button>
         </div>
       </div>
     </section>
