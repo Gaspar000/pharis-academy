@@ -833,6 +833,31 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 
 .slide-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-faint); font-size: 0.9rem; background: var(--panel); }
 
+/* ── Aviso de barrera 6→7 (ver goToSlide en curso.html) ──
+   Toast breve, centrado sobre la imagen — a diferencia de .slide-error no
+   tapa la diapositiva (fondo semitransparente, ancho de contenido), es un
+   aviso momentáneo, no un estado permanente. Mismo criterio de contraste
+   fijo que .viewer-controls: va sobre una imagen de contenido variable. */
+.slide-toast {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.96);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
+}
+.slide-toast.is-visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
 /* ── Capítulos: ahora clickeables, con estado activo ──
    Mismo lenguaje que .social-btn.is-active (accent-soft + accent-bright). */
 .chapter-item {
@@ -844,6 +869,18 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .chapter-item.is-current { background: var(--accent-soft); }
 .chapter-item.is-current .chapter-time,
 .chapter-item.is-current .chapter-label { color: var(--accent-bright); }
+
+/* Barrera 6→7 del curso "introduccion" (ver goToSlide en curso.html) —
+   pista visual antes de que el alumno haga click y reciba el toast:
+   atenuado + ícono de candado (ver .chapter-lock-icon, insertado por JS
+   en renderChapters) en vez del número, cursor not-allowed. El click
+   sigue llegando a goToSlide() (no se remueve el listener), que es la
+   única fuente de verdad de la barrera — esto es solo estética. */
+.chapter-item.is-locked { cursor: not-allowed; opacity: 0.55; }
+.chapter-item.is-locked:hover { background: transparent; }
+.chapter-item.is-locked .chapter-time { display: none; }
+.chapter-lock-icon { display: none; flex-shrink: 0; min-width: 38px; text-align: center; font-size: 0.85rem; color: var(--text-faint); }
+.chapter-item.is-locked .chapter-lock-icon { display: inline; }
 
 /* ── Course view: metadata (tags + título + autor/acciones) ──
    Debajo del visor: tags sueltas, después .page-header (título), después

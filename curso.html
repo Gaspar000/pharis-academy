@@ -74,6 +74,10 @@
                      goToSlide() según slide.hotspots. Vacío para
                      diapositivas sin interactividad (la mayoría). -->
                 <div class="slide-hotspots" id="slideHotspots"></div>
+                <!-- Aviso de barrera 6→7 (ver goToSlide) — oculto por
+                     defecto, aparece un instante cuando se intenta avanzar
+                     sin haber subido una actividad todavía. -->
+                <div class="slide-toast" id="slideToast"></div>
               </div>
 
               <!-- Barra de controles — superpuesta sobre la imagen, dentro
@@ -240,10 +244,17 @@
     const localHistory = [];
 
     async function loadCourse() {
-      const [coursesResult, meResult] = await Promise.allSettled([
+      const [coursesResult, meResult, entregaResult] = await Promise.allSettled([
         academyFetch('/academy/courses'),
         academyFetch('/academy/me'),
+        academyFetch(`/academy/courses/${encodeURIComponent(slug)}/tengo-entrega`),
       ]);
+      // Barrera 6→7 del curso "introduccion" (ver goToSlide) — si el fetch
+      // falla se asume false (más restrictivo, no más permisivo: mejor
+      // pedirle de nuevo que suba la actividad que dejar pasar por un error
+      // de red). Se sobrescribe con un valor real apenas termina un submit
+      // exitoso, sin esperar a otro round-trip (ver uploadBtn más abajo).
+      tieneEntregaCurso = entregaResult.status === 'fulfilled' && entregaResult.value.tengoEntrega;
 
       if (coursesResult.status === 'rejected') {
         document.getElementById('courseTitle').textContent = `Error al cargar el curso: ${coursesResult.reason.message}`;
@@ -311,12 +322,20 @@
 
     let currentSlideIndex = 0;
     let currentSlides = [];
+    // Barrera entre diapositivas 6→7 (índices 5→6) del curso "introduccion":
+    // no deja avanzar a la 7 sin al menos una entrega para este curso. Se
+    // resuelve en loadCourse() (GET .../tengo-entrega) y se actualiza en
+    // caliente tras un submit exitoso — ver goToSlide() para la barrera en
+    // sí y uploadBtn más abajo para dónde se pone en true.
+    let tieneEntregaCurso = false;
+    const SLIDE_INDEX_BARRERA_ENTREGA = 5; // 0-based: diapositiva 6
 
     function renderChapters(slides) {
       const listEl = document.getElementById('chaptersList');
       listEl.innerHTML = slides.map((s, i) => `
         <li class="chapter-item" data-index="${i}">
           <span class="chapter-time">${String(i + 1).padStart(2, '0')}</span>
+          <i class="ph ph-lock-simple chapter-lock-icon" aria-hidden="true"></i>
           <span class="chapter-label">${s.titulo}</span>
         </li>
       `).join('');
@@ -327,8 +346,11 @@
     }
 
     function updateChapterActiveState() {
+      const bloqueado = slug === 'introduccion' && !tieneEntregaCurso;
       document.querySelectorAll('#chaptersList .chapter-item').forEach(item => {
-        item.classList.toggle('is-current', Number(item.dataset.index) === currentSlideIndex);
+        const index = Number(item.dataset.index);
+        item.classList.toggle('is-current', index === currentSlideIndex);
+        item.classList.toggle('is-locked', bloqueado && index > SLIDE_INDEX_BARRERA_ENTREGA);
       });
     }
 
@@ -357,8 +379,28 @@
       });
     }
 
+    let slideToastTimeout = null;
+    function mostrarSlideToast(mensaje) {
+      const toast = document.getElementById('slideToast');
+      toast.textContent = mensaje;
+      toast.classList.add('is-visible');
+      clearTimeout(slideToastTimeout);
+      slideToastTimeout = setTimeout(() => toast.classList.remove('is-visible'), 3000);
+    }
+
     function goToSlide(index) {
       if (index < 0 || index >= currentSlides.length) return;
+      // Barrera 6→7, solo en el curso "introduccion": bloquea cualquier
+      // salto que cruce la diapositiva 6 hacia adelante (botón siguiente,
+      // teclado, barra de progreso, o click directo en el capítulo
+      // "Cierre") si todavía no hay una entrega para este curso puntual.
+      // Explícitamente atada al slug (no solo a "más de 6 diapositivas")
+      // para no heredar la barrera sin querer si otro curso llega a tener
+      // 7+ diapositivas reales en el futuro.
+      if (slug === 'introduccion' && index > SLIDE_INDEX_BARRERA_ENTREGA && !tieneEntregaCurso) {
+        mostrarSlideToast('Sube tu actividad para continuar.');
+        return;
+      }
       currentSlideIndex = index;
 
       const slide = currentSlides[currentSlideIndex];
@@ -573,6 +615,10 @@
         const sub = result.submission;
         localHistory.unshift(sub);
         renderHistory();
+        // Desbloquea la barrera 6→7 en caliente — sin esto, el alumno
+        // tendría que recargar la página para poder seguir viendo el curso
+        // después de subir la actividad.
+        tieneEntregaCurso = true;
 
         if (sub.calificacion) {
           showStatus('ok', `Evaluación: ${sub.calificacion}. ${sub.feedback_claude || ''}`);
