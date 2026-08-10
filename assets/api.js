@@ -117,10 +117,12 @@ const AcademyAuth = {
   },
 
   /**
-   * Dibuja el botón de notificaciones (campana) + panel desplegable
-   * dentro de `container`. No hay sistema de notificaciones real
-   * todavía — mismo enfoque que el Leaderboard: visible e interactivo,
-   * con contenido de ejemplo/vacío en vez de datos de backend.
+   * Dibuja el botón de notificaciones (campana) + panel desplegable dentro
+   * de `container`, y carga el historial real vía GET /academy/notifications
+   * — se consulta una sola vez al llamar esta función (mismo criterio que
+   * el resto de Academy: sin polling, ver academy-gamification.js en
+   * pharis-api). El punto rojo en la campana refleja `noLeidas`; se marcan
+   * todas como leídas al abrir el dropdown (no hay selección individual).
    */
   renderNotifMenu(container) {
     if (!container) return;
@@ -129,19 +131,62 @@ const AcademyAuth = {
     container.innerHTML = `
       <button class="notif-trigger" id="notifMenuTrigger" aria-label="Notificaciones">
         <i class="ph ph-bell"></i>
+        <span class="notif-badge" id="notifBadge" style="display:none;"></span>
       </button>
       <div class="notif-dropdown">
         <div class="notif-dropdown-title">Notificaciones</div>
-        <div class="notif-dropdown-empty">Sin notificaciones por el momento.</div>
+        <div class="notif-dropdown-empty" id="notifDropdownEmpty">Cargando...</div>
+        <div id="notifDropdownList"></div>
       </div>
     `;
 
-    container.querySelector('#notifMenuTrigger').addEventListener('click', (e) => {
+    const trigger = container.querySelector('#notifMenuTrigger');
+    let noLeidasPendientes = false;
+
+    trigger.addEventListener('click', (e) => {
       e.stopPropagation();
       container.classList.toggle('open');
+      if (container.classList.contains('open') && noLeidasPendientes) {
+        noLeidasPendientes = false;
+        document.getElementById('notifBadge').style.display = 'none';
+        // Best-effort — si falla, la próxima carga de página las vuelve a
+        // marcar (no hay pérdida real, solo el badge tarda un poco más en
+        // apagarse en algún caso raro de red).
+        academyFetch('/academy/notifications/marcar-leidas', { method: 'POST', body: '{}' }).catch(() => {});
+      }
     });
     document.addEventListener('click', (e) => {
       if (!container.contains(e.target)) container.classList.remove('open');
+    });
+
+    academyFetch('/academy/notifications').then(data => {
+      noLeidasPendientes = data.noLeidas > 0;
+      if (noLeidasPendientes) {
+        const badge = document.getElementById('notifBadge');
+        badge.textContent = data.noLeidas > 9 ? '9+' : String(data.noLeidas);
+        badge.style.display = 'flex';
+      }
+
+      const empty = document.getElementById('notifDropdownEmpty');
+      const list = document.getElementById('notifDropdownList');
+      if (!data.notifications.length) {
+        empty.textContent = 'Sin notificaciones por el momento.';
+        return;
+      }
+      empty.style.display = 'none';
+      const ICONO_POR_TIPO = { 'logro': 'ph-medal', 'curso-completado': 'ph-trophy' };
+      list.innerHTML = data.notifications.map(n => `
+        <div class="notif-item ${n.leidaAt ? '' : 'is-unread'}">
+          <i class="ph ${ICONO_POR_TIPO[n.tipo] || 'ph-bell'}"></i>
+          <div>
+            <div class="notif-item-titulo">${n.titulo}</div>
+            <div class="notif-item-mensaje">${n.mensaje}</div>
+          </div>
+        </div>
+      `).join('');
+    }).catch(() => {
+      // No bloquea la página — mismo criterio que loadNews en index.html.
+      document.getElementById('notifDropdownEmpty').textContent = 'No se pudieron cargar las notificaciones.';
     });
   },
 };

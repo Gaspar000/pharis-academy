@@ -348,6 +348,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
    datos de backend). */
 .notif-menu { position: relative; }
 .notif-trigger {
+  position: relative;
   width: 34px;
   height: 34px;
   flex-shrink: 0;
@@ -363,6 +364,27 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .notif-trigger:hover { color: var(--accent-bright); border-color: var(--rule-strong); }
 
+/* Punto/contador de notificaciones no leídas — superpuesto sobre la
+   esquina de la campana. display:flex se setea vía JS solo si noLeidas>0
+   (ver renderNotifMenu en assets/api.js), por eso no hay display acá. */
+.notif-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--red);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  border: 2px solid var(--bg);
+}
+
 .notif-dropdown {
   position: absolute;
   top: calc(100% + 8px);
@@ -371,6 +393,8 @@ p { margin: 0 0 1em; color: var(--text-muted); }
      los 280px de ancho se salían del viewport por la derecha. */
   right: 0;
   width: 280px;
+  max-height: 360px;
+  overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--rule);
   border-radius: var(--radius);
@@ -382,6 +406,23 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .notif-menu.open .notif-dropdown { display: block; }
 .notif-dropdown-title { font-size: 0.86rem; font-weight: 600; color: var(--text); margin-bottom: 8px; }
 .notif-dropdown-empty { font-size: 0.82rem; color: var(--text-faint); text-align: center; padding: 16px 4px; }
+
+/* ── Items de notificación real ── Mismo patrón "fila con separador top"
+   que .resource-item / .logro-item. is-unread solo cambia el color del
+   título (ya se marcaron leídas al abrir el dropdown, así que este estado
+   es visualmente sutil — el badge de la campana es la señal principal). */
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 2px;
+  border-top: 1px solid var(--rule);
+}
+.notif-item:first-child { border-top: none; }
+.notif-item i { font-size: 1.1rem; color: var(--accent-bright); flex-shrink: 0; margin-top: 1px; }
+.notif-item-titulo { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
+.notif-item.is-unread .notif-item-titulo { color: var(--text); }
+.notif-item-mensaje { font-size: 0.78rem; color: var(--text-faint); margin-top: 1px; }
 
 /* ── Auth pages ── */
 .auth-page {
