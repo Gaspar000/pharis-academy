@@ -69,6 +69,11 @@
               <!-- Visor real — oculto por defecto, se muestra solo si course.slides existe. -->
               <div class="slide-viewer" id="slideViewer" style="display:none;">
                 <img id="slideImage" alt="" />
+                <!-- Zonas interactivas por diapositiva (links/botones
+                     superpuestos en coordenadas %) — se repuebla en cada
+                     goToSlide() según slide.hotspots. Vacío para
+                     diapositivas sin interactividad (la mayoría). -->
+                <div class="slide-hotspots" id="slideHotspots"></div>
               </div>
 
               <!-- Barra de controles — superpuesta sobre la imagen, dentro
@@ -327,6 +332,31 @@
       });
     }
 
+    // Zonas clickeables superpuestas sobre la imagen (link a instalador,
+    // botón de actividad externa, etc.) — coordenadas en % del frame 16:9,
+    // así coinciden con el mismo punto visual de la imagen sin importar el
+    // tamaño real de pantalla. slide.hotspots es opcional: la mayoría de
+    // las diapositivas no llevan ninguno.
+    function renderHotspots(slide) {
+      const container = document.getElementById('slideHotspots');
+      container.innerHTML = '';
+      if (!slide.hotspots || !slide.hotspots.length) return;
+
+      slide.hotspots.forEach(h => {
+        const a = document.createElement('a');
+        a.className = `slide-hotspot slide-hotspot-${h.style || 'invisible'}`;
+        a.href = h.href;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.style.top = `${h.top}%`;
+        a.style.left = `${h.left}%`;
+        a.style.width = `${h.width}%`;
+        a.style.height = `${h.height}%`;
+        if (h.label) a.textContent = h.label;
+        container.appendChild(a);
+      });
+    }
+
     function goToSlide(index) {
       if (index < 0 || index >= currentSlides.length) return;
       currentSlideIndex = index;
@@ -335,6 +365,7 @@
       const img = document.getElementById('slideImage');
       img.alt = slide.titulo;
       img.src = slide.url;
+      renderHotspots(slide);
 
       document.getElementById('slideCounter').textContent = `${currentSlideIndex + 1} / ${currentSlides.length}`;
       document.getElementById('slidePrevBtn').disabled = currentSlideIndex === 0;

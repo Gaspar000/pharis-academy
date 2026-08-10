@@ -683,6 +683,31 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   display: block;
 }
 
+/* ── Zonas interactivas superpuestas (hotspots) ──
+   Coordenadas en % (ver renderHotspots() en curso.html) — inset:0 alinea
+   el contenedor exacto sobre #slideImage, que ya ocupa el 100% del
+   frame. Dos variantes: "invisible" (texto ya dibujado en el PNG, ej. la
+   palabra "enlace" — el link no necesita decoración propia) y "button"
+   (para acciones sin texto preexistente en la imagen, ej. "Abrir
+   actividad"). */
+.slide-hotspots { position: absolute; inset: 0; }
+.slide-hotspot { position: absolute; display: block; }
+.slide-hotspot-invisible { cursor: pointer; }
+.slide-hotspot-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-bright);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: filter 0.15s var(--ease);
+}
+.slide-hotspot-button:hover { filter: brightness(1.1); }
+
 /* ── Barra de controles del visor ──
    Superpuesta sobre la imagen dentro de .embed-frame (position:relative
    la contiene), oculta por defecto — aparece con hover/foco sobre el
