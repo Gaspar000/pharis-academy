@@ -1149,17 +1149,44 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .logro-titulo { font-size: 0.86rem; font-weight: 600; color: var(--text); }
 .logro-descripcion { font-size: 0.76rem; color: var(--text-faint); }
 
-.upload-status {
+.upload-status,
+.download-status {
   margin-top: 14px;
   font-size: 0.88rem;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
   display: none;
 }
-.upload-status.visible { display: block; }
-.upload-status.ok { background: var(--green-soft); color: var(--green-text); }
-.upload-status.warn { background: var(--amber-soft); color: var(--amber-text); }
-.upload-status.err { background: var(--red-soft); color: var(--red-text); }
+.upload-status.visible,
+.download-status.visible { display: block; }
+.upload-status.ok, .download-status.ok { background: var(--green-soft); color: var(--green-text); }
+.upload-status.warn, .download-status.warn { background: var(--amber-soft); color: var(--amber-text); }
+.upload-status.err, .download-status.err { background: var(--red-soft); color: var(--red-text); }
+
+/* ── Credenciales del profesor demo (acceso.html) ──
+   Mismo lenguaje que .upload-box (borde punteado sutil), pero informativo
+   en vez de interactivo — solo muestra correo/contraseña para copiar. */
+.demo-credentials {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-deep);
+  border: 1px solid var(--rule);
+}
+.demo-credentials-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.demo-credentials-label { font-size: 0.82rem; color: var(--text-faint); }
+.demo-credentials-row code {
+  font-family: "Fira Code", monospace;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: var(--panel-2);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.demo-credentials-hint { margin-top: 12px; margin-bottom: 0; font-size: 0.78rem; color: var(--text-faint); }
 
 .submission-history { margin-top: 20px; }
 .submission-item {

@@ -29,9 +29,7 @@
       <a href="index.html"><i class="ph ph-squares-four icon"></i> Overview</a>
       <a href="categoria.html"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="dashboard.html" id="navDashboard" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard</a>
-      <!-- Recordatorio de desarrollo, no un link real — sin href a
-           propósito, para que no genere expectativa de que lleva a algo. -->
-      <span class="wf-nav-todo"><i class="ph ph-puzzle-piece icon"></i> Pharis Extension</span>
+      <a href="acceso.html"><i class="ph ph-puzzle-piece icon"></i> Accede a Pharis</a>
     </nav>
   </aside>
 
@@ -368,14 +366,34 @@
       slide.hotspots.forEach(h => {
         const a = document.createElement('a');
         a.className = `slide-hotspot slide-hotspot-${h.style || 'invisible'}`;
-        a.href = h.href;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
         a.style.top = `${h.top}%`;
         a.style.left = `${h.left}%`;
         a.style.width = `${h.width}%`;
         a.style.height = `${h.height}%`;
         if (h.label) a.textContent = h.label;
+
+        if (h.style === 'download') {
+          // Descarga privada autenticada (ej. instalador de Pharis App) —
+          // el href de la API requiere Authorization: Bearer, así que no
+          // puede ser un link plano (target=_blank llevaría a un 401 sin
+          // el token). En su lugar, un fetch autenticado que devuelve una
+          // URL temporal ya lista para navegar.
+          a.href = '#';
+          a.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+              const data = await academyFetch(h.href);
+              window.location.href = data.url;
+            } catch (err) {
+              mostrarSlideToast(err.message);
+            }
+          });
+        } else {
+          a.href = h.href;
+          a.target = '_blank';
+          a.rel = 'noopener noreferrer';
+        }
+
         container.appendChild(a);
       });
     }
