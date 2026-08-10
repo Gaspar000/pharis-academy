@@ -1054,6 +1054,20 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .resource-item .titulo { font-size: 0.86rem; font-weight: 600; flex: 1; }
 .resource-item .btn { width: auto; margin-left: auto; padding: 6px 14px; font-size: 0.78rem; }
 
+/* ── Logros del perfil ── Mismo patrón "fila con separador top" que
+   .resource-item — ícono de acento + título/descripción. */
+.logro-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 2px;
+  border-top: 1px solid var(--rule);
+}
+.logro-item:first-child { border-top: none; }
+.logro-item i { font-size: 1.3rem; color: var(--accent-bright); flex-shrink: 0; }
+.logro-titulo { font-size: 0.86rem; font-weight: 600; color: var(--text); }
+.logro-descripcion { font-size: 0.76rem; color: var(--text-faint); }
+
 .upload-status {
   margin-top: 14px;
   font-size: 0.88rem;

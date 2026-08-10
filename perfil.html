@@ -102,23 +102,25 @@
       </div>
 
       <div>
-        <!-- Racha — dato real, viene de GET /academy/me -->
-        <div class="wf-section-title">Racha</div>
-        <div class="dash-stats" style="grid-template-columns:1fr;">
+        <!-- Racha + puntos — dato real, viene de GET /academy/me -->
+        <div class="wf-section-title">Racha y puntos</div>
+        <div class="dash-stats" style="grid-template-columns:1fr 1fr;">
           <div class="stat-tile">
             <div class="label">Días de racha</div>
             <div class="value" id="streakNum">–</div>
           </div>
+          <div class="stat-tile">
+            <div class="label">Puntos totales</div>
+            <div class="value" id="pointsNum">–</div>
+          </div>
         </div>
 
-        <!-- Logros — mismo mock que el Leaderboard, sin sistema real todavía -->
-        <div class="wf-section-title">
-          Logros <span class="mock-tag">ejemplo</span>
-        </div>
-        <div class="wf-panel" style="display:flex; flex-direction:column; gap:10px;">
-          <span class="wf-chip"><i class="ph ph-medal"></i> 7 insignias</span>
-          <span class="wf-chip"><i class="ph ph-trophy"></i> Curso completado</span>
-          <span class="wf-chip"><i class="ph ph-fire"></i> Racha de 5+ días</span>
+        <!-- Logros — dato real, viene de GET /academy/me (ver renderLogros()). -->
+        <div class="wf-section-title">Logros</div>
+        <div class="wf-panel" id="logrosPanel" style="display:flex; flex-direction:column; gap:10px;">
+          <div class="empty-state" style="padding:20px 8px;" id="logrosEmpty">
+            Todavía no desbloqueaste ningún logro.
+          </div>
         </div>
 
         <!-- Cursos guardados — dato real, viene de GET /academy/me/cursos-guardados -->
@@ -152,6 +154,7 @@
     const perfilSuccessBox = document.getElementById('perfilSuccessBox');
     const perfilSubmitBtn = document.getElementById('perfilSubmitBtn');
     const streakNum = document.getElementById('streakNum');
+    const pointsNum = document.getElementById('pointsNum');
 
     function showBox(box, msg) {
       box.textContent = msg;
@@ -170,6 +173,33 @@
     const categoriaInicial = perfilForm.querySelector(`input[name="categoriaPreferida"][value="${user.categoriaPreferida || 'alumnos'}"]`);
     if (categoriaInicial) categoriaInicial.checked = true;
     streakNum.textContent = user.streakCount ?? 0;
+    pointsNum.textContent = user.puntosTotales ?? 0;
+    renderLogros(user.logros || []);
+
+    // Ícono Phosphor por defecto si el logro no trae su propio campo
+    // `icono` (ej. datos viejos en localStorage de antes de este feature).
+    const ICONO_LOGRO_DEFECTO = 'ph-medal';
+
+    function renderLogros(logros) {
+      const panel = document.getElementById('logrosPanel');
+      if (!logros.length) {
+        panel.innerHTML = `
+          <div class="empty-state" style="padding:20px 8px;" id="logrosEmpty">
+            Todavía no desbloqueaste ningún logro.
+          </div>
+        `;
+        return;
+      }
+      panel.innerHTML = logros.map(l => `
+        <div class="logro-item">
+          <i class="ph ${l.icono || ICONO_LOGRO_DEFECTO}"></i>
+          <div>
+            <div class="logro-titulo">${l.titulo}</div>
+            <div class="logro-descripcion">${l.descripcion}</div>
+          </div>
+        </div>
+      `).join('');
+    }
 
     async function loadPerfil() {
       try {
@@ -180,6 +210,8 @@
         const categoria = perfilForm.querySelector(`input[name="categoriaPreferida"][value="${data.user.categoriaPreferida}"]`);
         if (categoria) categoria.checked = true;
         streakNum.textContent = data.user.streakCount ?? 0;
+        pointsNum.textContent = data.user.puntosTotales ?? 0;
+        renderLogros(data.user.logros || []);
       } catch { /* se queda con los datos de localStorage — no bloquea la página */ }
     }
 

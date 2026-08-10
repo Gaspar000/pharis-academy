@@ -91,53 +91,27 @@
           </div>
         </div>
 
-        <!-- Leaderboard — placeholder visual, no conectado a datos reales -->
         <div>
-          <div class="wf-section-title">
-            Leaderboard <span class="mock-tag">ejemplo, no funcional</span>
-          </div>
+          <!-- Leaderboard — dato real, viene de GET /academy/leaderboard.
+               Top 10 por puntos totales + la posición del usuario actual
+               (esté o no en el top). Sección oculta por completo si nadie
+               tiene puntos todavía (ver loadLeaderboard() más abajo). -->
+          <div id="leaderboardSection">
+            <div class="wf-section-title">Leaderboard</div>
 
-          <!-- Posición del usuario actual — card propio, encima del ranking. -->
-          <div class="wf-panel wf-leader-you-panel">
-            <div class="wf-avatar wf-leader-you-avatar">TU</div>
-            <div>
-              <div class="wf-leader-you-rank">#14</div>
-              <div class="wf-leader-you-label">Tu posición en el leaderboard</div>
+            <!-- Posición del usuario actual — card propio, encima del ranking. -->
+            <div class="wf-panel wf-leader-you-panel" id="leaderboardYouPanel" style="display:none;">
+              <div class="wf-avatar wf-leader-you-avatar" id="leaderboardYouAvatar"></div>
+              <div>
+                <div class="wf-leader-you-rank" id="leaderboardYouRank"></div>
+                <div class="wf-leader-you-label">Tu posición en el leaderboard</div>
+              </div>
+              <div class="wf-leader-you-chips">
+                <span class="wf-chip"><i class="ph ph-coin"></i> <span id="leaderboardYouPoints"></span> puntos</span>
+              </div>
             </div>
-            <div class="wf-leader-you-chips">
-              <span class="wf-chip"><i class="ph ph-coin"></i> 288 puntos</span>
-              <span class="wf-chip"><i class="ph ph-medal"></i> 7 insignias</span>
-            </div>
-          </div>
 
-          <div class="wf-panel">
-            <div class="wf-leader-row">
-              <div class="rank">#1</div>
-              <div class="wf-avatar" style="width:28px; height:28px; font-size:0.7rem;">LC</div>
-              <div>
-                <div class="name">Liz Cheng</div>
-                <div class="sub">Curso 01</div>
-              </div>
-              <div class="pts">320 pts</div>
-            </div>
-            <div class="wf-leader-row">
-              <div class="rank">#2</div>
-              <div class="wf-avatar" style="width:28px; height:28px; font-size:0.7rem;">JW</div>
-              <div>
-                <div class="name">Jenny Wilson</div>
-                <div class="sub">Introducción</div>
-              </div>
-              <div class="pts">290 pts</div>
-            </div>
-            <div class="wf-leader-row">
-              <div class="rank">#3</div>
-              <div class="wf-avatar" style="width:28px; height:28px; font-size:0.7rem;">RE</div>
-              <div>
-                <div class="name">Ralph Edwards</div>
-                <div class="sub">Curso 01</div>
-              </div>
-              <div class="pts">265 pts</div>
-            </div>
+            <div class="wf-panel" id="leaderboardTop"></div>
           </div>
 
           <!-- Noticias — publicadas por CLI (scripts/academy-news.js en
@@ -281,8 +255,47 @@
       }
     }
 
+    // ── Leaderboard ──────────────────────────────────────────────────────────
+    // Primera vez que se generan iniciales dinámicas para un avatar en el
+    // proyecto (el resto son fijas en HTML, ej. "EP" del autor de curso) —
+    // toma la primera letra de las 2 primeras palabras del nombre.
+    function iniciales(nombre) {
+      return nombre.trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+    }
+
+    async function loadLeaderboard() {
+      const section = document.getElementById('leaderboardSection');
+      try {
+        const data = await academyFetch('/academy/leaderboard');
+        if (!data.top.length) { section.style.display = 'none'; return; }
+
+        document.getElementById('leaderboardTop').innerHTML = data.top.map(row => `
+          <div class="wf-leader-row">
+            <div class="rank">#${row.posicion}</div>
+            <div class="wf-avatar" style="width:28px; height:28px; font-size:0.7rem;">${iniciales(row.nombre)}</div>
+            <div><div class="name">${row.nombre}</div></div>
+            <div class="pts">${row.puntosTotales} pts</div>
+          </div>
+        `).join('');
+
+        // "Tu posición" solo tiene sentido si el usuario ya ganó puntos —
+        // si nunca subió una actividad, tuPosicion.posicion es null (ver
+        // GET /academy/leaderboard en pharis-api).
+        if (data.tuPosicion.posicion) {
+          document.getElementById('leaderboardYouAvatar').textContent = iniciales(user.nombre);
+          document.getElementById('leaderboardYouRank').textContent = `#${data.tuPosicion.posicion}`;
+          document.getElementById('leaderboardYouPoints').textContent = data.tuPosicion.puntosTotales;
+          document.getElementById('leaderboardYouPanel').style.display = 'flex';
+        }
+      } catch {
+        // No bloquea el Overview — mismo criterio que loadNews.
+        section.style.display = 'none';
+      }
+    }
+
     loadCourses();
     loadNews();
+    loadLeaderboard();
   </script>
 </body>
 </html>
