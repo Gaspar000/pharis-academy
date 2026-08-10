@@ -134,7 +134,7 @@
             <div class="course-social-row">
               <button class="social-btn" id="likeBtn" type="button" aria-pressed="false">
                 <i class="ph ph-heart"></i> <span class="social-btn-label">Me gusta</span>
-                <span class="mock-tag social-mock-tag">ejemplo, no persiste</span>
+                <span class="social-btn-count" id="likeCount"></span>
               </button>
               <button class="social-btn" id="shareBtn" type="button">
                 <i class="ph ph-share-network"></i> <span class="social-btn-label">Compartir</span>
@@ -269,6 +269,7 @@
       }
       document.getElementById('courseTitle').textContent = course.titulo;
       document.getElementById('breadcrumbCurrent').textContent = course.titulo;
+      setLikeBtnActive(course.meGusta, course.totalLikes);
 
       if (course.slides && course.slides.length) {
         document.getElementById('embedPlaceholder').style.display = 'none';
@@ -483,31 +484,48 @@
     }
 
     // ── Acciones sociales ──
-    // likeBtn: mock puro, sin backend (ver mock-tag en el HTML).
-    // saveBtn: persiste de verdad contra POST /academy/courses/:slug/guardar
-    //   — handler async, espera la respuesta del backend antes de aplicar
-    //   el efecto visual (a diferencia de likeBtn, que es síncrono).
+    // likeBtn y saveBtn persisten de verdad (POST /academy/courses/:slug/
+    // me-gusta y /guardar respectivamente) — ambos handlers async, esperan
+    // la respuesta del backend antes de aplicar el efecto visual.
     const likeBtn = document.getElementById('likeBtn');
     const saveBtn = document.getElementById('saveBtn');
     const shareBtn = document.getElementById('shareBtn');
 
-    function toggleSocialBtn(btn, iconOutline, iconFilled) {
-      const active = btn.classList.toggle('is-active');
-      btn.setAttribute('aria-pressed', String(active));
-      const icon = btn.querySelector('i');
-      icon.className = active ? `ph ${iconFilled}` : `ph ${iconOutline}`;
+    // Fija el valor exacto que llega del backend (no alterna a ciegas) —
+    // se usa tanto al cargar la página (estado inicial) como tras cada
+    // respuesta del toggle. totalLikes es opcional: en la carga inicial
+    // siempre llega (ver course.totalLikes en loadCourse), en el toggle
+    // también lo devuelve el backend — solo se omite si algún día se
+    // reusa esta función sin ese dato disponible.
+    function setLikeBtnActive(active, totalLikes) {
+      likeBtn.classList.toggle('is-active', active);
+      likeBtn.setAttribute('aria-pressed', String(active));
+      likeBtn.querySelector('i').className = active ? 'ph ph-heart-fill' : 'ph ph-heart';
+      if (totalLikes !== undefined) {
+        document.getElementById('likeCount').textContent = totalLikes > 0 ? totalLikes : '';
+      }
     }
 
-    // Fija el valor exacto que llega del backend (no alterna a ciegas como
-    // toggleSocialBtn) — se usa tanto al cargar la página (estado inicial)
-    // como tras cada respuesta del toggle.
     function setSaveBtnActive(active) {
       saveBtn.classList.toggle('is-active', active);
       saveBtn.setAttribute('aria-pressed', String(active));
       saveBtn.querySelector('i').className = active ? 'ph ph-bookmark-simple-fill' : 'ph ph-bookmark-simple';
     }
 
-    likeBtn.addEventListener('click', () => toggleSocialBtn(likeBtn, 'ph-heart', 'ph-heart-fill'));
+    likeBtn.addEventListener('click', async () => {
+      likeBtn.disabled = true;
+      try {
+        const data = await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/me-gusta`, {
+          method: 'POST',
+          body: '{}',
+        });
+        setLikeBtnActive(data.meGusta, data.totalLikes);
+      } catch {
+        // No-bloqueante: si falla, el botón simplemente no cambia de estado.
+      } finally {
+        likeBtn.disabled = false;
+      }
+    });
 
     saveBtn.addEventListener('click', async () => {
       saveBtn.disabled = true;

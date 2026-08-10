@@ -1036,7 +1036,10 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   color: var(--accent-bright);
 }
 .social-btn i { font-size: 1rem; }
-.social-mock-tag { margin-left: 2px; }
+/* Contador de likes — vacío (sin dígitos) si el curso tiene 0, para no
+   mostrar "Me gusta 0" de entrada; ver setLikeBtnActive() en curso.html. */
+.social-btn-count { font-variant-numeric: tabular-nums; }
+.social-btn.is-active .social-btn-count { color: var(--accent-bright); }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
