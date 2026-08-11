@@ -75,22 +75,12 @@
          defecto, revelado por JS si user.rol === 'profesor'). -->
     <section class="course-section" id="teacherDashboardSection" style="display:none;">
       <h2>Dashboard de profesor</h2>
-      <p>Así es el dashboard real que usan los profesores con Pharis, con datos de ejemplo, para que veas de un vistazo qué información le llega y cómo lo ayuda a calificar más rápido.</p>
+      <p>Así es el dashboard real que usan los profesores con Pharis, con la actividad real de tus alumnos en Pharis Academy: entregas, calificaciones y avance por curso.</p>
       <div class="wf-panel" id="teacherDemoPanel">
-        <div class="demo-credentials">
-          <div class="demo-credentials-row">
-            <span class="demo-credentials-label">Correo</span>
-            <code id="demoEmail">—</code>
-          </div>
-          <div class="demo-credentials-row">
-            <span class="demo-credentials-label">Contraseña</span>
-            <code id="demoPassword">—</code>
-          </div>
-        </div>
         <a class="btn btn-primary" id="openDashboardBtn" href="#" target="_blank" rel="noopener noreferrer">
           Abrir dashboard de profesor <i class="ph ph-arrow-square-out"></i>
         </a>
-        <p class="demo-credentials-hint">Usá estas credenciales para entrar, es una cuenta de demostración, aislada de datos reales de ninguna universidad.</p>
+        <p class="demo-credentials-hint">Entrás con el mismo correo y contraseña que usás acá en Pharis Academy.</p>
       </div>
     </section>
     </main>
@@ -107,8 +97,6 @@
     if (user.rol === 'profesor') {
       document.getElementById('navDashboard').style.display = 'flex';
       document.getElementById('teacherDashboardSection').style.display = 'block';
-      document.getElementById('demoEmail').textContent = 'profesor@universidad-synth.pharis.mx';
-      document.getElementById('demoPassword').textContent = 'DemoProfe2026!';
       document.getElementById('openDashboardBtn').href = 'https://pharis-api-production.up.railway.app/dashboard-v2';
     }
 
