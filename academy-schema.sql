@@ -1,8 +1,8 @@
--- Pharis Academy — tablas nuevas para pharis-api / PostgreSQL (Railway)
+-- Pharis Academy, tablas nuevas para pharis-api / PostgreSQL (Railway)
 -- Ejecutar una sola vez contra la base de datos de Railway. También se
 -- aplica automáticamente si corres `npm run migrate` en pharis-api, ya que
 -- estas mismas sentencias están agregadas a src/db/migrate.js (migraciones
--- 038 y 039). Es seguro correr esto más de una vez — todo usa IF NOT EXISTS.
+-- 038 y 039). Es seguro correr esto más de una vez, todo usa IF NOT EXISTS.
 
 CREATE TABLE IF NOT EXISTS academy_users (
   id             SERIAL PRIMARY KEY,
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS academy_submissions (
 CREATE INDEX IF NOT EXISTS idx_academy_submissions_user  ON academy_submissions(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_academy_submissions_curso ON academy_submissions(curso);
 
--- Códigos de invitación — el registro es privado, no hay auto-registro
+-- Códigos de invitación, el registro es privado, no hay auto-registro
 -- libre. El rol real del usuario lo fija el código (no el body del
 -- cliente), y cada código es de un solo uso.
 CREATE TABLE IF NOT EXISTS academy_invite_codes (

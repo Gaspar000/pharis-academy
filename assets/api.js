@@ -1,6 +1,6 @@
 'use strict';
 
-// Pharis Academy — cliente de la API (pharis-api, prefijo /academy).
+// Pharis Academy, cliente de la API (pharis-api, prefijo /academy).
 // Cambia API_BASE si despliegas pharis-api en otra URL.
 const API_BASE = 'https://pharis-api-production.up.railway.app';
 
@@ -43,7 +43,7 @@ const AcademyAuth = {
     window.location.href = 'login.html';
   },
   /** Mergea `partial` sobre el user guardado y refresca localStorage sin
-   * pedir un nuevo login — usado tras PATCH /academy/me, ya que el JWT
+   * pedir un nuevo login, usado tras PATCH /academy/me, ya que el JWT
    * solo lleva id/email/rol y nunca se re-emite en este flujo. */
   updateUser(partial) {
     const current = this.getUser();
@@ -54,7 +54,7 @@ const AcademyAuth = {
   /**
    * Dibuja el chip de usuario + dropdown (nombre/correo, modo oscuro,
    * salir) dentro de `container`. Único lugar del sitio con esas 2
-   * acciones — antes vivían sueltas en sidebar/topbar de cada página.
+   * acciones, antes vivían sueltas en sidebar/topbar de cada página.
    * Requiere sesión activa (llamar después de requireAuth()).
    */
   renderUserMenu(container) {
@@ -96,7 +96,7 @@ const AcademyAuth = {
     });
     container.querySelector('#userMenuLogout').addEventListener('click', () => this.logout());
 
-    // Cierra al hacer click fuera — un solo listener global por menú
+    // Cierra al hacer click fuera, un solo listener global por menú
     // renderizado, no por página (evita duplicarlo si esto se llama más
     // de una vez en el futuro).
     document.addEventListener('click', (e) => {
@@ -104,7 +104,7 @@ const AcademyAuth = {
     });
 
     // El click del botón de tema lo maneja la delegación global de
-    // theme.js (document.addEventListener('click', ...)) — no hace falta
+    // theme.js (document.addEventListener('click', ...)), no hace falta
     // engancharlo acá aparte, eso duplicaba el toggle (2 clicks lógicos
     // por 1 click real, y el tema quedaba sin cambiar la mitad de las
     // veces). Solo hay que sincronizar el ícono/label del botón recién
@@ -119,7 +119,7 @@ const AcademyAuth = {
   /**
    * Dibuja el botón de notificaciones (campana) + panel desplegable dentro
    * de `container`, y carga el historial real vía GET /academy/notifications
-   * — se consulta una sola vez al llamar esta función (mismo criterio que
+   *, se consulta una sola vez al llamar esta función (mismo criterio que
    * el resto de Academy: sin polling, ver academy-gamification.js en
    * pharis-api). El punto rojo en la campana refleja `noLeidas`; se marcan
    * todas como leídas al abrir el dropdown (no hay selección individual).
@@ -149,7 +149,7 @@ const AcademyAuth = {
       if (container.classList.contains('open') && noLeidasPendientes) {
         noLeidasPendientes = false;
         document.getElementById('notifBadge').style.display = 'none';
-        // Best-effort — si falla, la próxima carga de página las vuelve a
+        // Best-effort, si falla, la próxima carga de página las vuelve a
         // marcar (no hay pérdida real, solo el badge tarda un poco más en
         // apagarse en algún caso raro de red).
         academyFetch('/academy/notifications/marcar-leidas', { method: 'POST', body: '{}' }).catch(() => {});
@@ -185,7 +185,7 @@ const AcademyAuth = {
         </div>
       `).join('');
     }).catch(() => {
-      // No bloquea la página — mismo criterio que loadNews en index.html.
+      // No bloquea la página, mismo criterio que loadNews en index.html.
       document.getElementById('notifDropdownEmpty').textContent = 'No se pudieron cargar las notificaciones.';
     });
   },

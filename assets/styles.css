@@ -1,17 +1,17 @@
 /* ============================================================
-   Pharis Academy — tokens compartidos, modo oscuro y claro.
+   Pharis Academy, tokens compartidos, modo oscuro y claro.
    Brand law: ground #020617 (oscuro) / #f6f8fc (claro), acento
    #508ff8 (oscuro) / #2f6fe0 (claro), Manrope + Fira Sans.
 
    3 capas, en orden de prioridad creciente:
-   1. :root          — oscuro, valor por defecto (comportamiento actual).
-   2. @media (prefers-color-scheme: light) — sigue el SO si el usuario
+   1. :root, oscuro, valor por defecto (comportamiento actual).
+   2. @media (prefers-color-scheme: light), sigue el SO si el usuario
       nunca tocó el toggle manual.
-   3. :root[data-theme="dark"|"light"] — el toggle de assets/theme.js
+   3. :root[data-theme="dark"|"light"], el toggle de assets/theme.js
       estampa este atributo y SIEMPRE gana, en ambas direcciones,
       sobre el media query.
    Los componentes se estilizan solo a través de estas variables, nunca
-   con colores directos dentro de un media query — así toda la cascada
+   con colores directos dentro de un media query, así toda la cascada
    se resuelve consistente sin impotar cuál capa ganó.
    ============================================================ */
 :root {
@@ -41,7 +41,7 @@
   --red-soft: rgba(240, 102, 90, 0.14);
   --red-text: #ffb3ab;
 
-  /* Gradiente de marca del hero — mismo ángulo/estructura en ambos temas,
+  /* Gradiente de marca del hero, mismo ángulo/estructura en ambos temas,
      tonos propios por tema (ver overrides abajo) para que el texto blanco
      encima siga teniendo contraste suficiente. */
   --hero-gradient: linear-gradient(135deg, #1f6fe0 0%, #508ff8 45%, #6aa8ff 100%);
@@ -71,7 +71,7 @@
     --text-muted: #52607a;
     --text-faint: #8592a8;
 
-    /* Oscuros y saturados (no el pastel claro del tema oscuro) — sobre
+    /* Oscuros y saturados (no el pastel claro del tema oscuro), sobre
        fondo -soft claro, texto claro perdería casi todo el contraste. */
     --green-text: #0d7d54;
     --amber-text: #a15a06;
@@ -123,7 +123,7 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
-/* Scroll personalizado — mismo patrón que #app en dashboard-v2
+/* Scroll personalizado, mismo patrón que #app en dashboard-v2
    (pharis-api): delgado, sin flechas, con --panel-2 como thumb
    (equivalente a --surface4 ahí). Aplica al scroll de toda la página. */
 html::-webkit-scrollbar { width: 8px; }
@@ -163,7 +163,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   padding: 0 24px;
 }
 /* curso.html: ocupa todo el ancho de .wf-main en vez de centrarse con un
-   tope fijo — con margin:0 auto + max-width:1120px sobraba espacio tanto
+   tope fijo, con margin:0 auto + max-width:1120px sobraba espacio tanto
    a la izquierda (contra el sidebar) como a la derecha en viewports
    anchos. Acá se saca el tope y el margin automático para que el
    contenido use el espacio disponible completo, sin hueco de ningún
@@ -171,7 +171,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-shell { max-width: none; margin-left: 0; margin-right: 0; }
 .topbar {
   border-bottom: 1px solid var(--rule);
-  /* var(--bg) con transparencia — antes era rgba(2,6,23,...) fijo (el
+  /* var(--bg) con transparencia, antes era rgba(2,6,23,...) fijo (el
      --bg del oscuro sin variable), así que en modo claro la topbar de
      curso/categoria/dashboard.html se quedaba con fondo oscuro aunque el
      resto de la página ya hubiera cambiado a claro. color-mix() calcula
@@ -201,14 +201,14 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   letter-spacing: -0.01em;
 }
 .brand-mark { width: 22px; height: 18px; flex-shrink: 0; }
-/* margin-left:auto — antes bastaba con justify-content:space-between del
+/* margin-left:auto, antes bastaba con justify-content:space-between del
    padre (.wf-topbar/.topbar-inner) porque .topbar-actions era el único
    otro hijo además del <h1>/logo. Con el breadcrumb como tercer hijo
    (curso.html/categoria.html), esto sigue empujándolo al extremo derecho
    sin depender de cuántos hermanos tenga antes. */
 .topbar-actions { display: flex; align-items: center; gap: 12px; margin-left: auto; }
 
-/* Menú de usuario — el chip es el trigger de un dropdown con nombre/correo
+/* Menú de usuario, el chip es el trigger de un dropdown con nombre/correo
    completo, el toggle de tema, y Salir. Único lugar del sitio con esas 2
    acciones (antes vivían sueltas en sidebar/topbar de cada página). */
 .user-menu { position: relative; }
@@ -247,7 +247,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .user-dropdown-name-row { display: flex; align-items: center; gap: 8px; }
 .user-dropdown-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
 .user-dropdown-email { font-size: 0.78rem; color: var(--text-faint); margin-top: 2px; word-break: break-all; }
-/* Chip de rol — mismo componente visual que .badge, pero sin semántica de
+/* Chip de rol, mismo componente visual que .badge, pero sin semántica de
    estado (no es éxito/error/advertencia, solo distingue estudiante/profesor),
    así que usa el acento en vez de las variantes verde/ámbar/rojo. */
 .role-chip {
@@ -267,7 +267,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   align-items: center;
   gap: 8px;
   width: 100%;
-  /* Antes 9px 12px — el borde nativo del <button> (nunca reseteado
+  /* Antes 9px 12px, el borde nativo del <button> (nunca reseteado
      globalmente, solo font/color/cursor) se leía como un hitbox grande
      y "duro"; con border:none explícito acá y padding más chico el
      botón queda visualmente más liviano. */
@@ -282,7 +282,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .user-dropdown-item:hover { background: var(--accent-soft); color: var(--text); }
 .user-dropdown-item.danger:hover { background: var(--red-soft); color: var(--red-text); }
 
-/* Fila del switch de tema — label a la izquierda, switch a la derecha.
+/* Fila del switch de tema, label a la izquierda, switch a la derecha.
    No es clickeable como fila completa (a diferencia de los demás
    .user-dropdown-item): el switch mismo es el control. */
 .theme-row { justify-content: space-between; cursor: default; }
@@ -290,7 +290,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 
 /* Switch estilo iOS. El thumb usa el mismo glow de 3 capas que el orbe
    que sigue al cursor en la app de escritorio (src/overlay.html #orb,
-   #4f8ef7 + box-shadow 8px/16px/28px) — referencia visual pedida por el
+   #4f8ef7 + box-shadow 8px/16px/28px), referencia visual pedida por el
    usuario en vez de un thumb blanco liso. */
 .theme-switch {
   position: relative;
@@ -301,7 +301,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   border-radius: 999px;
   /* --panel-2, no --rule-strong: ese ya lleva ~30% de tinte de acento
      (rgba con el mismo azul), así que el track "apagado" se leía casi
-     igual de brillante que el "encendido" — imposible distinguir el
+     igual de brillante que el "encendido", imposible distinguir el
      estado de un vistazo. --panel-2 es neutro (superficie, sin tinte
      de marca), reservando el azul solo para el estado "on". */
   background: var(--panel-2);
@@ -324,7 +324,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .theme-switch.is-light .theme-switch-thumb { left: 21px; }
 
-/* Toggle de tema — botón circular tipo ícono, para topbar/páginas de auth
+/* Toggle de tema, botón circular tipo ícono, para topbar/páginas de auth
    sin sesión (login/register, donde no hay menú de usuario). */
 .theme-toggle {
   width: 34px;
@@ -342,7 +342,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .theme-toggle:hover { color: var(--accent-bright); border-color: var(--rule-strong); }
 
-/* Notificaciones — mismo botón circular que .theme-toggle, con panel
+/* Notificaciones, mismo botón circular que .theme-toggle, con panel
    desplegable propio (no hay sistema de notificaciones real todavía;
    mismo enfoque mock que el Leaderboard: visible e interactivo, sin
    datos de backend). */
@@ -364,7 +364,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .notif-trigger:hover { color: var(--accent-bright); border-color: var(--rule-strong); }
 
-/* Punto/contador de notificaciones no leídas — superpuesto sobre la
+/* Punto/contador de notificaciones no leídas, superpuesto sobre la
    esquina de la campana. display:flex se setea vía JS solo si noLeidas>0
    (ver renderNotifMenu en assets/api.js), por eso no hay display acá. */
 .notif-badge {
@@ -389,7 +389,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   position: absolute;
   top: calc(100% + 8px);
   /* right, no left: el trigger vive pegado al borde derecho del topbar
-     (justo a la izquierda del chip de usuario) — anclado por la izquierda,
+     (justo a la izquierda del chip de usuario), anclado por la izquierda,
      los 280px de ancho se salían del viewport por la derecha. */
   right: 0;
   width: 280px;
@@ -410,7 +410,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 /* ── Items de notificación real ── Mismo patrón "fila con separador top"
    que .resource-item / .logro-item. is-unread solo cambia el color del
    título (ya se marcaron leídas al abrir el dropdown, así que este estado
-   es visualmente sutil — el badge de la campana es la señal principal). */
+   es visualmente sutil, el badge de la campana es la señal principal). */
 .notif-item {
   display: flex;
   align-items: flex-start;
@@ -481,7 +481,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   color: var(--text-faint);
   margin-top: 6px;
 }
-/* Selector de categoría preferida en el registro — puramente clasificatorio,
+/* Selector de categoría preferida en el registro, puramente clasificatorio,
    no otorga ni restringe ningún permiso (ver register.html). */
 .category-toggle { display: flex; gap: 8px; }
 .category-toggle label {
@@ -517,7 +517,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-bright); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
-/* Notoriamente más chico que .btn — solo para "Ver cursos" en las
+/* Notoriamente más chico que .btn, solo para "Ver cursos" en las
    tarjetas de categoría de "Todos los cursos". */
 .btn-small { width: fit-content; padding: 4px 12px; font-size: 0.72rem; }
 .btn-secondary {
@@ -548,7 +548,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .error-box.visible { display: block; }
 
-/* Variante de éxito — mismo patrón que .error-box, usada donde el flujo
+/* Variante de éxito, mismo patrón que .error-box, usada donde el flujo
    NO redirige tras completarse (ej. guardar cambios de perfil), así que
    necesita confirmar en la misma página en vez de solo limpiar el error. */
 .success-box {
@@ -565,7 +565,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 
 /* ── Tarjeta/chip genéricos (antes en home.css) ──
    Movidos acá porque no dependen del layout de sidebar de home.css
-   (body{display:flex}) — perfil.html los necesita sin cargar ese archivo,
+   (body{display:flex}), perfil.html los necesita sin cargar ese archivo,
    que rompería su propio layout de topbar+main. Las variantes específicas
    del Leaderboard (.wf-stat, .wf-avatar, .wf-leader-*) se quedan en
    home.css, esas sí son propias del layout de index.html. */
@@ -607,7 +607,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 
 /* ── Breadcrumb ──
    Ruta de navegación en la topbar, a la derecha del título de la sección
-   (mismo renglón que notificaciones/usuario) — no centrado por el
+   (mismo renglón que notificaciones/usuario), no centrado por el
    space-between del padre (.wf-topbar): margin-left lo pega al <h1>, y
    .topbar-actions lleva su propio margin-left:auto para seguir quedando
    pegado al extremo derecho con 3 hijos en vez de 2. Todos los niveles en
@@ -648,11 +648,11 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-card .btn { margin-top: 8px; }
 
 /* ── Course view: panel de Capítulos + card de Curso sugerido ──
-   Dos .wf-panel independientes, apilados con gap — antes compartían un
+   Dos .wf-panel independientes, apilados con gap, antes compartían un
    único panel con un border-top como separador. */
 .side-panels { display: flex; flex-direction: column; gap: 20px; }
 
-/* Curso sugerido: mismo .course-card, pero comprimido — el panel es
+/* Curso sugerido: mismo .course-card, pero comprimido, el panel es
    260px fijos, no un grid con columnas de 280px+ como .course-grid. Sin
    padding propio: ya lo aporta el .wf-panel que lo envuelve. */
 .course-card-compact { padding: 0; gap: 6px; }
@@ -677,7 +677,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 
 /* ── Categoría: agrupación por tema ──
    Título (.wf-section-title, reusado tal cual) + su propio .course-grid,
-   apiladas — mismo patrón que "Estadísticas" + "Todos los cursos" en
+   apiladas, mismo patrón que "Estadísticas" + "Todos los cursos" en
    index.html, no un grid único con separadores. */
 .tema-section { margin-bottom: 8px; }
 .tema-section + .tema-section { margin-top: 8px; }
@@ -695,7 +695,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-section h2 { font-size: 1.3rem; }
 /* "Subir actividad": mismo ancho que la columna del visor en
    .course-watch-grid (resta los 260px fijos del panel de Capítulos +
-   su gap de 20px) — no vive dentro del grid (está en otra sección más
+   su gap de 20px), no vive dentro del grid (está en otra sección más
    abajo en la página), así que se replica el cálculo a mano. */
 .course-section-narrow .upload-box { max-width: calc(100% - 260px - 20px); }
 .embed-frame {
@@ -725,10 +725,10 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 
 /* ── Zonas interactivas superpuestas (hotspots) ──
-   Coordenadas en % (ver renderHotspots() en curso.html) — inset:0 alinea
+   Coordenadas en % (ver renderHotspots() en curso.html), inset:0 alinea
    el contenedor exacto sobre #slideImage, que ya ocupa el 100% del
    frame. Dos variantes: "invisible" (texto ya dibujado en el PNG, ej. la
-   palabra "enlace" — el link no necesita decoración propia) y "button"
+   palabra "enlace", el link no necesita decoración propia) y "button"
    (para acciones sin texto preexistente en la imagen, ej. "Abrir
    actividad"). */
 .slide-hotspots { position: absolute; inset: 0; }
@@ -751,7 +751,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 
 /* ── Barra de controles del visor ──
    Superpuesta sobre la imagen dentro de .embed-frame (position:relative
-   la contiene), oculta por defecto — aparece con hover/foco sobre el
+   la contiene), oculta por defecto, aparece con hover/foco sobre el
    frame, para no estorbar la lectura de la diapositiva cuando el cursor
    no está encima. Fondo semitransparente fijo (no var(--panel)): va
    sobre una imagen de contenido variable, necesita contraste garantizado
@@ -783,7 +783,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   transform: translateY(0);
   pointer-events: auto;
 }
-/* Sin hover posible (touch) los controles quedan siempre visibles — el
+/* Sin hover posible (touch) los controles quedan siempre visibles, el
    auto-hide es una comodidad de mouse, no debe esconder la única forma
    de navegar en pantallas táctiles. */
 @media (hover: none) {
@@ -834,7 +834,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .slide-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-faint); font-size: 0.9rem; background: var(--panel); }
 
 /* ── Aviso de barrera 6→7 (ver goToSlide en curso.html) ──
-   Toast breve, centrado sobre la imagen — a diferencia de .slide-error no
+   Toast breve, centrado sobre la imagen, a diferencia de .slide-error no
    tapa la diapositiva (fondo semitransparente, ancho de contenido), es un
    aviso momentáneo, no un estado permanente. Mismo criterio de contraste
    fijo que .viewer-controls: va sobre una imagen de contenido variable. */
@@ -870,12 +870,12 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .chapter-item.is-current .chapter-time,
 .chapter-item.is-current .chapter-label { color: var(--accent-bright); }
 
-/* Barrera 6→7 del curso "introduccion" (ver goToSlide en curso.html) —
+/* Barrera 6→7 del curso "introduccion" (ver goToSlide en curso.html),
    pista visual antes de que el alumno haga click y reciba el toast:
    atenuado + ícono de candado (ver .chapter-lock-icon, insertado por JS
    en renderChapters) en vez del número, cursor not-allowed. El click
    sigue llegando a goToSlide() (no se remueve el listener), que es la
-   única fuente de verdad de la barrera — esto es solo estética. */
+   única fuente de verdad de la barrera, esto es solo estética. */
 .chapter-item.is-locked { cursor: not-allowed; opacity: 0.55; }
 .chapter-item.is-locked:hover { background: transparent; }
 .chapter-item.is-locked .chapter-time { display: none; }
@@ -888,7 +888,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
    derecha. Wrap en mobile. */
 .course-meta-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
 /* .page-header trae padding:40px 0 8px pensado para ser lo primero de la
-   página (home.css) — acá vive después del visor y las tags, así que ese
+   página (home.css), acá vive después del visor y las tags, así que ese
    aire de arriba sobra, y el padding-bottom se anula del todo: el gap
    real hasta .course-meta-row lo da únicamente el margin-top de esa
    fila (evita sumar dos valores en dos lugares distintos). */
@@ -907,14 +907,14 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-author { display: flex; align-items: center; gap: 10px; }
 .course-author-avatar { width: 34px; height: 34px; font-size: 0.78rem; }
 /* Mismo SVG del logo que .brand-mark (sidebar), en blanco en vez de azul
-   de marca — el fondo del avatar (var(--accent)) ya es ese mismo azul,
+   de marca, el fondo del avatar (var(--accent)) ya es ese mismo azul,
    así que el logo necesita el contraste inverso para no perderse. */
 .course-author-avatar-mark { width: 16px; height: 13px; }
 .course-author-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
 .course-author-role { font-size: 0.74rem; color: var(--text-faint); }
 
 /* ── Course view: embed + capítulos, lado a lado ──
-   260px fijo para el panel de capítulos, el embed toma el resto —
+   260px fijo para el panel de capítulos, el embed toma el resto,
    angostado desde 320px para darle más ancho relativo al visor de
    diapositivas. */
 .course-watch-grid {
@@ -923,7 +923,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   gap: 20px;
   align-items: start;
 }
-/* Único hijo de la columna 1fr — evita que el grid item se desborde si
+/* Único hijo de la columna 1fr, evita que el grid item se desborde si
    algún contenido interno (ej. texto largo) pide más ancho del disponible. */
 .watch-main-col { min-width: 0; }
 .chapters-panel { display: flex; flex-direction: column; gap: 2px; max-height: 100%; }
@@ -935,7 +935,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .chapters-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
 /* Mismo patrón "fila con separador top, sin borde en la primera" que
-   .wf-leader-row / .news-item (home.css) — coherencia visual, aunque este
+   .wf-leader-row / .news-item (home.css), coherencia visual, aunque este
    vive en styles.css por ser específico de curso.html. */
 .chapter-item {
   display: flex;
@@ -945,7 +945,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   border-top: 1px solid var(--rule);
   font-size: 0.82rem;
 }
-/* Solo se anula el borde, no el padding-top — con padding-top:0 el primer
+/* Solo se anula el borde, no el padding-top, con padding-top:0 el primer
    item quedaba con la mitad de alto que el resto, y su texto se veía
    corrido hacia arriba dentro de la franja de selección/hover. */
 .chapter-item:first-child { border-top: none; }
@@ -955,7 +955,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   font-weight: 600;
   font-size: 0.74rem;
   /* Manrope tiene un line-height más alto que la Fira Sans heredada de
-     .chapter-label — sin esto, el número se ve corrido hacia arriba
+     .chapter-label, sin esto, el número se ve corrido hacia arriba
      aunque align-items:center ya centre las cajas correctamente. */
   line-height: 1;
   color: var(--accent-bright);
@@ -1008,7 +1008,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 
 /* ── Course view: acciones sociales ──
    Fila de botones tipo .wf-chip pero interactivos, con estado .is-active.
-   Vive dentro de .course-meta-row, a la derecha del autor — sin margin
+   Vive dentro de .course-meta-row, a la derecha del autor, sin margin
    propio, el espaciado entre filas ya lo da .page-header/.course-meta-tags. */
 .course-social-row {
   display: flex;
@@ -1036,7 +1036,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   color: var(--accent-bright);
 }
 .social-btn i { font-size: 1rem; }
-/* Contador de likes — vacío (sin dígitos) si el curso tiene 0, para no
+/* Contador de likes, vacío (sin dígitos) si el curso tiene 0, para no
    mostrar "Me gusta 0" de entrada; ver setLikeBtnActive() en curso.html. */
 .social-btn-count { font-variant-numeric: tabular-nums; }
 .social-btn.is-active .social-btn-count { color: var(--accent-bright); }
@@ -1064,7 +1064,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 
 /* ── Selector de archivo personalizado ──
    El <input type="file"> real queda oculto visualmente (no display:none,
-   para no romper el foco por teclado) — el <label> asociado es el
+   para no romper el foco por teclado), el <label> asociado es el
    disparador visual real, dispara el picker nativo del navegador vía la
    asociación for/id estándar de HTML, sin JS. */
 .file-picker { display: flex; align-items: center; margin-bottom: 14px; }
@@ -1136,7 +1136,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .resource-item .btn { width: auto; margin-left: auto; padding: 6px 14px; font-size: 0.78rem; }
 
 /* ── Logros del perfil ── Mismo patrón "fila con separador top" que
-   .resource-item — ícono de acento + título/descripción. */
+   .resource-item, ícono de acento + título/descripción. */
 .logro-item {
   display: flex;
   align-items: center;
@@ -1165,7 +1165,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 
 /* ── Credenciales del profesor demo (acceso.html) ──
    Mismo lenguaje que .upload-box (borde punteado sutil), pero informativo
-   en vez de interactivo — solo muestra correo/contraseña para copiar. */
+   en vez de interactivo, solo muestra correo/contraseña para copiar. */
 .demo-credentials {
   display: flex;
   flex-direction: column;
@@ -1274,7 +1274,7 @@ tbody tr:hover { background: rgba(231, 238, 247, 0.02); }
 }
 
 /* ── Modal de bienvenida (post-login/registro) ──
-   Primer modal centrado con backdrop del proyecto — los dropdowns de
+   Primer modal centrado con backdrop del proyecto, los dropdowns de
    usuario/notificaciones son position:absolute anclados a un botón, sin
    backdrop. z-index 30, por encima de esos dropdowns (z-index:20) por si
    quedara alguno abierto (no debería pasar en la práctica). */

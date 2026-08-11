@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Curso — Pharis Academy</title>
+  <title>Curso, Pharis Academy</title>
   <meta name="theme-color" content="#020617" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 17' fill='none'%3E%3Cpath d='M0.018654 0C0.291685 0.0346468 1.06363 0.351087 1.35507 0.444175C2.00683 0.652386 2.66098 0.893337 3.30632 1.1157L7.44425 2.51569C8.06511 2.72709 8.66921 2.90399 9.28163 3.14897C9.27745 3.58039 9.21329 4.21939 9.18326 4.67222C9.11664 5.7132 9.04471 6.75378 8.96742 7.79399C8.90088 8.70041 8.87595 9.5429 8.82382 10.438L8.61194 13.5626C8.55515 14.428 8.39189 15.9957 8.40472 16.8065C7.86712 16.785 7.20704 16.8116 6.65379 16.8015C6.24697 16.7941 5.34462 16.7703 4.9748 16.8225C5.17644 16.3851 5.28948 15.8819 5.4424 15.4234C6.19564 13.1646 6.9358 10.8953 7.67625 8.63259C7.92098 7.93723 8.10071 7.37357 8.29986 6.66252C7.99596 6.82813 7.43703 6.98952 7.09294 7.10483L5.15151 7.75164C3.9828 8.13023 2.75982 8.58522 1.59136 8.9865C1.14081 9.14125 0.395517 9.31603 0.0199016 9.55254C0.00992916 8.76633 -0.022738 7.75843 0.0263541 6.98817C0.650986 6.90894 9.11771 4.70463 9.03973 4.77851C8.91731 4.62324 7.17078 4.26203 6.87252 4.18944L3.81818 3.43088C2.59209 3.13691 1.23158 2.74788 0.000468966 2.50575C0.0457848 1.81065 0.0160509 0.727473 0.018654 0Z' fill='%23508FF8'/%3E%3Cpath d='M20.2672 0.0289993L20.3871 0.0302827C20.4597 0.124471 20.4258 2.21354 20.4249 2.49028C18.2297 3.0131 16.04 3.55894 13.8563 4.12766C13.5136 4.21342 11.545 4.59757 11.479 4.78639C11.655 4.86837 12.1966 4.9594 12.4251 5.01729L15.214 5.71423C16.9305 6.1261 18.725 6.6281 20.4239 7.02197C20.4254 7.37599 20.4564 9.20695 20.3958 9.44314C19.9444 9.43269 16.2385 8.06739 15.5812 7.84396L13.6376 7.19099C13.1168 7.01981 12.568 6.86388 12.079 6.62051C12.3181 7.16521 12.5208 7.916 12.7227 8.50749C12.9069 8.9939 13.0299 9.48999 13.1962 9.98319L14.8492 14.9667C14.9894 15.3789 15.2887 16.4491 15.4624 16.7646C14.3807 16.8598 13.1516 16.7846 12.0532 16.8182C12.0684 16.5415 11.9832 15.6921 11.9634 15.3661L11.7317 11.8073C11.6749 10.9925 11.6565 10.2069 11.6083 9.40552C11.4933 7.31429 11.3464 5.22496 11.1675 3.13823C12.1316 2.77479 13.1446 2.46883 14.1199 2.12588C16.1561 1.40981 18.2385 0.762741 20.2672 0.0289993Z' fill='%23508FF8'/%3E%3C/svg%3E">
 
@@ -55,7 +55,7 @@
     <section class="course-section">
       <div class="course-watch-grid">
         <!-- Visor + info del curso (tags/título/autor) van juntos, como
-             único hijo de la columna 1fr — así su posición depende del
+             único hijo de la columna 1fr, así su posición depende del
              flujo real de esta columna, no de la altura total de la fila
              del grid (que antes se igualaba a .side-panels cuando este
              era más alto que el visor, dejando un hueco vacío debajo). -->
@@ -64,23 +64,23 @@
             <div class="embed-frame" id="embedFrame">
               <span id="embedPlaceholder">Las diapositivas se agregarán próximamente.</span>
 
-              <!-- Visor real — oculto por defecto, se muestra solo si course.slides existe. -->
+              <!-- Visor real, oculto por defecto, se muestra solo si course.slides existe. -->
               <div class="slide-viewer" id="slideViewer" style="display:none;">
                 <img id="slideImage" alt="" />
                 <!-- Zonas interactivas por diapositiva (links/botones
-                     superpuestos en coordenadas %) — se repuebla en cada
+                     superpuestos en coordenadas %), se repuebla en cada
                      goToSlide() según slide.hotspots. Vacío para
                      diapositivas sin interactividad (la mayoría). -->
                 <div class="slide-hotspots" id="slideHotspots"></div>
-                <!-- Aviso de barrera 6→7 (ver goToSlide) — oculto por
+                <!-- Aviso de barrera 6→7 (ver goToSlide), oculto por
                      defecto, aparece un instante cuando se intenta avanzar
                      sin haber subido una actividad todavía. -->
                 <div class="slide-toast" id="slideToast"></div>
               </div>
 
-              <!-- Barra de controles — superpuesta sobre la imagen, dentro
+              <!-- Barra de controles, superpuesta sobre la imagen, dentro
                    de .embed-frame (position:absolute). Oculta por defecto,
-                   aparece con hover/foco sobre el frame (ver CSS) — así no
+                   aparece con hover/foco sobre el frame (ver CSS), así no
                    tapa la imagen cuando el cursor no está encima. Oculta
                    también hasta que haya diapositivas reales cargadas. -->
               <div class="viewer-controls" id="viewerControls" style="display:none;">
@@ -103,7 +103,7 @@
             </div>
           </div>
 
-          <!-- Tags de categoría — la categoría se resuelve en loadCourse()
+          <!-- Tags de categoría, la categoría se resuelve en loadCourse()
                contra data.categorias. -->
           <div class="course-meta-tags" id="courseTags"></div>
 
@@ -114,7 +114,7 @@
           <!-- Autor (mock fijo, no existe ese campo en el curso, ver README) +
                acciones sociales en la misma fila. "Me gusta" sigue siendo mock
                puro (sin backend ni acción real). "Compartir" copia la URL al
-               portapapeles (real). "Guardar" persiste en el backend (real) —
+               portapapeles (real). "Guardar" persiste en el backend (real),
                ver academy_saved_courses. -->
           <div class="course-meta-row">
             <div class="course-author">
@@ -150,7 +150,7 @@
             <ol class="chapters-list" id="chaptersList"></ol>
           </aside>
 
-          <!-- Curso sugerido — datos reales de GET /academy/courses, misma
+          <!-- Curso sugerido, datos reales de GET /academy/courses, misma
                categoría, excluyendo el actual. Solo se muestra el primero
                (el panel es angosto, no un grid). Oculto por completo si no
                hay otros cursos en la categoría. Card propia, separada de
@@ -163,15 +163,15 @@
       </div>
     </section>
 
-    <!-- Recursos del curso — visible para todos (ver/descargar), la subida
+    <!-- Recursos del curso, visible para todos (ver/descargar), la subida
          es admin-only (ver academy_users.es_admin / JWT esAdmin). Sección
          oculta por completo (para todos, incluido admin) si no hay ningún
-         recurso subido todavía — ver renderResources() en el script. -->
+         recurso subido todavía, ver renderResources() en el script. -->
     <section class="course-section" id="resourcesSection" style="display:none;">
       <h2>Recursos del curso</h2>
       <div id="resourcesList"></div>
 
-      <!-- Oculto por defecto — solo se muestra si user.esAdmin === true. -->
+      <!-- Oculto por defecto, solo se muestra si user.esAdmin === true. -->
       <div class="upload-box" id="resourceUploadBox" style="display:none;">
         <div class="field" style="margin-bottom:10px;">
           <input type="text" id="resourceTitulo" placeholder="Título del recurso (ej. Lista de cotejo)" style="width:100%; background:var(--bg-deep); border:1px solid var(--rule); border-radius:var(--radius-sm); padding:11px 13px; color:var(--text); font-size:0.9rem;" />
@@ -193,7 +193,7 @@
       <p>Sube tu actividad en PDF o imagen (JPG/PNG). Pharis la revisará automáticamente contra la rúbrica del curso.</p>
 
       <div class="upload-box">
-        <!-- Dropzone: arrastrar-y-soltar real (ver JS — DataTransfer arma
+        <!-- Dropzone: arrastrar-y-soltar real (ver JS, DataTransfer arma
              una FileList sintética para #fileInput y dispara 'change', así
              reusa la misma validación/lectura que ya usa uploadBtn) más
              click para abrir el picker nativo, vía <label for>. -->
@@ -201,7 +201,7 @@
           <input type="file" id="fileInput" accept="application/pdf,image/png,image/jpeg" class="file-picker-input" />
           <i class="ph ph-upload-simple dropzone-icon"></i>
           <p class="dropzone-text" id="dropzoneText">Suelta tu archivo aquí, o <span class="dropzone-link">haz clic para subir</span></p>
-          <p class="dropzone-hint">PDF, JPG o PNG — hasta 10MB</p>
+          <p class="dropzone-hint">PDF, JPG o PNG, hasta 10MB</p>
         </label>
         <button class="btn btn-primary" id="uploadBtn">Subir actividad</button>
         <div class="upload-status" id="uploadStatus"></div>
@@ -231,12 +231,12 @@
     // Va en el hash (#slug=X), no en el query string (?slug=X): el hash
     // nunca se envía al servidor, así que ningún servidor estático con
     // "clean URLs" (ej. npx serve en desarrollo local) puede perderlo en
-    // un redirect — a diferencia del query string, que sí se pierde ahí.
+    // un redirect, a diferencia del query string, que sí se pierde ahí.
     const params = new URLSearchParams(window.location.hash.slice(1));
     const slug = params.get('slug');
     if (!slug) window.location.href = 'index.html';
 
-    // Historial local de esta sesión de navegador — el backend no expone
+    // Historial local de esta sesión de navegador, el backend no expone
     // GET /academy/mis-entregas (fuera de alcance de esta primera versión),
     // así que solo se listan las entregas hechas en esta pestaña/sesión.
     const localHistory = [];
@@ -247,7 +247,7 @@
         academyFetch('/academy/me'),
         academyFetch(`/academy/courses/${encodeURIComponent(slug)}/tengo-entrega`),
       ]);
-      // Barrera 6→7 del curso "introduccion" (ver goToSlide) — si el fetch
+      // Barrera 6→7 del curso "introduccion" (ver goToSlide), si el fetch
       // falla se asume false (más restrictivo, no más permisivo: mejor
       // pedirle de nuevo que suba la actividad que dejar pasar por un error
       // de red). Se sobrescribe con un valor real apenas termina un submit
@@ -278,16 +278,16 @@
         goToSlide(0);
       } else if (course.slidesEmbedUrl) {
         // Compatibilidad con el mecanismo anterior (iframe) para cursos que
-        // algún día usen ese camino en vez de imágenes — no aplica hoy a
+        // algún día usen ese camino en vez de imágenes, no aplica hoy a
         // ninguno de los 4 cursos actuales, pero no se rompe si se usa después.
         document.getElementById('embedPlaceholder').outerHTML = `<iframe src="${course.slidesEmbedUrl}" allowfullscreen></iframe>`;
       } else {
-        // Sin slides ni slidesEmbedUrl (los otros 3 cursos hoy) — placeholder
+        // Sin slides ni slidesEmbedUrl (los otros 3 cursos hoy), placeholder
         // actual, sin cambios de comportamiento.
         renderChapters(MOCK_CHAPTERS_FALLBACK);
       }
 
-      // Tag de categoría — título legible desde data.categorias, no el slug crudo.
+      // Tag de categoría, título legible desde data.categorias, no el slug crudo.
       const categoria = (data.categorias || []).find(c => c.slug === course.categoria);
       document.getElementById('courseTags').innerHTML = `
         <span class="wf-chip"><i class="ph ph-tag"></i> ${categoria ? categoria.titulo : course.categoria}</span>
@@ -299,7 +299,7 @@
 
       renderSuggested(data.courses, course);
 
-      // Estado inicial de "Guardar" — si /academy/me falló, saveBtn se
+      // Estado inicial de "Guardar", si /academy/me falló, saveBtn se
       // queda en su estado por defecto en vez de bloquear la carga del curso.
       if (meResult.status === 'fulfilled') {
         const guardados = meResult.value.user.cursosGuardados || [];
@@ -307,11 +307,11 @@
       }
     }
 
-    // Capítulos mock — fallback para cursos sin diapositivas reales todavía
+    // Capítulos mock, fallback para cursos sin diapositivas reales todavía
     // (mismo texto que el mock original, solo con la clave `titulo` en vez
     // de `label` para calzar con el shape real de renderChapters()). No
     // corresponden a ninguna diapositiva, así que no llevan data-index útil
-    // — se listan igual pero el click no navega nada.
+    //, se listan igual pero el click no navega nada.
     const MOCK_CHAPTERS_FALLBACK = [
       { titulo: 'Introducción' },
       { titulo: 'Conceptos clave' },
@@ -324,7 +324,7 @@
     // Barrera entre diapositivas 6→7 (índices 5→6) del curso "introduccion":
     // no deja avanzar a la 7 sin al menos una entrega para este curso. Se
     // resuelve en loadCourse() (GET .../tengo-entrega) y se actualiza en
-    // caliente tras un submit exitoso — ver goToSlide() para la barrera en
+    // caliente tras un submit exitoso, ver goToSlide() para la barrera en
     // sí y uploadBtn más abajo para dónde se pone en true.
     let tieneEntregaCurso = false;
     const SLIDE_INDEX_BARRERA_ENTREGA = 5; // 0-based: diapositiva 6
@@ -354,7 +354,7 @@
     }
 
     // Zonas clickeables superpuestas sobre la imagen (link a instalador,
-    // botón de actividad externa, etc.) — coordenadas en % del frame 16:9,
+    // botón de actividad externa, etc.), coordenadas en % del frame 16:9,
     // así coinciden con el mismo punto visual de la imagen sin importar el
     // tamaño real de pantalla. slide.hotspots es opcional: la mayoría de
     // las diapositivas no llevan ninguno.
@@ -373,7 +373,7 @@
         if (h.label) a.textContent = h.label;
 
         if (h.style === 'download') {
-          // Descarga privada autenticada (ej. instalador de Pharis App) —
+          // Descarga privada autenticada (ej. instalador de Pharis App),
           // el href de la API requiere Authorization: Bearer, así que no
           // puede ser un link plano (target=_blank llevaría a un 401 sin
           // el token). En su lugar, un fetch autenticado que devuelve una
@@ -431,14 +431,14 @@
       document.getElementById('slideCounter').textContent = `${currentSlideIndex + 1} / ${currentSlides.length}`;
       document.getElementById('slidePrevBtn').disabled = currentSlideIndex === 0;
       document.getElementById('slideNextBtn').disabled = currentSlideIndex === currentSlides.length - 1;
-      // Progreso = diapositivas completadas, no "posición actual" — en la
+      // Progreso = diapositivas completadas, no "posición actual", en la
       // 1 de 7 arranca en 0%, en la 7 de 7 llega a 100%.
       const progress = currentSlides.length > 1 ? (currentSlideIndex / (currentSlides.length - 1)) * 100 : 100;
       document.getElementById('viewerProgressFill').style.width = `${progress}%`;
       updateChapterActiveState();
     }
 
-    // Click/drag en la barra de progreso — salta a la diapositiva más
+    // Click/drag en la barra de progreso, salta a la diapositiva más
     // cercana a la posición horizontal del click, mapeando el % de ancho
     // a un índice entero.
     function seekToProgressPosition(clientX) {
@@ -449,7 +449,7 @@
       goToSlide(Math.round(ratio * (currentSlides.length - 1)));
     }
     // El foco por teclado (ArrowLeft/ArrowRight) ya lo cubre el listener
-    // global de document más abajo — no se duplica acá para evitar que,
+    // global de document más abajo, no se duplica acá para evitar que,
     // con foco en la barra, una flecha dispare goToSlide() dos veces.
     document.getElementById('viewerProgress').addEventListener('click', (e) => seekToProgressPosition(e.clientX));
 
@@ -462,7 +462,7 @@
       }
     });
 
-    // Manejo de error de imagen — sin precedente en el proyecto, tratamiento
+    // Manejo de error de imagen, sin precedente en el proyecto, tratamiento
     // simple: si la URL de GCS falla (placeholder sin reemplazar, 404, etc.),
     // se ve un texto claro en vez de un ícono roto de navegador.
     document.getElementById('slideImage').addEventListener('error', (e) => {
@@ -483,7 +483,7 @@
     });
 
     function renderSuggested(allCourses, currentCourse) {
-      // Solo el primero — el panel de Capítulos es angosto (260px), no un
+      // Solo el primero, el panel de Capítulos es angosto (260px), no un
       // grid, así que no tiene sentido apilar más de una tarjeta ahí.
       const suggested = allCourses
         .filter(c => c.categoria === currentCourse.categoria && c.slug !== currentCourse.slug)
@@ -503,17 +503,17 @@
 
     // ── Acciones sociales ──
     // likeBtn y saveBtn persisten de verdad (POST /academy/courses/:slug/
-    // me-gusta y /guardar respectivamente) — ambos handlers async, esperan
+    // me-gusta y /guardar respectivamente), ambos handlers async, esperan
     // la respuesta del backend antes de aplicar el efecto visual.
     const likeBtn = document.getElementById('likeBtn');
     const saveBtn = document.getElementById('saveBtn');
     const shareBtn = document.getElementById('shareBtn');
 
-    // Fija el valor exacto que llega del backend (no alterna a ciegas) —
+    // Fija el valor exacto que llega del backend (no alterna a ciegas),
     // se usa tanto al cargar la página (estado inicial) como tras cada
     // respuesta del toggle. totalLikes es opcional: en la carga inicial
     // siempre llega (ver course.totalLikes en loadCourse), en el toggle
-    // también lo devuelve el backend — solo se omite si algún día se
+    // también lo devuelve el backend, solo se omite si algún día se
     // reusa esta función sin ese dato disponible.
     function setLikeBtnActive(active, totalLikes) {
       likeBtn.classList.toggle('is-active', active);
@@ -651,7 +651,7 @@
         const sub = result.submission;
         localHistory.unshift(sub);
         renderHistory();
-        // Desbloquea la barrera 6→7 en caliente — sin esto, el alumno
+        // Desbloquea la barrera 6→7 en caliente, sin esto, el alumno
         // tendría que recargar la página para poder seguir viendo el curso
         // después de subir la actividad.
         tieneEntregaCurso = true;
@@ -680,7 +680,7 @@
     });
 
     // Arrastrar-y-soltar real: DataTransfer arma una FileList sintética
-    // para el <input> oculto y dispara 'change' — reusa la misma
+    // para el <input> oculto y dispara 'change', reusa la misma
     // validación/lectura que ya corre para la selección por click.
     ['dragenter', 'dragover'].forEach(evt => {
       dropzone.addEventListener(evt, (e) => {

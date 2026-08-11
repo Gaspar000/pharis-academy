@@ -15,11 +15,11 @@ Se despliega en GitHub Pages como `gaspar000.github.io/pharis-academy`.
 
 ```
 pharis-academy/
-├── index.html          # Home — lista de cursos (requiere sesión)
+├── index.html          # Home, lista de cursos (requiere sesión)
 ├── login.html
 ├── register.html
 ├── curso.html           # Vista de curso + subir actividad
-├── dashboard.html        # Solo profesores — usuarios, entregas, export CSV
+├── dashboard.html        # Solo profesores, usuarios, entregas, export CSV
 ├── assets/
 │   ├── styles.css        # Tokens visuales (fondo #020617, acento #508ff8)
 │   └── api.js             # Cliente fetch + manejo de sesión (localStorage)
@@ -42,7 +42,7 @@ pharis-academy/
 
 3. El sitio queda disponible en `https://gaspar000.github.io/pharis-academy/`.
 
-No hay build step — GitHub Pages sirve los `.html` tal cual.
+No hay build step, GitHub Pages sirve los `.html` tal cual.
 
 ## Backend (pharis-api)
 
@@ -59,9 +59,9 @@ O ejecuta `academy-schema.sql` directamente contra la base de Railway si prefier
 
 Agrega en Railway (o `.env` local de `pharis-api`):
 ```
-ACADEMY_JWT_SECRET=<64 hex chars — genera con: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))">
+ACADEMY_JWT_SECRET=<64 hex chars, genera con: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))">
 ```
-Si se omite, cae a `JWT_SECRET` (no recomendado en producción — mezclaría los tokens de Academy con los de la app de escritorio).
+Si se omite, cae a `JWT_SECRET` (no recomendado en producción, mezclaría los tokens de Academy con los de la app de escritorio).
 
 ### 3. CORS
 
@@ -71,7 +71,7 @@ ALLOWED_ORIGINS=https://gaspar000.github.io,...
 ```
 
 Para probar el frontend local contra el backend real de Railway (en vez de mockear
-`/academy/*`), agrega también `http://localhost:3000` — y sirve siempre con ese
+`/academy/*`), agrega también `http://localhost:3000`, y sirve siempre con ese
 puerto fijo (`npx serve -l 3000` desde `pharis-academy`, no `npx serve` a secas):
 la comparación de origen es un string exacto, así que un puerto aleatorio (el que
 `serve` elige por defecto si 3000 está ocupado) nunca va a matchear.
@@ -86,14 +86,14 @@ Todas bajo `pharis-api/src/routes/academy.js`, montadas en `src/index.js`:
 | Método | Ruta | Auth | Descripción |
 |---|---|---|---|
 | POST | `/academy/register` | código de invitación | Registro: nombre, email, password, código |
-| POST | `/academy/login` | — | Login, devuelve JWT propio de Academy |
+| POST | `/academy/login` | sin auth | Login, devuelve JWT propio de Academy |
 | GET | `/academy/courses` | JWT Academy | Lista de cursos (placeholders) |
 | POST | `/academy/submit` | JWT Academy | Sube actividad (base64) y la evalúa con Claude Haiku |
 | GET | `/academy/dashboard` | JWT Academy + rol profesor | Usuarios + entregas |
 
 ### Registro por invitación (código de un solo uso)
 
-El registro es privado: **no hay auto-registro libre**. `/academy/register` exige un `codigo` válido y sin usar — el rol (`estudiante`/`profesor`) queda fijado por ese código, no por lo que el cliente mande en el body. Esto evita que cualquiera se auto-asigne `profesor` y lea `/academy/dashboard` (nombres, correos y entregas de todos).
+El registro es privado: **no hay auto-registro libre**. `/academy/register` exige un `codigo` válido y sin usar, el rol (`estudiante`/`profesor`) queda fijado por ese código, no por lo que el cliente mande en el body. Esto evita que cualquiera se auto-asigne `profesor` y lea `/academy/dashboard` (nombres, correos y entregas de todos).
 
 Para generar un código:
 ```
@@ -101,7 +101,7 @@ cd pharis-api
 npm run academy:invite -- "Nombre del destinatario" estudiante
 npm run academy:invite -- "Nombre del destinatario" profesor
 ```
-Imprime un código de ~8 caracteres. Compártelo por un canal de confianza (WhatsApp, correo) — queda ligado a `destinatario` para poder rastrear qué cuenta corresponde a quién, y se invalida automáticamente tras el primer registro exitoso.
+Imprime un código de ~8 caracteres. Compártelo por un canal de confianza (WhatsApp, correo), queda ligado a `destinatario` para poder rastrear qué cuenta corresponde a quién, y se invalida automáticamente tras el primer registro exitoso.
 
 ## Cambiar el backend que consume el frontend
 
@@ -111,5 +111,5 @@ Si despliegas `pharis-api` en otra URL, edita `API_BASE` en [assets/api.js](asse
 
 - **Contenido real de los cursos**: `curso.html` y el catálogo en `pharis-api/src/lib/academy-courses.js` usan placeholders (`slidesEmbedUrl: null`). Para activar las diapositivas, pega la URL de embed de Google Slides (o un visor de PDF) en `slidesEmbedUrl` de cada curso.
 - **Historial de entregas del alumno**: `curso.html` solo muestra las entregas hechas en la sesión actual del navegador (no hay `GET /academy/mis-entregas` todavía).
-- **Recuperación de contraseña**: no implementada — fuera de alcance de esta primera versión.
+- **Recuperación de contraseña**: no implementada, fuera de alcance de esta primera versión.
 - **Paginación del dashboard**: si el número de usuarios/entregas crece mucho, `GET /academy/dashboard` debería paginar en vez de devolver todo en una sola respuesta.

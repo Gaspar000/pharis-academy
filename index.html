@@ -48,7 +48,7 @@
            (pharis-api). Saludo con jerarquía menor, estadística destacada con
            tipografía mayor. Las tarjetas verticales muestran solo los 2 cursos
            de la categoría preferida del usuario (categoriaPreferida, elegida
-           en el registro — puramente clasificatorio) — el resto vive en
+           en el registro, puramente clasificatorio), el resto vive en
            "Todos los cursos" más abajo. -->
       <section class="wf-hero" id="heroSection">
         <div class="wf-hero-greeting">
@@ -65,7 +65,7 @@
 
       <!-- Columna izquierda: Estadísticas + Todos los cursos apilados.
            Columna derecha: Leaderboard solo. Gap horizontal grande entre
-           ambas (ver .wf-grid-stats-leaders) — mismo patrón que
+           ambas (ver .wf-grid-stats-leaders), mismo patrón que
            Statistics+My Assignments vs Leaders en la referencia visual.
            Cursos disponibles y días de racha son datos reales; el resto de
            las stats es ilustrativo hasta que exista GET /academy/mis-entregas
@@ -90,14 +90,14 @@
         </div>
 
         <div>
-          <!-- Leaderboard — dato real, viene de GET /academy/leaderboard.
+          <!-- Leaderboard, dato real, viene de GET /academy/leaderboard.
                Top 10 por puntos totales + la posición del usuario actual
                (esté o no en el top). Sección oculta por completo si nadie
                tiene puntos todavía (ver loadLeaderboard() más abajo). -->
           <div id="leaderboardSection">
             <div class="wf-section-title">Leaderboard</div>
 
-            <!-- Posición del usuario actual — card propio, encima del ranking. -->
+            <!-- Posición del usuario actual, card propio, encima del ranking. -->
             <div class="wf-panel wf-leader-you-panel" id="leaderboardYouPanel" style="display:none;">
               <div class="wf-avatar wf-leader-you-avatar" id="leaderboardYouAvatar"></div>
               <div>
@@ -112,7 +112,7 @@
             <div class="wf-panel" id="leaderboardTop"></div>
           </div>
 
-          <!-- Noticias — publicadas por CLI (scripts/academy-news.js en
+          <!-- Noticias, publicadas por CLI (scripts/academy-news.js en
                pharis-api), sin panel de admin. Card chico, debajo del
                Leaderboard, alineado en la misma columna derecha. Sección
                "opcional": si falla el fetch no bloquea el resto del
@@ -124,7 +124,7 @@
     </div>
   </div>
 
-  <!-- Modal de bienvenida — solo aparece tras login/registro exitoso, ver
+  <!-- Modal de bienvenida, solo aparece tras login/registro exitoso, ver
        sessionStorage 'academy_just_authenticated' en login.html/register.html. -->
   <div class="welcome-modal-backdrop" id="welcomeModalBackdrop" style="display:none;">
     <div class="welcome-modal">
@@ -143,7 +143,7 @@
   <script>
     AcademyAuth.requireAuth();
 
-    // Modal de bienvenida — solo tras login/registro exitoso (flag seteado en
+    // Modal de bienvenida, solo tras login/registro exitoso (flag seteado en
     // login.html/register.html justo antes del redirect). Se borra apenas se
     // lee para que un F5 posterior en Overview no lo vuelva a mostrar.
     if (sessionStorage.getItem('academy_just_authenticated')) {
@@ -160,7 +160,7 @@
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
     document.getElementById('helloMsg').textContent = `Hola, ${user.nombre.split(' ')[0]}!`;
     // Ya viene en localStorage desde el último login (POST /academy/login
-    // ahora devuelve streakCount) — no hace falta un fetch aparte para esto.
+    // ahora devuelve streakCount), no hace falta un fetch aparte para esto.
     document.getElementById('statStreak').textContent = user.streakCount ?? 0;
     if (user.rol === 'profesor') {
       document.getElementById('navDashboard').style.display = 'flex';
@@ -184,7 +184,7 @@
         }
 
         // Hero: solo los cursos de la categoría preferida del usuario (2 de
-        // los 4) — categoriaPreferida es clasificatorio, no restringe acceso;
+        // los 4), categoriaPreferida es clasificatorio, no restringe acceso;
         // el usuario igual puede tomar cualquier curso desde "Todos los
         // cursos". Si por algún motivo no hay coincidencias, se muestran los
         // primeros 2 cursos como respaldo. Barra de progreso en 0%: a futuro
@@ -223,12 +223,12 @@
       }
     }
 
-    // Noticias — sección "opcional": si falla el fetch, se muestra el
+    // Noticias, sección "opcional": si falla el fetch, se muestra el
     // mensaje de error ahí mismo pero no bloquea el resto del Overview
     // (Estadísticas/Leaderboard/Cursos ya cargan con su propio try/catch
     // independiente en loadCourses).
     async function loadNews() {
-      // #newsList YA es .wf-panel (definido en el HTML) — acá solo se
+      // #newsList YA es .wf-panel (definido en el HTML), acá solo se
       // rellena su contenido, sin reconfigurar el contenedor por JS.
       const newsList = document.getElementById('newsList');
       try {
@@ -238,7 +238,7 @@
           return;
         }
         // Quita empty-state (fijo en el HTML como estado inicial de
-        // "Cargando...") — si se queda, su text-align:center centra todo
+        // "Cargando..."), si se queda, su text-align:center centra todo
         // el contenido real de las noticias, no solo el mensaje de carga.
         newsList.classList.remove('empty-state');
         newsList.innerHTML = data.news.map(n => `
@@ -255,7 +255,7 @@
 
     // ── Leaderboard ──────────────────────────────────────────────────────────
     // Primera vez que se generan iniciales dinámicas para un avatar en el
-    // proyecto (el resto son fijas en HTML, ej. "EP" del autor de curso) —
+    // proyecto (el resto son fijas en HTML, ej. "EP" del autor de curso),
     // toma la primera letra de las 2 primeras palabras del nombre.
     function iniciales(nombre) {
       return nombre.trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
@@ -276,7 +276,7 @@
           </div>
         `).join('');
 
-        // "Tu posición" solo tiene sentido si el usuario ya ganó puntos —
+        // "Tu posición" solo tiene sentido si el usuario ya ganó puntos,
         // si nunca subió una actividad, tuPosicion.posicion es null (ver
         // GET /academy/leaderboard en pharis-api).
         if (data.tuPosicion.posicion) {
@@ -286,7 +286,7 @@
           document.getElementById('leaderboardYouPanel').style.display = 'flex';
         }
       } catch {
-        // No bloquea el Overview — mismo criterio que loadNews.
+        // No bloquea el Overview, mismo criterio que loadNews.
         section.style.display = 'none';
       }
     }

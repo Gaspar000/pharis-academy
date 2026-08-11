@@ -1,7 +1,7 @@
 /* ============================================================
-   Home del alumno — layout con sidebar, inspirado en referencia "hance".
+   Home del alumno, layout con sidebar, inspirado en referencia "hance".
    Comparte tokens con styles.css. mock-tag marca visualmente los datos
-   de ejemplo (leaderboard, stats sin backend real) — ver README.
+   de ejemplo (leaderboard, stats sin backend real), ver README.
    ============================================================ */
 body { display: flex; min-height: 100vh; }
 
@@ -32,7 +32,7 @@ body { display: flex; min-height: 100vh; }
 .wf-nav a:hover { background: var(--accent-soft); color: var(--text); }
 .wf-nav a.active { background: var(--accent-soft); color: var(--accent-bright); }
 .wf-nav .icon { width: 18px; text-align: center; flex-shrink: 0; font-size: 1.05rem; }
-/* Recordatorio de desarrollo, no un link — mismo layout que .wf-nav a,
+/* Recordatorio de desarrollo, no un link, mismo layout que .wf-nav a,
    pero atenuado y sin hover interactivo (cursor:default) para que no se
    lea como algo clickeable. */
 .wf-nav-todo {
@@ -47,7 +47,7 @@ body { display: flex; min-height: 100vh; }
   cursor: default;
 }
 
-/* Toggle de tema — fila propia en el sidebar, encima de "Salir".
+/* Toggle de tema, fila propia en el sidebar, encima de "Salir".
    Mismo patrón visual que .wf-nav a pero como <button>, no <a>. */
 .wf-toggle {
   display: flex;
@@ -82,7 +82,7 @@ body { display: flex; min-height: 100vh; }
    Ahí el hueco derecho lo llena una ilustración; aquí van las tarjetas de
    curso en su lugar, así que el layout es flex en vez de grid con imagen.
    Más alto que el original de dashboard-v2 (168px) para dar espacio a
-   tarjetas de curso más altas — las tarjetas ocupan el resto del ancho
+   tarjetas de curso más altas, las tarjetas ocupan el resto del ancho
    disponible (flex:1 en .wf-hero-cards) hasta el borde derecho. */
 .wf-hero {
   display: flex;
@@ -97,7 +97,7 @@ body { display: flex; min-height: 100vh; }
 }
 /* align-items:stretch en .wf-hero + space-between aquí: el saludo (hello+stat)
    queda arriba, alineado con el tope de las tarjetas; el botón "Ver todos"
-   queda abajo, alineado con la base de las tarjetas — en vez de centrar el
+   queda abajo, alineado con la base de las tarjetas, en vez de centrar el
    bloque completo como una unidad. */
 .wf-hero-greeting {
   display: flex;
@@ -106,7 +106,7 @@ body { display: flex; min-height: 100vh; }
   flex-shrink: 0;
 }
 .wf-hero-greeting-top { display: flex; flex-direction: column; gap: 6px; }
-/* Saludo: texto de apoyo, menor jerarquía — la estadística es el dato que
+/* Saludo: texto de apoyo, menor jerarquía, la estadística es el dato que
    debe destacar (mismo patrón que #v2-welcome-greeting vs #v2-carousel-stat b). */
 .wf-hero-greeting .hello {
   font-family: "Manrope", sans-serif;
@@ -123,7 +123,7 @@ body { display: flex; min-height: 100vh; }
   line-height: 1.15;
 }
 /* Contenedor del mismo color que el fondo del hero (transparente sobre el
-   gradiente, así "es" el mismo color) con texto blanco — no el botón sin
+   gradiente, así "es" el mismo color) con texto blanco, no el botón sin
    fondo de .rp-ver-todo (ese solo funciona sobre paneles oscuros planos). */
 .hero-see-all {
   display: inline-flex;
@@ -141,16 +141,16 @@ body { display: flex; min-height: 100vh; }
   transition: background 0.15s var(--ease);
 }
 .hero-see-all:hover { background: rgba(255, 255, 255, 0.22); }
-/* flex:1 — ocupa todo el ancho restante del hero. Las tarjetas tienen ancho
+/* flex:1, ocupa todo el ancho restante del hero. Las tarjetas tienen ancho
    fijo (angosto, ver .wf-hero-card), así que justify-content:flex-end las
-   empuja al borde derecho del hero — el espacio libre queda entre el
+   empuja al borde derecho del hero, el espacio libre queda entre el
    saludo y las tarjetas, no después de ellas.
    Sin overflow-x:auto: forzaba overflow-y:auto también (un eje no puede
    quedar "visible" si el otro no lo es), y eso recortaba el
    translateY(-2px) del hover contra el borde del contenedor. Con solo 2
    tarjetas de ancho fijo dentro de un hero que ya tiene min-height/ancho
    de sobra, el desbordamiento horizontal no debería ocurrir en la
-   práctica — flex-wrap:wrap en .wf-hero (línea superior) es el respaldo
+   práctica, flex-wrap:wrap en .wf-hero (línea superior) es el respaldo
    si algún día no caben. */
 .wf-hero-cards {
   display: flex;
@@ -162,7 +162,7 @@ body { display: flex; min-height: 100vh; }
 }
 /* Vertical: mitad superior reservada para una ilustración (placeholder por
    ahora), mitad inferior con nombre + barra de progreso (a futuro: % de
-   slides revisadas). Más angosta que alta a propósito — flex-grow:0 evita
+   slides revisadas). Más angosta que alta a propósito, flex-grow:0 evita
    que .wf-hero-cards (flex:1) las estire de más; el espacio sobrante del
    hero queda vacío en vez de ensanchar las tarjetas. */
 .wf-hero-card {
@@ -192,7 +192,7 @@ body { display: flex; min-height: 100vh; }
   gap: 8px;
 }
 /* min-height reserva el alto de 2 líneas siempre, aunque el título real
-   ocupe solo 1 — antes esto variaba entre tarjetas ("Introducción" a 1
+   ocupe solo 1, antes esto variaba entre tarjetas ("Introducción" a 1
    línea vs "Curso 01: ..." a 2), y como .wf-hero-card-illustration es
    flex:1 ("lo que sobra" del alto fijo de la tarjeta), la ilustración de
    la tarjeta con título corto crecía más que la de al lado. */
@@ -207,19 +207,19 @@ body { display: flex; min-height: 100vh; }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-/* Orden: título, luego label ("x / y secciones"), luego la barra —
+/* Orden: título, luego label ("x / y secciones"), luego la barra,
    el label describe la barra, así que va inmediatamente encima de ella. */
 .wf-progress-bar { height: 6px; border-radius: 999px; background: var(--rule); overflow: hidden; margin-top: 2px; }
 .wf-progress-bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
 /* Fijo en "0 / 0" hasta que exista el conteo real de diapositivas por
-   curso — ver comentario en index.html donde se genera este markup. */
+   curso, ver comentario en index.html donde se genera este markup. */
 .wf-progress-label { font-size: 0.72rem; color: var(--text-faint); }
 
 /* Columna izquierda (Estadísticas + Todos los cursos) y columna derecha
-   (Leaderboard) — Leaderboard 120px más angosto que la mitad exacta (60px
+   (Leaderboard), Leaderboard 120px más angosto que la mitad exacta (60px
    menos por lado del reparto). gap:90px separa ambas columnas.
    Con columnas en % fijo, el gap se suma APARTE del 100% del contenedor
-   (a diferencia de fr, donde el gap se resta antes de repartir) — eso
+   (a diferencia de fr, donde el gap se resta antes de repartir), eso
    desbordaba el grid 90px más allá de .wf-hero. Se resta la mitad del
    gap (45px) a cada columna para compensar y que el ancho total (columnas
    + gap) vuelva a sumar exactamente 100%. */
@@ -250,7 +250,7 @@ body { display: flex; min-height: 100vh; }
   font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
 }
 
-/* Card de "tu posición" — encima del ranking general, con acento propio
+/* Card de "tu posición", encima del ranking general, con acento propio
    para distinguirla como el bloque personal del usuario. */
 .wf-leader-you-panel {
   display: flex;
@@ -278,7 +278,7 @@ body { display: flex; min-height: 100vh; }
 .wf-leader-row .sub { font-size: 0.74rem; color: var(--text-faint); }
 .wf-leader-row .pts { margin-left: auto; font-size: 0.78rem; color: var(--accent-bright); font-weight: 600; }
 
-/* Fila compacta de noticia — mismo patrón que .wf-leader-row (separador
+/* Fila compacta de noticia, mismo patrón que .wf-leader-row (separador
    fino en vez de tarjeta propia por ítem), para el card chico de Noticias
    debajo del Leaderboard. */
 .news-item { padding: 8px 2px; border-top: 1px solid var(--rule); }
