@@ -121,21 +121,30 @@
           </div>
         </div>
 
-        <!-- Logros, dato real, viene de GET /academy/me (ver renderLogros()). -->
-        <div class="wf-section-title">Logros</div>
-        <div class="wf-panel" id="logrosPanel" style="display:flex; flex-direction:column; gap:10px;">
-          <div class="empty-state" style="padding:20px 8px;" id="logrosEmpty">
-            Todavía no desbloqueaste ningún logro.
+        <!-- Logros y Cursos guardados, cada uno su propio bloque separado
+             con gap (mismo .side-panels que ya usa curso.html para
+             Capítulos/Curso sugerido) en vez de quedar pegados uno al otro. -->
+        <div class="side-panels">
+          <div>
+            <!-- Logros, dato real, viene de GET /academy/me (ver renderLogros()). -->
+            <div class="wf-section-title">Logros</div>
+            <div class="wf-panel" id="logrosPanel" style="display:flex; flex-direction:column; gap:10px;">
+              <div class="empty-state" style="padding:20px 8px;" id="logrosEmpty">
+                Todavía no desbloqueaste ningún logro.
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- Cursos guardados, dato real, viene de GET /academy/me/cursos-guardados -->
-        <div class="wf-section-title">Cursos guardados</div>
-        <div class="wf-panel" id="savedCoursesPanel">
-          <div class="empty-state" style="padding:20px 8px;" id="savedCoursesEmpty">
-            Todavía no guardaste ningún curso.
+          <div>
+            <!-- Cursos guardados, dato real, viene de GET /academy/me/cursos-guardados -->
+            <div class="wf-section-title">Cursos guardados</div>
+            <div class="wf-panel" id="savedCoursesPanel">
+              <div class="empty-state" style="padding:20px 8px;" id="savedCoursesEmpty">
+                Todavía no guardaste ningún curso.
+              </div>
+              <div id="savedCoursesList"></div>
+            </div>
           </div>
-          <div id="savedCoursesList"></div>
         </div>
       </div>
     </div>
