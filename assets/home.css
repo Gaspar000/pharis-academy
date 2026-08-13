@@ -38,6 +38,42 @@ body { display: flex; min-height: 100vh; }
    dispara un toast en vez de navegar, por eso conserva cursor:pointer. */
 .wf-nav a.is-locked { color: var(--text-faint); }
 .wf-nav a.is-locked:hover { background: transparent; color: var(--text-faint); }
+
+/* Card motivacional, fondo de la sidebar — mismo gradiente que el hero de
+   Overview (--hero-gradient) para que combine con el resto del sitio en
+   vez de un color ajeno. margin-top:auto lo empuja al fondo de la
+   sidebar (flex column, height:100vh), pegado siempre abajo del nav sin
+   importar cuántos links tenga. */
+.wf-sidebar-promo {
+  margin-top: auto;
+  border-radius: 20px;
+  background: var(--hero-gradient);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: #fff;
+}
+/* Espacio reservado para la ilustración — sin contenido propio, solo el
+   hueco donde va a vivir. Proporción ~1:1 sobre el ancho útil del card
+   (240px de sidebar - 2*18px de padding del aside - 2*16px de padding
+   del card ≈ 172px), igual que la referencia. */
+.wf-sidebar-promo-art {
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.10);
+}
+.wf-sidebar-promo-text {
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+.wf-sidebar-promo-sub {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.78);
+  margin-top: -8px;
+}
 /* Recordatorio de desarrollo, no un link, mismo layout que .wf-nav a,
    pero atenuado y sin hover interactivo (cursor:default) para que no se
    lea como algo clickeable. */
