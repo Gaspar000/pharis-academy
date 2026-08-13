@@ -80,17 +80,6 @@
       document.getElementById('navDashboard').style.display = 'flex';
     }
 
-    // Sin #slug= explícito: usa la categoría preferida del usuario
-    // (categoriaPreferida, elegida en el registro, puramente clasificatorio,
-    // NO es user.rol). Con #slug= explícito (p. ej. viniendo de una tarjeta
-    // de "Todos los cursos" en index.html), se respeta tal cual.
-    // Va en el hash (#slug=X), no en el query string (?slug=X): el hash
-    // nunca se envía al servidor, así que ningún servidor estático con
-    // "clean URLs" (ej. npx serve en desarrollo local) puede perderlo en
-    // un redirect, a diferencia del query string, que sí se pierde ahí.
-    const params = new URLSearchParams(window.location.hash.slice(1));
-    const categoriaSlug = params.get('slug') || user.categoriaPreferida || 'alumnos';
-
     const sectionsEl = document.getElementById('courseSections');
     const titleEl = document.getElementById('categoriaTitle');
     const crosslinkBanner = document.getElementById('crosslinkBanner');
@@ -141,7 +130,28 @@
       `).join('');
     }
 
+    // Sin #slug= explícito: usa la categoría preferida del usuario
+    // (categoriaPreferida, elegida en el registro, puramente clasificatorio,
+    // NO es user.rol). Con #slug= explícito (p. ej. viniendo de una tarjeta
+    // de "Todos los cursos" en index.html, o del crosslink de esta misma
+    // página), se respeta tal cual. Va en el hash (#slug=X), no en el
+    // query string (?slug=X): el hash nunca se envía al servidor, así que
+    // ningún servidor estático con "clean URLs" (ej. npx serve en
+    // desarrollo local) puede perderlo en un redirect, a diferencia del
+    // query string, que sí se pierde ahí.
+    //
+    // Se recalcula en CADA llamada (no una constante de módulo): el
+    // crosslink de esta misma página cambia solo el hash sin recargar
+    // (ver listener de hashchange más abajo) — si categoriaSlug quedara
+    // fijo en el valor de la primera carga, un segundo click al crosslink
+    // actualizaría la URL visible pero nunca el contenido renderizado.
+    function categoriaSlugActual() {
+      const params = new URLSearchParams(window.location.hash.slice(1));
+      return params.get('slug') || user.categoriaPreferida || 'alumnos';
+    }
+
     async function loadCategoria() {
+      const categoriaSlug = categoriaSlugActual();
       try {
         const data = await academyFetch('/academy/courses');
         const categorias = data.categorias || [];
@@ -174,6 +184,11 @@
     }
 
     loadCategoria();
+    // El crosslink de esta misma página solo cambia el hash (misma URL de
+    // documento), así que el navegador no dispara una carga nueva —
+    // sin este listener, un click ahí actualizaba la barra de direcciones
+    // pero el contenido renderizado se quedaba en la categoría vieja.
+    window.addEventListener('hashchange', loadCategoria);
   </script>
 </body>
 </html>
