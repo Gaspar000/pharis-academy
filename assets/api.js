@@ -189,6 +189,57 @@ const AcademyAuth = {
       document.getElementById('notifDropdownEmpty').textContent = 'No se pudieron cargar las notificaciones.';
     });
   },
+
+  /**
+   * Toast global de 3s, mismo lenguaje visual que .slide-toast (curso.html)
+   * pero portátil: inyecta su propio nodo la primera vez que se llama, no
+   * depende de que la página ya tenga un elemento en el HTML. Reusa el
+   * mismo nodo en llamadas siguientes (evita duplicar <div>s).
+   */
+  _toastEl: null,
+  _toastTimeout: null,
+  mostrarToast(mensaje) {
+    if (!this._toastEl) {
+      this._toastEl = document.createElement('div');
+      this._toastEl.className = 'academy-toast';
+      document.body.appendChild(this._toastEl);
+    }
+    this._toastEl.textContent = mensaje;
+    this._toastEl.classList.add('is-visible');
+    clearTimeout(this._toastTimeout);
+    this._toastTimeout = setTimeout(() => this._toastEl.classList.remove('is-visible'), 3000);
+  },
+
+  /**
+   * Gate de "Accede a Pharis" en el sidebar — llamar después de
+   * requireAuth() en cada página. Si el rol del usuario no completó su
+   * curso introductorio correspondiente (GET /academy/me/acceso), el link
+   * del sidebar queda visualmente deshabilitado (.is-locked) y su click
+   * muestra un toast en vez de navegar. Silencioso ante error de red: si
+   * el fetch falla, el link queda como estaba (sin gate) — un timeout acá
+   * no debe bloquear el acceso a Academy entero.
+   */
+  async aplicarGateSidebar() {
+    const link = document.querySelector('.wf-nav a[href="acceso.html"]');
+    if (!link) return;
+
+    let acceso;
+    try {
+      acceso = await academyFetch('/academy/me/acceso');
+    } catch {
+      return;
+    }
+
+    const user = this.getUser();
+    const desbloqueado = user?.rol === 'profesor' ? acceso.desbloqueadoDashboard : acceso.desbloqueadoApp;
+    if (desbloqueado) return;
+
+    link.classList.add('is-locked');
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.mostrarToast('Primero realiza alguno de los dos cursos introductorios.');
+    });
+  },
 };
 
 /**

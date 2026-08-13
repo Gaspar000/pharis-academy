@@ -32,6 +32,12 @@ body { display: flex; min-height: 100vh; }
 .wf-nav a:hover { background: var(--accent-soft); color: var(--text); }
 .wf-nav a.active { background: var(--accent-soft); color: var(--accent-bright); }
 .wf-nav .icon { width: 18px; text-align: center; flex-shrink: 0; font-size: 1.05rem; }
+/* "Accede a Pharis" antes de completar el curso introductorio (ver
+   AcademyAuth.aplicarGateSidebar en assets/api.js) — a diferencia de
+   .wf-nav-todo (nunca clickeable), esto SÍ recibe el click, solo que
+   dispara un toast en vez de navegar, por eso conserva cursor:pointer. */
+.wf-nav a.is-locked { color: var(--text-faint); }
+.wf-nav a.is-locked:hover { background: transparent; color: var(--text-faint); }
 /* Recordatorio de desarrollo, no un link, mismo layout que .wf-nav a,
    pero atenuado y sin hover interactivo (cursor:default) para que no se
    lea como algo clickeable. */

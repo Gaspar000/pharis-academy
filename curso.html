@@ -219,6 +219,7 @@
     const user = AcademyAuth.getUser();
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
+    AcademyAuth.aplicarGateSidebar();
 
     if (user.rol === 'profesor') {
       document.getElementById('navDashboard').style.display = 'flex';
@@ -387,6 +388,21 @@
             } catch (err) {
               mostrarSlideToast(err.message);
             }
+          });
+        } else if (h.href === 'acceso.html') {
+          // Hotspot de acceso de la diapositiva "Tutorial" — navegación
+          // normal dentro del mismo sitio (no target=_blank, es una página
+          // de Academy, no un link externo), pero antes de salir registra
+          // el evento que desbloquea "Accede a Pharis" en el sidebar
+          // (POST /academy/courses/:slug/vi-tutorial). Fire-and-forget:
+          // no se espera la respuesta, un fallo de red no debe bloquear
+          // la navegación — el alumno igual puede ver acceso.html, solo
+          // que el gate seguirá bloqueado hasta el próximo click exitoso.
+          a.href = h.href;
+          a.addEventListener('click', () => {
+            academyFetch(`/academy/courses/${encodeURIComponent(slug)}/vi-tutorial`, {
+              method: 'POST', body: '{}',
+            }).catch(() => {});
           });
         } else {
           a.href = h.href;

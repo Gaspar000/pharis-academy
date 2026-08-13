@@ -158,6 +158,7 @@
     const user = AcademyAuth.getUser();
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
+    AcademyAuth.aplicarGateSidebar();
     document.getElementById('helloMsg').textContent = `Hola, ${user.nombre.split(' ')[0]}!`;
     // Ya viene en localStorage desde el último login (POST /academy/login
     // ahora devuelve streakCount), no hace falta un fetch aparte para esto.

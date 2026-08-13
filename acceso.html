@@ -53,8 +53,8 @@
       <p>Descarga las herramientas de Pharis o mira cómo se ve del otro lado, el dashboard que usan los profesores de verdad.</p>
     </div>
 
-    <section class="course-section">
-      <h2>Descargas</h2>
+    <section class="course-section" id="downloadsSection">
+      <h2>Descargas <i class="ph ph-lock-simple lock-icon" aria-hidden="true"></i></h2>
       <div class="course-grid">
         <div class="course-card">
           <h2>Pharis App</h2>
@@ -74,7 +74,7 @@
     <!-- Solo profesores, mismo patrón que #navDashboard (oculto por
          defecto, revelado por JS si user.rol === 'profesor'). -->
     <section class="course-section" id="teacherDashboardSection" style="display:none;">
-      <h2>Dashboard de profesor</h2>
+      <h2>Dashboard de profesor <i class="ph ph-lock-simple lock-icon" aria-hidden="true"></i></h2>
       <p>Así es el dashboard real que usan los profesores con Pharis, con la actividad real de tus alumnos en Pharis Academy: entregas, calificaciones y avance por curso.</p>
       <div class="wf-panel" id="teacherDemoPanel">
         <a class="btn btn-primary" id="openDashboardBtn" href="#" target="_blank" rel="noopener noreferrer">
@@ -93,6 +93,7 @@
     const user = AcademyAuth.getUser();
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
+    AcademyAuth.aplicarGateSidebar();
 
     if (user.rol === 'profesor') {
       document.getElementById('navDashboard').style.display = 'flex';
@@ -126,6 +127,38 @@
       e.preventDefault();
       showDownloadStatus('downloadExtensionStatus', 'warn', 'La extensión todavía no está disponible para descarga, pronto.');
     });
+
+    // Gate por función, independiente del gate del sidebar (aplicarGateSidebar
+    // solo decide si el link del sidebar está habilitado — quien entra acá
+    // directo por URL, con el link bloqueado o no, igual necesita ver las
+    // secciones correctas atenuadas). Falla abierto ante error de red (no
+    // atenúa nada) — mismo criterio que aplicarGateSidebar, un timeout acá
+    // no debe bloquear a un alumno que ya tenía acceso real.
+    academyFetch('/academy/me/acceso').then(acceso => {
+      if (!acceso.desbloqueadoApp) {
+        document.getElementById('downloadsSection').classList.add('is-locked-section');
+      }
+      // Solo relevante si la sección de profesor ya está visible (rol
+      // 'profesor') — para un alumno, teacherDashboardSection sigue oculta
+      // por display:none y este atenuado no tiene efecto visible.
+      if (!acceso.desbloqueadoDashboard) {
+        document.getElementById('teacherDashboardSection').classList.add('is-locked-section');
+      }
+    }).catch(() => {});
+
+    function interceptarSiBloqueado(sectionId, mensaje) {
+      const section = document.getElementById(sectionId);
+      section.querySelectorAll('a, button').forEach(el => {
+        el.addEventListener('click', (e) => {
+          if (!section.classList.contains('is-locked-section')) return;
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          AcademyAuth.mostrarToast(mensaje);
+        }, { capture: true });
+      });
+    }
+    interceptarSiBloqueado('downloadsSection', 'Primero haz el curso introductorio de alumnos.');
+    interceptarSiBloqueado('teacherDashboardSection', 'Primero haz el curso introductorio de profesores.');
   </script>
 </body>
 </html>

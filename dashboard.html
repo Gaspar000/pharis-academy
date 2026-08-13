@@ -61,6 +61,7 @@
     const user = AcademyAuth.getUser();
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
+    AcademyAuth.aplicarGateSidebar();
 
     if (user.rol === 'profesor') {
       document.getElementById('navDashboard').style.display = 'flex';

@@ -693,6 +693,16 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .course-section:last-child { border-bottom: none; }
 .course-section h2 { font-size: 1.3rem; }
+/* Sección de acceso.html (Descargas / Dashboard de profesor) bloqueada
+   hasta completar el curso introductorio correspondiente (ver
+   interceptarSiBloqueado en acceso.html) — atenuada pero interactiva
+   (el click sigue llegando, solo que dispara un toast en vez de la
+   acción real), por eso NO usa pointer-events:none. El ícono de candado
+   es un <i class="ph ph-lock-simple lock-icon"> real en el HTML (mismo
+   patrón que .chapter-lock-icon), no un pseudo-elemento con codepoint. */
+.course-section.is-locked-section { opacity: 0.5; }
+.course-section .lock-icon { display: none; margin-left: 8px; font-size: 0.8rem; color: var(--text-faint); vertical-align: middle; }
+.course-section.is-locked-section .lock-icon { display: inline; }
 /* "Subir actividad": mismo ancho que la columna del visor en
    .course-watch-grid (resta los 260px fijos del panel de Capítulos +
    su gap de 20px), no vive dentro del grid (está en otra sección más
@@ -857,6 +867,33 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
 }
 .slide-toast.is-visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+/* ── Toast global (AcademyAuth.mostrarToast, assets/api.js) ──
+   Mismo lenguaje visual que .slide-toast (contraste fijo, no tokens de
+   tema — puede aparecer sobre cualquier página/contenido), pero position:
+   fixed anclado a la ventana en vez de absolute sobre el visor de
+   diapositivas, ya que se inyecta dinámicamente en páginas sin ese
+   contenedor relativo (sidebar, dashboard, etc). */
+.academy-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.9);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
+}
+.academy-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ── Capítulos: ahora clickeables, con estado activo ──
    Mismo lenguaje que .social-btn.is-active (accent-soft + accent-bright). */
