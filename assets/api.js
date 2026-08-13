@@ -212,12 +212,17 @@ const AcademyAuth = {
 
   /**
    * Gate de "Accede a Pharis" en el sidebar — llamar después de
-   * requireAuth() en cada página. Si el rol del usuario no completó su
-   * curso introductorio correspondiente (GET /academy/me/acceso), el link
-   * del sidebar queda visualmente deshabilitado (.is-locked) y su click
-   * muestra un toast en vez de navegar. Silencioso ante error de red: si
-   * el fetch falla, el link queda como estaba (sin gate) — un timeout acá
-   * no debe bloquear el acceso a Academy entero.
+   * requireAuth() en cada página. El link se habilita si se completó
+   * CUALQUIERA de los dos cursos introductorios (App/Extensión O
+   * Dashboard), sin importar el rol de la cuenta — un profesor que
+   * completa el curso de alumnos igual desbloquea App/Extensión, y
+   * viceversa. Dentro de acceso.html cada sección se atenúa por separado
+   * según su propio gate específico (ver interceptarSiBloqueado). Fue un
+   * bug real, no diseño: antes esto decidía por rol (profesor → solo
+   * mirar desbloqueadoDashboard), dejando el link bloqueado para un
+   * profesor que ya había completado el curso de alumnos. Silencioso ante
+   * error de red: si el fetch falla, el link queda como estaba (sin
+   * gate) — un timeout acá no debe bloquear el acceso a Academy entero.
    */
   async aplicarGateSidebar() {
     const link = document.querySelector('.wf-nav a[href="acceso.html"]');
@@ -230,9 +235,7 @@ const AcademyAuth = {
       return;
     }
 
-    const user = this.getUser();
-    const desbloqueado = user?.rol === 'profesor' ? acceso.desbloqueadoDashboard : acceso.desbloqueadoApp;
-    if (desbloqueado) return;
+    if (acceso.desbloqueadoApp || acceso.desbloqueadoDashboard) return;
 
     link.classList.add('is-locked');
     link.addEventListener('click', (e) => {
