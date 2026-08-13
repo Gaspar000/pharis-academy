@@ -172,9 +172,47 @@
     const statCourses = document.getElementById('statCourses');
     const statCoursesLabel = document.getElementById('statCoursesLabel');
 
+    // Fracción/porcentaje de progreso de un curso. El % usa la MISMA
+    // fórmula que goToSlide en curso.html (maxSlideIndex / (totalSlides-1),
+    // 0-based) — no maxSlideIndex+1 sobre totalSlides, que daría un %
+    // distinto para la misma diapositiva entre esta pantalla y curso.html
+    // (ej. "llegué a la diapositiva 1 de 7" daría 0% en curso.html pero
+    // ~14% acá con esa fórmula incorrecta). La fracción de texto ("X/Y
+    // secciones") sí es 1-based (maxSlideIndex+1), porque "3/7" es lo que
+    // tiene sentido mostrarle al usuario, no un índice interno.
+    function calcularProgreso(totalSlides, maxSlideIndex) {
+      const idx = Math.min(maxSlideIndex ?? -1, totalSlides - 1);
+      const completadas = Math.max(idx + 1, 0);
+      const porcentaje = totalSlides > 1 ? (Math.max(idx, 0) / (totalSlides - 1)) * 100 : (completadas > 0 ? 100 : 0);
+      return { completadas, porcentaje };
+    }
+
+    function renderHeroCard(c, avance) {
+      const totalSlides = (c.slides || []).length;
+      const cardBody = totalSlides === 0
+        ? `<h3>${c.titulo}</h3>`
+        : (() => {
+            const { completadas, porcentaje } = calcularProgreso(totalSlides, avance[c.slug]);
+            return `
+              <h3>${c.titulo}</h3>
+              <div class="wf-progress-label">${completadas} / ${totalSlides} secciones completadas</div>
+              <div class="wf-progress-bar"><span style="width:${porcentaje}%"></span></div>
+            `;
+          })();
+      return `
+        <a class="wf-hero-card" href="curso.html#slug=${encodeURIComponent(c.slug)}">
+          <div class="wf-hero-card-illustration"><i class="ph ph-image"></i></div>
+          <div class="wf-hero-card-body">${cardBody}</div>
+        </a>
+      `;
+    }
+
     async function loadCourses() {
       try {
-        const data = await academyFetch('/academy/courses');
+        const [data, avance] = await Promise.all([
+          academyFetch('/academy/courses'),
+          academyFetch('/academy/me/avance').catch(() => ({})), // no bloquea el resto de la página si falla
+        ]);
         statCourses.textContent = data.courses.length;
         statCoursesLabel.textContent = `Tienes ${data.courses.length} curso${data.courses.length === 1 ? '' : 's'} por explorar`;
 
@@ -188,22 +226,14 @@
         // los 4), categoriaPreferida es clasificatorio, no restringe acceso;
         // el usuario igual puede tomar cualquier curso desde "Todos los
         // cursos". Si por algún motivo no hay coincidencias, se muestran los
-        // primeros 2 cursos como respaldo. Barra de progreso en 0%: a futuro
-        // se medirá por % de slides revisadas (no hay ese dato todavía).
+        // primeros 2 cursos como respaldo. Barra de progreso real por
+        // diapositiva (GET /academy/me/avance) — los cursos sin contenido
+        // (slides:null) no muestran barra, solo título (ver renderHeroCard).
         const categoriaUsuario = user.categoriaPreferida || 'alumnos';
         const cursosDestacados = data.courses.filter(c => c.categoria === categoriaUsuario);
         const cursosParaHero = cursosDestacados.length ? cursosDestacados : data.courses.slice(0, 2);
 
-        heroCards.innerHTML = cursosParaHero.map(c => `
-          <a class="wf-hero-card" href="curso.html#slug=${encodeURIComponent(c.slug)}">
-            <div class="wf-hero-card-illustration"><i class="ph ph-image"></i></div>
-            <div class="wf-hero-card-body">
-              <h3>${c.titulo}</h3>
-              <div class="wf-progress-label">0 / 0 secciones completadas</div>
-              <div class="wf-progress-bar"><span style="width:0%"></span></div>
-            </div>
-          </a>
-        `).join('');
+        heroCards.innerHTML = cursosParaHero.map(c => renderHeroCard(c, avance)).join('');
 
         // "Todos los cursos": una tarjeta por categoría (Para profesores /
         // Para alumnos), cada una lleva a categoria.html con sus 2 cursos.

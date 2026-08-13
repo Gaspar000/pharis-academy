@@ -458,6 +458,17 @@
       const progress = currentSlides.length > 1 ? (currentSlideIndex / (currentSlides.length - 1)) * 100 : 100;
       document.getElementById('viewerProgressFill').style.width = `${progress}%`;
       updateChapterActiveState();
+
+      // Persiste el avance (máximo índice alcanzado, GREATEST en el
+      // backend — retroceder a repasar nunca hace bajar lo guardado).
+      // Fire-and-forget sin esperar: a diferencia del hotspot de acceso
+      // en "Tutorial" (que navega fuera de la página), acá el alumno se
+      // queda en curso.html, así que no hay riesgo de que una navegación
+      // aborte el fetch a mitad de camino. Alimenta la barra de progreso
+      // del hero en index.html.
+      academyFetch(`/academy/courses/${encodeURIComponent(slug)}/avance`, {
+        method: 'POST', body: JSON.stringify({ slideIndex: currentSlideIndex }),
+      }).catch(() => {});
     }
 
     // Click/drag en la barra de progreso, salta a la diapositiva más
