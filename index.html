@@ -67,16 +67,15 @@
            Columna derecha: Leaderboard solo. Gap horizontal grande entre
            ambas (ver .wf-grid-stats-leaders), mismo patrón que
            Statistics+My Assignments vs Leaders en la referencia visual.
-           Cursos disponibles y días de racha son datos reales; el resto de
-           las stats es ilustrativo hasta que exista GET /academy/mis-entregas
-           y un sistema de puntos. -->
+           Las 4 stats son datos reales (GET /academy/me/entregas para
+           enviadas/completadas). -->
       <div class="wf-grid-stats-leaders">
         <div>
           <div class="wf-section-title">Estadísticas</div>
           <div class="wf-stats-row">
             <div class="wf-stat"><div class="num" id="statCourses">–</div><div class="lbl">Cursos disponibles</div></div>
-            <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Actividades enviadas <span class="mock-tag">ejemplo</span></div></div>
-            <div class="wf-stat wf-stat-mock"><div class="num">–</div><div class="lbl">Completadas <span class="mock-tag">ejemplo</span></div></div>
+            <div class="wf-stat"><div class="num" id="statEnviadas">–</div><div class="lbl">Actividades enviadas</div></div>
+            <div class="wf-stat"><div class="num" id="statCompletadas">–</div><div class="lbl">Completadas</div></div>
             <div class="wf-stat"><div class="num" id="statStreak">–</div><div class="lbl">Días de racha</div></div>
           </div>
 
@@ -254,6 +253,17 @@
       }
     }
 
+    // Actividades enviadas / Completadas — no bloquea el resto del Overview
+    // si falla, mismo criterio que loadNews/loadLeaderboard: se quedan en
+    // "–" en vez de tumbar la página entera.
+    async function loadEntregas() {
+      try {
+        const data = await academyFetch('/academy/me/entregas');
+        document.getElementById('statEnviadas').textContent = data.enviadas;
+        document.getElementById('statCompletadas').textContent = data.completadas;
+      } catch {}
+    }
+
     // Noticias, sección "opcional": si falla el fetch, se muestra el
     // mensaje de error ahí mismo pero no bloquea el resto del Overview
     // (Estadísticas/Leaderboard/Cursos ya cargan con su propio try/catch
@@ -265,7 +275,7 @@
       try {
         const data = await academyFetch('/academy/news');
         if (!data.news.length) {
-          newsList.innerHTML = '<div class="empty-state" style="padding:8px 0;">Sin noticias por el momento.</div>';
+          newsList.innerHTML = '<div class="empty-state" style="padding:8px 0;">Nada para contar por ahora :(</div>';
           return;
         }
         // Quita empty-state (fijo en el HTML como estado inicial de
@@ -323,6 +333,7 @@
     }
 
     loadCourses();
+    loadEntregas();
     loadNews();
     loadLeaderboard();
   </script>
