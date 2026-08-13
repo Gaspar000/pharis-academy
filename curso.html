@@ -84,6 +84,9 @@
                      defecto, aparece un instante cuando se intenta avanzar
                      sin haber subido una actividad todavía. -->
                 <div class="slide-toast" id="slideToast"></div>
+                <!-- Capa de celebración de puntos (ver celebrarPuntos), sus
+                     hijos los crea y borra el JS en cada diapositiva nueva. -->
+                <div class="slide-points-layer" id="slidePointsLayer"></div>
               </div>
 
               <!-- Barra de controles, superpuesta sobre la imagen, dentro
@@ -103,6 +106,11 @@
                 <div class="slide-counter" id="slideCounter"></div>
                 <button class="viewer-btn" id="slideNextBtn" type="button" aria-label="Diapositiva siguiente">
                   <i class="ph ph-caret-right"></i>
+                </button>
+                <!-- Silenciar el sonido de puntos. La preferencia se guarda
+                     en localStorage (academy_sonido_puntos), ver initSonido. -->
+                <button class="viewer-btn" id="soundToggleBtn" type="button" aria-pressed="false">
+                  <i class="ph ph-speaker-high" id="soundToggleIcon"></i>
                 </button>
                 <button class="viewer-btn" id="fullscreenBtn" type="button" aria-label="Pantalla completa">
                   <i class="ph ph-corners-out"></i>
@@ -428,6 +436,95 @@
       });
     }
 
+    // ── Sonido de puntos ─────────────────────────────────────────────────────
+    // Web Audio API en vez de un archivo: son dos notas cortas de onda
+    // senoidal, no vale la pena un request extra ni sumar un binario al
+    // repo. El AudioContext se crea perezosamente en el primer sonido real
+    // (ya hubo interacción del usuario para entonces — click/tecla para
+    // cambiar de diapositiva —, así el navegador no lo bloquea por autoplay).
+    const SONIDO_STORAGE_KEY = 'academy_sonido_puntos';
+    let sonidoActivo = localStorage.getItem(SONIDO_STORAGE_KEY) !== 'off';
+    let audioCtx = null;
+
+    function sonarPuntos() {
+      if (!sonidoActivo) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        // Dos notas ascendentes (mi6 → la6), 90ms cada una: leve, sin cola
+        // larga que se solape si el alumno navega rápido entre diapositivas.
+        [1318.5, 1760].forEach((freq, i) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          const t0 = audioCtx.currentTime + i * 0.09;
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, t0);
+          gain.gain.setValueAtTime(0.0001, t0);
+          gain.gain.exponentialRampToValueAtTime(0.16, t0 + 0.012);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(t0);
+          osc.stop(t0 + 0.14);
+        });
+      } catch {
+        // Audio no disponible (permisos, navegador viejo) — la animación
+        // visual sigue funcionando igual, no es un fallo que valga reportar.
+      }
+    }
+
+    function actualizarBotonSonido() {
+      const btn = document.getElementById('soundToggleBtn');
+      const icon = document.getElementById('soundToggleIcon');
+      if (!btn || !icon) return;
+      icon.className = 'ph ' + (sonidoActivo ? 'ph-speaker-high' : 'ph-speaker-slash');
+      btn.setAttribute('aria-pressed', String(!sonidoActivo));
+      btn.setAttribute('aria-label', sonidoActivo ? 'Silenciar sonido de puntos' : 'Activar sonido de puntos');
+    }
+
+    document.getElementById('soundToggleBtn').addEventListener('click', () => {
+      sonidoActivo = !sonidoActivo;
+      localStorage.setItem(SONIDO_STORAGE_KEY, sonidoActivo ? 'on' : 'off');
+      actualizarBotonSonido();
+      if (sonidoActivo) sonarPuntos(); // muestra cómo suena al reactivarlo
+    });
+    actualizarBotonSonido();
+
+    // ── Celebración de puntos ────────────────────────────────────────────────
+    // Solo se llama con puntos > 0, es decir cuando el backend confirmó que
+    // esta diapositiva se vio por PRIMERA vez (ver otorgarPuntosPorSlideVista
+    // en pharis-api). Cada nodo se borra solo al terminar su animación, así
+    // navegar rápido no acumula elementos huérfanos en el DOM.
+    const PARTICULAS_POR_CELEBRACION = 8;
+
+    function celebrarPuntos(puntos) {
+      const layer = document.getElementById('slidePointsLayer');
+      if (!layer) return;
+
+      const insignia = document.createElement('div');
+      insignia.className = 'slide-points-gain';
+      insignia.innerHTML = `<i class="ph ph-coin"></i> +${puntos}`;
+      insignia.addEventListener('animationend', () => insignia.remove());
+      layer.appendChild(insignia);
+
+      // Ángulos repartidos en el círculo completo, con un desfase aleatorio
+      // por celebración para que dos diapositivas seguidas no se vean
+      // idénticas. La distancia también varía un poco entre partículas.
+      const offset = Math.random() * Math.PI * 2;
+      for (let i = 0; i < PARTICULAS_POR_CELEBRACION; i++) {
+        const angulo = offset + (i / PARTICULAS_POR_CELEBRACION) * Math.PI * 2;
+        const distancia = 26 + Math.random() * 18;
+        const p = document.createElement('div');
+        p.className = 'slide-points-particle';
+        p.style.setProperty('--dx', `${Math.cos(angulo) * distancia}px`);
+        p.style.setProperty('--dy', `${Math.sin(angulo) * distancia}px`);
+        p.style.animationDelay = `${Math.random() * 0.06}s`;
+        p.addEventListener('animationend', () => p.remove());
+        layer.appendChild(p);
+      }
+
+      sonarPuntos();
+    }
+
     let slideToastTimeout = null;
     function mostrarSlideToast(mensaje) {
       const toast = document.getElementById('slideToast');
@@ -474,8 +571,13 @@
       // queda en curso.html, así que no hay riesgo de que una navegación
       // aborte el fetch a mitad de camino. Alimenta la barra de progreso
       // del hero en index.html.
+      // La respuesta trae puntosGanados: > 0 solo la PRIMERA vez que se ve
+      // esta diapositiva (el backend lo resuelve con un INSERT idempotente),
+      // así repasar una ya vista no vuelve a animar ni a sonar.
       academyFetch(`/academy/courses/${encodeURIComponent(slug)}/avance`, {
         method: 'POST', body: JSON.stringify({ slideIndex: currentSlideIndex }),
+      }).then(res => {
+        if (res && res.puntosGanados > 0) celebrarPuntos(res.puntosGanados);
       }).catch(() => {});
     }
 

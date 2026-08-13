@@ -868,6 +868,92 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .slide-toast.is-visible { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
+/* ── Celebración de puntos ganados (ver celebrarPuntos en curso.html) ──
+   Aparece cuando POST /academy/courses/:slug/avance devuelve
+   puntosGanados > 0, es decir SOLO la primera vez que se ve una
+   diapositiva — nunca al repasar una ya vista. Anclado arriba a la
+   derecha de la imagen (lejos del contador y las flechas de
+   .viewer-controls, abajo), para no competir con los controles ni tapar
+   el centro de la diapositiva.
+
+   Los nodos son efímeros: el JS los crea, los anima y los borra al
+   terminar (animationend), así no queda basura en el DOM ni hay estado
+   que resetear entre diapositivas. Contraste fijo (no tokens de tema):
+   va sobre una imagen de contenido variable, igual criterio que
+   .viewer-controls / .slide-toast. */
+.slide-points-layer {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+.slide-points-gain {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-family: "Manrope", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  animation: slide-points-rise 1.15s var(--ease) forwards;
+}
+.slide-points-gain i { font-size: 0.95rem; color: #ffd479; }
+
+@keyframes slide-points-rise {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.85); }
+  18%  { opacity: 1; transform: translateY(0) scale(1.06); }
+  32%  { transform: translateY(-2px) scale(1); }
+  70%  { opacity: 1; transform: translateY(-20px) scale(1); }
+  100% { opacity: 0; transform: translateY(-34px) scale(0.96); }
+}
+
+/* Partículas: 8 divs pequeños que salen radialmente desde el centro de la
+   insignia. El ángulo y la distancia de cada una los fija el JS con las
+   custom properties --dx/--dy (calculadas en un círculo), acá solo se
+   define el movimiento y el desvanecido — así una sola regla CSS sirve
+   para las 8 sin escribir un keyframe por dirección. */
+.slide-points-particle {
+  position: absolute;
+  top: 14px;
+  right: 26px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffd479;
+  opacity: 0;
+  animation: slide-points-burst 0.75s var(--ease) forwards;
+}
+@keyframes slide-points-burst {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
+  22%  { opacity: 1; transform: translate(calc(var(--dx) * 0.35), calc(var(--dy) * 0.35)) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3); }
+}
+
+/* Sin animación: la insignia sigue apareciendo (el feedback de "ganaste
+   puntos" no debe perderse), pero estática y sin partículas — solo se
+   muestra y se desvanece con la opacidad, sin desplazamientos ni escalas. */
+@media (prefers-reduced-motion: reduce) {
+  .slide-points-gain { animation: slide-points-fade 1.15s linear forwards; }
+  .slide-points-particle { display: none; }
+  @keyframes slide-points-fade {
+    0%, 70% { opacity: 1; transform: none; }
+    100%    { opacity: 0; transform: none; }
+  }
+}
+
 /* ── Toast global (AcademyAuth.mostrarToast, assets/api.js) ──
    Mismo lenguaje visual que .slide-toast (contraste fijo, no tokens de
    tema — puede aparecer sobre cualquier página/contenido), pero position:
