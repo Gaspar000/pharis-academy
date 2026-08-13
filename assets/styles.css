@@ -1272,6 +1272,15 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .logro-titulo { font-size: 0.86rem; font-weight: 600; color: var(--text); }
 .logro-descripcion { font-size: 0.76rem; color: var(--text-faint); }
 
+/* Logro todavía no desbloqueado: se muestra igual pero apagado, para que el
+   alumno vea qué hay por conseguir sin confundirlo con uno ya ganado. El
+   ícono real se reemplaza por un candado en el HTML (ver renderLogros en
+   perfil.html) — el gris solo no alcanza como señal, un ícono de trofeo
+   apagado sigue leyéndose como "logro obtenido" de reojo. */
+.logro-item.is-locked i { color: var(--text-faint); }
+.logro-item.is-locked .logro-titulo { color: var(--text-muted); font-weight: 500; }
+.logro-item.is-locked .logro-descripcion { color: var(--text-faint); }
+
 .upload-status,
 .download-status {
   margin-top: 14px;

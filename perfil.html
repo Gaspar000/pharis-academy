@@ -196,6 +196,11 @@
     // `icono` (ej. datos viejos en localStorage de antes de este feature).
     const ICONO_LOGRO_DEFECTO = 'ph-medal';
 
+    // GET /academy/me devuelve el catálogo COMPLETO, cada logro con su flag
+    // `desbloqueado` — los que faltan se muestran en gris y con candado, para
+    // que el alumno vea qué hay por conseguir. El `!== false` tolera el shape
+    // viejo (localStorage de antes de este cambio, donde solo venían los
+    // desbloqueados y sin ese campo): sin el flag, se asume desbloqueado.
     function renderLogros(logros) {
       const panel = document.getElementById('logrosPanel');
       if (!logros.length) {
@@ -206,15 +211,19 @@
         `;
         return;
       }
-      panel.innerHTML = logros.map(l => `
-        <div class="logro-item">
-          <i class="ph ${l.icono || ICONO_LOGRO_DEFECTO}"></i>
-          <div>
-            <div class="logro-titulo">${l.titulo}</div>
-            <div class="logro-descripcion">${l.descripcion}</div>
+      panel.innerHTML = logros.map(l => {
+        const desbloqueado = l.desbloqueado !== false;
+        const icono = desbloqueado ? (l.icono || ICONO_LOGRO_DEFECTO) : 'ph-lock-simple';
+        return `
+          <div class="logro-item${desbloqueado ? '' : ' is-locked'}">
+            <i class="ph ${icono}"></i>
+            <div>
+              <div class="logro-titulo">${l.titulo}</div>
+              <div class="logro-descripcion">${l.descripcion}</div>
+            </div>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function loadPerfil() {
