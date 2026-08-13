@@ -83,6 +83,13 @@ const AcademyAuth = {
         <a class="user-dropdown-item" href="perfil.html">
           <i class="ph ph-user"></i> Ver perfil
         </a>
+        <!-- El modal de bienvenida era la ÚNICA explicación de qué es
+             Academy en todo el sitio, y se borraba del sessionStorage antes
+             de mostrarse: quien lo cerraba sin leer no podía recuperarlo.
+             Solo aparece en index.html, que es donde vive el modal. -->
+        <a class="user-dropdown-item" href="index.html#que-es">
+          <i class="ph ph-question"></i> ¿Qué es Pharis Academy?
+        </a>
         <button class="user-dropdown-item danger" id="userMenuLogout">
           <i class="ph ph-sign-out"></i> Salir
         </button>
@@ -211,6 +218,68 @@ const AcademyAuth = {
   },
 
   /**
+   * Barra de navegación inferior para móvil. Bajo 900px el sidebar se
+   * oculta por completo (ver home.css) y hasta ahora NO había ningún
+   * reemplazo: el usuario perdía Overview, Cursos, Dashboard y Accede a
+   * Pharis, y desde perfil.html —que no tiene breadcrumb— no había forma
+   * de volver salvo el botón atrás del navegador.
+   *
+   * Se construye clonando los links del sidebar en vez de duplicar el
+   * markup en las 6 páginas: así el nav móvil hereda automáticamente
+   * cualquier cambio del sidebar (links nuevos, el Dashboard que solo se
+   * muestra a profesores, el candado del gate) sin poder desincronizarse.
+   * Llamar DESPUÉS de mostrar/ocultar links por rol y de aplicarGateSidebar.
+   */
+  renderNavMovil() {
+    if (document.querySelector('.wf-mobile-nav')) return;
+    const links = document.querySelectorAll('.wf-sidebar .wf-nav a');
+    if (!links.length) return;
+
+    const nav = document.createElement('nav');
+    nav.className = 'wf-mobile-nav';
+    nav.setAttribute('aria-label', 'Navegación principal');
+
+    links.forEach(link => {
+      // Respeta los links ocultos por rol (Dashboard con display:none para
+      // alumnos) — se consulta el estilo inline porque el nodo puede no
+      // estar aún en un layout calculado.
+      if (link.style.display === 'none') return;
+
+      const a = document.createElement('a');
+      a.href = link.getAttribute('href');
+      if (link.classList.contains('active')) a.classList.add('active');
+      if (link.classList.contains('is-locked')) a.classList.add('is-locked');
+
+      const iconoOriginal = link.querySelector('i.icon');
+      const icono = document.createElement('i');
+      icono.className = iconoOriginal ? iconoOriginal.className : 'ph ph-circle';
+      icono.setAttribute('aria-hidden', 'true');
+
+      const etiqueta = document.createElement('span');
+      // textContent del link incluye el ícono (que no aporta texto) y el
+      // label; trim alcanza porque el ícono es un <i> vacío.
+      etiqueta.textContent = link.textContent.trim();
+
+      a.appendChild(icono);
+      a.appendChild(etiqueta);
+
+      // El gate bloquea igual que en el sidebar: mismo mensaje, misma
+      // prevención de navegación.
+      if (link.classList.contains('is-locked')) {
+        a.setAttribute('aria-disabled', 'true');
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.mostrarToast('Abre el curso introductorio y recorre sus diapositivas para desbloquearlo.');
+        });
+      }
+
+      nav.appendChild(a);
+    });
+
+    document.body.appendChild(nav);
+  },
+
+  /**
    * Gate de "Accede a Pharis" en el sidebar — llamar después de
    * requireAuth() en cada página. El link se habilita si se completó
    * CUALQUIERA de los dos cursos introductorios (App/Extensión O
@@ -232,16 +301,36 @@ const AcademyAuth = {
     try {
       acceso = await academyFetch('/academy/me/acceso');
     } catch {
+      // Falla abierto (sin gate), pero el nav móvil se arma igual: sin él
+      // el usuario en móvil se queda sin ninguna navegación.
+      this.renderNavMovil();
       return;
     }
 
-    if (acceso.desbloqueadoApp || acceso.desbloqueadoDashboard) return;
+    if (acceso.desbloqueadoApp || acceso.desbloqueadoDashboard) {
+      this.renderNavMovil();
+      return;
+    }
 
     link.classList.add('is-locked');
+    // Candado explícito: antes el único indicio era un gris más apagado, que
+    // no se lee como "bloqueado" hasta que el usuario clickea y recibe el
+    // toast. Se agrega junto al texto sin tocar el ícono de la izquierda,
+    // que identifica la sección.
+    if (!link.querySelector('.nav-lock-icon')) {
+      const lock = document.createElement('i');
+      lock.className = 'ph ph-lock-simple nav-lock-icon';
+      lock.setAttribute('aria-hidden', 'true');
+      link.appendChild(lock);
+    }
+    link.setAttribute('aria-disabled', 'true');
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      this.mostrarToast('Primero realiza alguno de los dos cursos introductorios.');
+      this.mostrarToast('Abre el curso introductorio y recorre sus diapositivas para desbloquearlo.');
     });
+
+    // Después de aplicar el candado, para que el nav móvil lo herede.
+    this.renderNavMovil();
   },
 };
 

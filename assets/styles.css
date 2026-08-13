@@ -29,7 +29,7 @@
 
   --text: #e8eef7;
   --text-muted: #9aa8bd;
-  --text-faint: #64748b;
+  --text-faint: #8b98ad;
 
   --green: #34d399;
   --green-soft: rgba(52, 211, 153, 0.14);
@@ -69,7 +69,7 @@
 
     --text: #0f1b2d;
     --text-muted: #52607a;
-    --text-faint: #8592a8;
+    --text-faint: #646f85;
 
     /* Oscuros y saturados (no el pastel claro del tema oscuro), sobre
        fondo -soft claro, texto claro perdería casi todo el contraste. */
@@ -95,7 +95,7 @@
   --accent-soft-2: rgba(80, 143, 248, 0.18);
   --text: #e8eef7;
   --text-muted: #9aa8bd;
-  --text-faint: #64748b;
+  --text-faint: #8b98ad;
   --green-text: #86e8c4;
   --amber-text: #f5c78e;
   --red-text: #ffb3ab;
@@ -114,7 +114,7 @@
   --accent-soft-2: rgba(47, 111, 224, 0.16);
   --text: #0f1b2d;
   --text-muted: #52607a;
-  --text-faint: #8592a8;
+  --text-faint: #646f85;
   --green-text: #0d7d54;
   --amber-text: #a15a06;
   --red-text: #b3261e;
@@ -315,14 +315,24 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #4f8ef7;
+  /* var(--accent) en vez del #4f8ef7 fijo que tenía: era el único
+     componente de marca que no acompañaba el cambio de tema (en claro el
+     acento es #2f6fe0). El glow se define con currentColor para que siga
+     al mismo token sin repetir el valor en 3 rgba(). */
+  background: var(--accent);
+  color: var(--accent);
   box-shadow:
-    0 0 8px rgba(79, 142, 247, 0.9),
-    0 0 16px rgba(79, 142, 247, 0.6),
-    0 0 28px rgba(79, 142, 247, 0.3);
+    0 0 8px color-mix(in srgb, currentColor 90%, transparent),
+    0 0 16px color-mix(in srgb, currentColor 55%, transparent);
   transition: left 0.2s var(--ease);
 }
-.theme-switch.is-light .theme-switch-thumb { left: 21px; }
+/* Con el track ya pintado de --accent (is-light), el thumb necesita
+   contrastar CONTRA él, no fundirse: pasa a blanco y suelta el glow. */
+.theme-switch.is-light .theme-switch-thumb {
+  left: 21px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
 
 /* Toggle de tema, botón circular tipo ícono, para topbar/páginas de auth
    sin sesión (login/register, donde no hay menú de usuario). */
@@ -646,6 +656,25 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-card h2 { font-size: 1.15rem; margin-bottom: 4px; }
 .course-card p { font-size: 0.88rem; margin-bottom: 0; flex: 1; }
 .course-card .btn { margin-top: 8px; }
+/* Curso sin diapositivas todavía: sigue siendo clickeable (adentro explica
+   el estado y ofrece ir al curso real), pero no promete "Entrar al curso"
+   como uno con contenido. Chip en vez de botón para que la diferencia se
+   lea de un vistazo en la grilla. */
+.course-card.is-empty-course { opacity: 0.85; }
+.course-card.is-empty-course:hover { transform: none; }
+.course-card-soon {
+  margin-top: 8px;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px dashed var(--rule-strong);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
 
 /* ── Course view: panel de Capítulos + card de Curso sugerido ──
    Dos .wf-panel independientes, apilados con gap, antes compartían un
@@ -771,6 +800,23 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .viewer-shell:fullscreen { display: flex; flex-direction: column; background: #000; }
 .viewer-shell:fullscreen .embed-frame { flex: 1; aspect-ratio: unset; border-radius: 0; border: 0; }
 
+/* Curso sin diapositivas todavía (ver marcarCursoSinContenido en
+   curso.html). Estado explícito con una salida concreta, en vez del marco
+   vacío con una línea gris que se leía como error de carga. */
+.course-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 380px;
+  padding: 0 20px;
+  text-align: center;
+}
+.course-empty i { font-size: 2rem; color: var(--text-faint); }
+.course-empty-title { font-size: 1rem; font-weight: 700; color: var(--text); font-family: "Manrope", sans-serif; }
+.course-empty-text { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+.course-empty .btn { margin-top: 6px; }
+
 .viewer-controls {
   position: absolute;
   left: 10px;
@@ -861,7 +907,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   font-size: 0.85rem;
   font-weight: 600;
   text-align: center;
-  white-space: nowrap;
+  /* Sin nowrap: los mensajes del gate son largos y en móvil se salían de
+     la pantalla. max-width lo mantiene dentro del visor en cualquier ancho. */
+  max-width: min(88%, 420px);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
@@ -973,13 +1021,18 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   font-size: 0.85rem;
   font-weight: 600;
   text-align: center;
-  white-space: nowrap;
+  /* Sin nowrap (los mensajes del gate no entran en una línea en móvil).
+     El bottom deja lugar a la barra de navegación inferior. */
+  max-width: min(88vw, 460px);
   opacity: 0;
   pointer-events: none;
   z-index: 9999;
   transition: opacity 0.15s var(--ease), transform 0.15s var(--ease);
 }
 .academy-toast.is-visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (max-width: 900px) {
+  .academy-toast { bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+}
 
 /* ── Capítulos: ahora clickeables, con estado activo ──
    Mismo lenguaje que .social-btn.is-active (accent-soft + accent-bright). */
@@ -1237,6 +1290,20 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .dropzone:hover,
 .dropzone.is-dragover { border-color: var(--accent-bright); background: var(--accent-soft); }
+/* Destello al llegar desde la barrera 6→7 (ver goToSlide en curso.html):
+   tras el scroll automático, señala cuál es el elemento al que se lo trajo. */
+.dropzone.is-highlighted {
+  border-color: var(--accent-bright);
+  background: var(--accent-soft);
+  animation: dropzone-pulse 0.6s var(--ease) 2;
+}
+@keyframes dropzone-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(80, 143, 248, 0); }
+  50%      { box-shadow: 0 0 0 5px rgba(80, 143, 248, 0.22); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dropzone.is-highlighted { animation: none; }
+}
 .file-picker-input:focus-visible + .dropzone-icon { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 50%; }
 .dropzone-icon { font-size: 1.8rem; color: var(--accent-bright); }
 .dropzone-text { font-size: 0.92rem; color: var(--text); margin: 0; }
@@ -1396,7 +1463,10 @@ tbody td {
   border-top: 1px solid var(--rule);
   vertical-align: top;
 }
-tbody tr:hover { background: rgba(231, 238, 247, 0.02); }
+/* --accent-soft en vez de un blanco al 2%: ese valor era invisible en tema
+   claro (blanco translúcido sobre --panel #ffffff). El token ya está
+   definido por tema y es el mismo hover que usa .wf-nav. */
+tbody tr:hover { background: var(--accent-soft); }
 .feedback-cell { max-width: 320px; font-size: 0.82rem; color: var(--text-muted); }
 
 .empty-state {
@@ -1404,6 +1474,21 @@ tbody tr:hover { background: rgba(231, 238, 247, 0.02); }
   padding: 60px 20px;
   color: var(--text-faint);
 }
+
+/* Estado vacío que además invita a hacer algo, en vez de solo informar de
+   la ausencia ("Todavía no desbloqueaste ningún logro." y punto). Explica
+   qué va a aparecer ahí y da una acción concreta para llegar. */
+.empty-state-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.empty-state-action i { font-size: 1.6rem; color: var(--text-faint); }
+.empty-state-action span { max-width: 34ch; }
 
 /* ── Modal de bienvenida (post-login/registro) ──
    Primer modal centrado con backdrop del proyecto, los dropdowns de

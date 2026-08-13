@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Curso, Pharis Academy</title>
-  <meta name="theme-color" content="#020617" />
+  <meta name="theme-color" content="#f6f8fc" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 17' fill='none'%3E%3Cpath d='M0.018654 0C0.291685 0.0346468 1.06363 0.351087 1.35507 0.444175C2.00683 0.652386 2.66098 0.893337 3.30632 1.1157L7.44425 2.51569C8.06511 2.72709 8.66921 2.90399 9.28163 3.14897C9.27745 3.58039 9.21329 4.21939 9.18326 4.67222C9.11664 5.7132 9.04471 6.75378 8.96742 7.79399C8.90088 8.70041 8.87595 9.5429 8.82382 10.438L8.61194 13.5626C8.55515 14.428 8.39189 15.9957 8.40472 16.8065C7.86712 16.785 7.20704 16.8116 6.65379 16.8015C6.24697 16.7941 5.34462 16.7703 4.9748 16.8225C5.17644 16.3851 5.28948 15.8819 5.4424 15.4234C6.19564 13.1646 6.9358 10.8953 7.67625 8.63259C7.92098 7.93723 8.10071 7.37357 8.29986 6.66252C7.99596 6.82813 7.43703 6.98952 7.09294 7.10483L5.15151 7.75164C3.9828 8.13023 2.75982 8.58522 1.59136 8.9865C1.14081 9.14125 0.395517 9.31603 0.0199016 9.55254C0.00992916 8.76633 -0.022738 7.75843 0.0263541 6.98817C0.650986 6.90894 9.11771 4.70463 9.03973 4.77851C8.91731 4.62324 7.17078 4.26203 6.87252 4.18944L3.81818 3.43088C2.59209 3.13691 1.23158 2.74788 0.000468966 2.50575C0.0457848 1.81065 0.0160509 0.727473 0.018654 0Z' fill='%23508FF8'/%3E%3Cpath d='M20.2672 0.0289993L20.3871 0.0302827C20.4597 0.124471 20.4258 2.21354 20.4249 2.49028C18.2297 3.0131 16.04 3.55894 13.8563 4.12766C13.5136 4.21342 11.545 4.59757 11.479 4.78639C11.655 4.86837 12.1966 4.9594 12.4251 5.01729L15.214 5.71423C16.9305 6.1261 18.725 6.6281 20.4239 7.02197C20.4254 7.37599 20.4564 9.20695 20.3958 9.44314C19.9444 9.43269 16.2385 8.06739 15.5812 7.84396L13.6376 7.19099C13.1168 7.01981 12.568 6.86388 12.079 6.62051C12.3181 7.16521 12.5208 7.916 12.7227 8.50749C12.9069 8.9939 13.0299 9.48999 13.1962 9.98319L14.8492 14.9667C14.9894 15.3789 15.2887 16.4491 15.4624 16.7646C14.3807 16.8598 13.1516 16.7846 12.0532 16.8182C12.0684 16.5415 11.9832 15.6921 11.9634 15.3661L11.7317 11.8073C11.6749 10.9925 11.6565 10.2069 11.6083 9.40552C11.4933 7.31429 11.3464 5.22496 11.1675 3.13823C12.1316 2.77479 13.1446 2.46883 14.1199 2.12588C16.1561 1.40981 18.2385 0.762741 20.2672 0.0289993Z' fill='%23508FF8'/%3E%3C/svg%3E">
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -98,12 +99,18 @@
                 <button class="viewer-btn" id="slidePrevBtn" type="button" aria-label="Diapositiva anterior">
                   <i class="ph ph-caret-left"></i>
                 </button>
-                <div class="viewer-progress" id="viewerProgress" role="slider" aria-label="Progreso de diapositivas" tabindex="0">
+                <!-- aria-valuenow/min/max los actualiza goToSlide: un
+                     role="slider" sin valores es inválido en ARIA. -->
+                <div class="viewer-progress" id="viewerProgress" role="slider" aria-label="Progreso de diapositivas"
+                     tabindex="0" aria-valuemin="1" aria-valuenow="1" aria-valuemax="1">
                   <div class="viewer-progress-track">
                     <div class="viewer-progress-fill" id="viewerProgressFill"></div>
                   </div>
                 </div>
-                <div class="slide-counter" id="slideCounter"></div>
+                <!-- aria-live: sin esto, un usuario de teclado con lector de
+                     pantalla pulsaba flecha y no recibía ninguna confirmación
+                     de que la diapositiva había cambiado. -->
+                <div class="slide-counter" id="slideCounter" aria-live="polite" aria-atomic="true"></div>
                 <button class="viewer-btn" id="slideNextBtn" type="button" aria-label="Diapositiva siguiente">
                   <i class="ph ph-caret-right"></i>
                 </button>
@@ -161,7 +168,7 @@
         </div>
 
         <div class="side-panels">
-          <aside class="chapters-panel wf-panel">
+          <aside class="chapters-panel wf-panel" id="chaptersPanel">
             <div class="chapters-panel-title">Capítulos</div>
             <ol class="chapters-list" id="chaptersList"></ol>
           </aside>
@@ -204,7 +211,7 @@
       </div>
     </section>
 
-    <section class="course-section course-section-narrow">
+    <section class="course-section course-section-narrow" id="uploadSection">
       <h2>Subir actividad</h2>
       <p>Sube tu actividad en PDF o imagen (JPG/PNG). Pharis la revisará automáticamente contra la rúbrica del curso.</p>
 
@@ -235,11 +242,13 @@
     const user = AcademyAuth.getUser();
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
-    AcademyAuth.aplicarGateSidebar();
-
+    // El link de Dashboard se revela ANTES del gate: aplicarGateSidebar()
+    // termina construyendo el nav móvil clonando los links visibles, así
+    // que un profesor se quedaría sin Dashboard ahí si se revelara después.
     if (user.rol === 'profesor') {
       document.getElementById('navDashboard').style.display = 'flex';
     }
+    AcademyAuth.aplicarGateSidebar();
 
     if (user.esAdmin) {
       document.getElementById('resourceUploadBox').style.display = 'block';
@@ -299,9 +308,13 @@
         // ninguno de los 4 cursos actuales, pero no se rompe si se usa después.
         document.getElementById('embedPlaceholder').outerHTML = `<iframe src="${course.slidesEmbedUrl}" allowfullscreen></iframe>`;
       } else {
-        // Sin slides ni slidesEmbedUrl (los otros 3 cursos hoy), placeholder
-        // actual, sin cambios de comportamiento.
-        renderChapters(MOCK_CHAPTERS_FALLBACK);
+        // Curso sin contenido todavía (3 de los 4 del catálogo hoy). Antes
+        // se listaban 4 capítulos INVENTADOS con cursor:pointer y hover,
+        // cuyo click no hacía nada — se leía como roto, no como vacío. Ahora
+        // se oculta el panel de capítulos entero y la sección de subir
+        // actividad (no tiene sentido entregar algo de un curso sin
+        // contenido ni rúbrica), y se muestra un estado honesto.
+        marcarCursoSinContenido();
       }
 
       // Tag de categoría, título legible desde data.categorias, no el slug crudo.
@@ -324,17 +337,34 @@
       }
     }
 
-    // Capítulos mock, fallback para cursos sin diapositivas reales todavía
-    // (mismo texto que el mock original, solo con la clave `titulo` en vez
-    // de `label` para calzar con el shape real de renderChapters()). No
-    // corresponden a ninguna diapositiva, así que no llevan data-index útil
-    //, se listan igual pero el click no navega nada.
-    const MOCK_CHAPTERS_FALLBACK = [
-      { titulo: 'Introducción' },
-      { titulo: 'Conceptos clave' },
-      { titulo: 'Ejemplo práctico' },
-      { titulo: 'Cierre y siguientes pasos' },
-    ];
+    // Curso sin diapositivas todavía: se ocultan las partes que no aplican
+    // (capítulos, subir actividad) y el visor muestra un estado explícito de
+    // "en preparación" en vez de un marco vacío rodeado de controles que no
+    // llevan a ningún lado.
+    function marcarCursoSinContenido() {
+      const panelCapitulos = document.getElementById('chaptersPanel');
+      if (panelCapitulos) panelCapitulos.style.display = 'none';
+
+      // Sin contenido no hay rúbrica contra la cual evaluar: dejar el
+      // formulario activo invitaba a entregar algo que nadie puede calificar.
+      const upload = document.getElementById('uploadSection');
+      if (upload) upload.style.display = 'none';
+
+      const placeholder = document.getElementById('embedPlaceholder');
+      if (placeholder) {
+        placeholder.innerHTML = `
+          <span class="course-empty">
+            <i class="ph ph-hourglass-medium" aria-hidden="true"></i>
+            <span class="course-empty-title">Este curso está en preparación</span>
+            <span class="course-empty-text">
+              Todavía no tiene diapositivas. Mientras tanto, puedes empezar por
+              el curso de introducción.
+            </span>
+            <a class="btn btn-primary btn-small" href="curso.html#slug=introduccion">Ir a Introducción para alumnos</a>
+          </span>
+        `;
+      }
+    }
 
     let currentSlideIndex = 0;
     let currentSlides = [];
@@ -545,17 +575,39 @@
       // 7+ diapositivas reales en el futuro.
       if (slug === 'introduccion' && index > SLIDE_INDEX_BARRERA_ENTREGA && !tieneEntregaCurso) {
         mostrarSlideToast('Sube tu actividad para continuar.');
+        // El toast solo daba la orden: el formulario vive más abajo, después
+        // de la fila de autor y de la sección de recursos, así que el
+        // usuario tenía que adivinar que debía bajar. Llevarlo ahí convierte
+        // el bloqueo en guía. El foco va al dropzone para que quien navega
+        // por teclado también llegue, no solo quien ve el scroll.
+        const dropzone = document.getElementById('dropzone');
+        if (dropzone) {
+          dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          dropzone.classList.add('is-highlighted');
+          setTimeout(() => dropzone.classList.remove('is-highlighted'), 2000);
+        }
         return;
       }
       currentSlideIndex = index;
 
       const slide = currentSlides[currentSlideIndex];
       const img = document.getElementById('slideImage');
-      img.alt = slide.titulo;
+      // slide.alt es la descripción real del contenido (ver academy-courses.js
+      // en pharis-api). El título solo (ej. "Problema") no describe nada: todo
+      // el contenido del curso son PNG, así que sin esto el curso entero es
+      // inaccesible para un lector de pantalla. Fallback al título para
+      // diapositivas que todavía no tengan su descripción escrita.
+      img.alt = slide.alt
+        ? `Diapositiva ${currentSlideIndex + 1} de ${currentSlides.length}. ${slide.titulo}. ${slide.alt}`
+        : `Diapositiva ${currentSlideIndex + 1} de ${currentSlides.length}. ${slide.titulo}.`;
       img.src = slide.url;
       renderHotspots(slide);
 
       document.getElementById('slideCounter').textContent = `${currentSlideIndex + 1} / ${currentSlides.length}`;
+      const progressEl = document.getElementById('viewerProgress');
+      progressEl.setAttribute('aria-valuenow', String(currentSlideIndex + 1));
+      progressEl.setAttribute('aria-valuemax', String(currentSlides.length));
+      progressEl.setAttribute('aria-valuetext', `Diapositiva ${currentSlideIndex + 1} de ${currentSlides.length}: ${slide.titulo}`);
       document.getElementById('slidePrevBtn').disabled = currentSlideIndex === 0;
       document.getElementById('slideNextBtn').disabled = currentSlideIndex === currentSlides.length - 1;
       // Progreso = diapositivas completadas, no "posición actual", en la
@@ -621,8 +673,16 @@
 
     document.addEventListener('keydown', (e) => {
       if (!currentSlides.length) return;
-      if (e.key === 'ArrowLeft') goToSlide(currentSlideIndex - 1);
+      // Ignorar cuando el foco está en un campo de texto: sin esto, mover el
+      // cursor con las flechas dentro del input de título de recurso (o de
+      // cualquier otro campo) también cambiaba de diapositiva.
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+
+      if (e.key === 'ArrowLeft')  goToSlide(currentSlideIndex - 1);
       if (e.key === 'ArrowRight') goToSlide(currentSlideIndex + 1);
+      if (e.key === 'Home')       { e.preventDefault(); goToSlide(0); }
+      if (e.key === 'End')        { e.preventDefault(); goToSlide(currentSlides.length - 1); }
     });
 
     function renderSuggested(allCourses, currentCourse) {

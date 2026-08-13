@@ -38,6 +38,10 @@ body { display: flex; min-height: 100vh; }
    dispara un toast en vez de navegar, por eso conserva cursor:pointer. */
 .wf-nav a.is-locked { color: var(--text-faint); }
 .wf-nav a.is-locked:hover { background: transparent; color: var(--text-faint); }
+/* Candado al final del link (lo agrega aplicarGateSidebar en api.js) — el
+   gris más apagado solo no se lee como "bloqueado" hasta que el usuario
+   clickea y recibe el toast. margin-left:auto lo empuja al borde derecho. */
+.wf-nav a.is-locked .nav-lock-icon { margin-left: auto; font-size: 0.95rem; flex-shrink: 0; }
 
 /* Card motivacional, fondo de la sidebar — mismo gradiente que el hero de
    Overview (--hero-gradient) para que combine con el resto del sitio en
@@ -130,7 +134,11 @@ body { display: flex; min-height: 100vh; }
   display: flex;
   align-items: stretch;
   gap: 28px;
-  min-height: 340px;
+  /* Antes 340px fijos: con tarjetas de 228px quedaban ~100px de gradiente
+     vacío arriba y abajo en desktop, y en cursos sin barra de progreso el
+     hueco era todavía mayor. Ahora la altura la fija el contenido, con un
+     mínimo bajo solo para que no colapse mientras cargan las tarjetas. */
+  min-height: 220px;
   background: var(--hero-gradient);
   border-radius: var(--radius);
   padding: 28px 32px;
@@ -274,16 +282,44 @@ body { display: flex; min-height: 100vh; }
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
 .wf-stat {
   background: var(--panel);
   border-radius: var(--radius);
   padding: 18px;
 }
-.wf-stat .num { font-family: "Manrope", sans-serif; font-size: 1.7rem; font-weight: 700; }
+/* 1.6rem, igual que .stat-tile .value (perfil/dashboard): ambos son "número
+   grande de estadística" y estaban a 1.7 vs 1.6 por deriva, no por diseño. */
+.wf-stat .num { font-family: "Manrope", sans-serif; font-size: 1.6rem; font-weight: 700; }
 .wf-stat .lbl { font-size: 0.8rem; color: var(--text-faint); margin-top: 2px; }
 .wf-stat-mock { opacity: 0.6; }
+
+/* Leyenda de cómo se ganan puntos. La regla existía solo en el backend
+   (academy-gamification.js): el usuario veía un "+2" flotar sobre una
+   diapositiva y tenía que inferirla. */
+.stats-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+.stats-hint i { color: var(--accent-bright); font-size: 0.95rem; margin-top: 1px; flex-shrink: 0; }
+.stats-hint strong { color: var(--text); font-weight: 700; }
+
+@media (max-width: 900px) {
+  .wf-stats-row { grid-template-columns: repeat(2, 1fr); }
+  /* El grid de 2 columnas del perfil se apila; el orden del HTML deja los
+     formularios primero y la gamificación después, que es el orden correcto
+     de lectura en una sola columna. */
+  .perfil-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+}
 
 .wf-avatar {
   width: 36px; height: 36px; border-radius: 50%;
@@ -329,8 +365,64 @@ body { display: flex; min-height: 100vh; }
 .news-item p { font-size: 0.78rem; margin-bottom: 4px; }
 .news-item .date { font-size: 0.7rem; color: var(--text-faint); }
 
+/* ── Navegación inferior (móvil) ──
+   La construye AcademyAuth.renderNavMovil() clonando los links del
+   sidebar. Oculta en desktop: aparece solo cuando el sidebar se esconde,
+   así nunca hay dos navegaciones visibles a la vez. 4 destinos entra
+   cómodo en el rango recomendado (3-5) para una barra al alcance del
+   pulgar. */
+.wf-mobile-nav { display: none; }
+
 @media (max-width: 900px) {
   .wf-sidebar { display: none; }
-  .wf-hero { grid-template-columns: 1fr; }
+  /* El hero es flex (no grid): la regla grid-template-columns anterior no
+     hacía nada. Lo que sí hace falta en móvil es apilar el saludo y las
+     tarjetas, y bajar la altura mínima (340px de gradiente casi vacío en
+     una pantalla chica es media pantalla desperdiciada). */
+  .wf-hero { flex-direction: column; min-height: 0; gap: 20px; }
+  .wf-hero-cards { flex-wrap: wrap; }
   .wf-grid-stats-leaders { grid-template-columns: 1fr; }
+
+  /* Espacio para que la barra inferior no tape el final del contenido. */
+  .wf-main { padding-bottom: 72px; }
+
+  .wf-mobile-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    gap: 2px;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+    background: var(--panel);
+    border-top: 1px solid var(--rule);
+  }
+  .wf-mobile-nav a {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    /* 44px es el mínimo recomendado de área táctil. */
+    min-height: 44px;
+    padding: 6px 2px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .wf-mobile-nav a i { font-size: 1.15rem; }
+  .wf-mobile-nav a.active { color: var(--accent-bright); background: var(--accent-soft); }
+  .wf-mobile-nav a.is-locked { color: var(--text-faint); }
+
+  /* La topbar apretaba h1 + breadcrumb + campana + chip de usuario en el
+     mismo renglón; en 375px eso desborda. */
+  .wf-topbar { padding: 16px 18px; flex-wrap: wrap; gap: 10px; }
+  .wf-topbar h1 { font-size: 1.25rem; }
 }

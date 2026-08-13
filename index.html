@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pharis Academy</title>
-  <meta name="theme-color" content="#020617" />
+  <meta name="theme-color" content="#f6f8fc" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#020617" media="(prefers-color-scheme: dark)" />
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 21 17' fill='none'%3E%3Cpath d='M0.018654 0C0.291685 0.0346468 1.06363 0.351087 1.35507 0.444175C2.00683 0.652386 2.66098 0.893337 3.30632 1.1157L7.44425 2.51569C8.06511 2.72709 8.66921 2.90399 9.28163 3.14897C9.27745 3.58039 9.21329 4.21939 9.18326 4.67222C9.11664 5.7132 9.04471 6.75378 8.96742 7.79399C8.90088 8.70041 8.87595 9.5429 8.82382 10.438L8.61194 13.5626C8.55515 14.428 8.39189 15.9957 8.40472 16.8065C7.86712 16.785 7.20704 16.8116 6.65379 16.8015C6.24697 16.7941 5.34462 16.7703 4.9748 16.8225C5.17644 16.3851 5.28948 15.8819 5.4424 15.4234C6.19564 13.1646 6.9358 10.8953 7.67625 8.63259C7.92098 7.93723 8.10071 7.37357 8.29986 6.66252C7.99596 6.82813 7.43703 6.98952 7.09294 7.10483L5.15151 7.75164C3.9828 8.13023 2.75982 8.58522 1.59136 8.9865C1.14081 9.14125 0.395517 9.31603 0.0199016 9.55254C0.00992916 8.76633 -0.022738 7.75843 0.0263541 6.98817C0.650986 6.90894 9.11771 4.70463 9.03973 4.77851C8.91731 4.62324 7.17078 4.26203 6.87252 4.18944L3.81818 3.43088C2.59209 3.13691 1.23158 2.74788 0.000468966 2.50575C0.0457848 1.81065 0.0160509 0.727473 0.018654 0Z' fill='%23508FF8'/%3E%3Cpath d='M20.2672 0.0289993L20.3871 0.0302827C20.4597 0.124471 20.4258 2.21354 20.4249 2.49028C18.2297 3.0131 16.04 3.55894 13.8563 4.12766C13.5136 4.21342 11.545 4.59757 11.479 4.78639C11.655 4.86837 12.1966 4.9594 12.4251 5.01729L15.214 5.71423C16.9305 6.1261 18.725 6.6281 20.4239 7.02197C20.4254 7.37599 20.4564 9.20695 20.3958 9.44314C19.9444 9.43269 16.2385 8.06739 15.5812 7.84396L13.6376 7.19099C13.1168 7.01981 12.568 6.86388 12.079 6.62051C12.3181 7.16521 12.5208 7.916 12.7227 8.50749C12.9069 8.9939 13.0299 9.48999 13.1962 9.98319L14.8492 14.9667C14.9894 15.3789 15.2887 16.4491 15.4624 16.7646C14.3807 16.8598 13.1516 16.7846 12.0532 16.8182C12.0684 16.5415 11.9832 15.6921 11.9634 15.3661L11.7317 11.8073C11.6749 10.9925 11.6565 10.2069 11.6083 9.40552C11.4933 7.31429 11.3464 5.22496 11.1675 3.13823C12.1316 2.77479 13.1446 2.46883 14.1199 2.12588C16.1561 1.40981 18.2385 0.762741 20.2672 0.0289993Z' fill='%23508FF8'/%3E%3C/svg%3E">
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -80,11 +81,21 @@
       <div class="wf-grid-stats-leaders">
         <div>
           <div class="wf-section-title">Estadísticas</div>
+          <!-- "Puntos totales" reemplaza a "Cursos disponibles", que no era
+               una estadística del usuario sino una constante global (4 para
+               todo el mundo) ocupando un cuarto de la fila. Los puntos son la
+               moneda del sistema y hasta ahora solo se veían entrando al
+               perfil. La leyenda explica cómo se ganan: antes la regla no
+               estaba escrita en ninguna parte del producto. -->
           <div class="wf-stats-row">
-            <div class="wf-stat"><div class="num" id="statCourses">–</div><div class="lbl">Cursos disponibles</div></div>
+            <div class="wf-stat"><div class="num" id="statPuntos">–</div><div class="lbl">Puntos totales</div></div>
             <div class="wf-stat"><div class="num" id="statEnviadas">–</div><div class="lbl">Actividades enviadas</div></div>
             <div class="wf-stat"><div class="num" id="statCompletadas">–</div><div class="lbl">Completadas</div></div>
             <div class="wf-stat"><div class="num" id="statStreak">–</div><div class="lbl">Días de racha</div></div>
+          </div>
+          <div class="stats-hint">
+            <i class="ph ph-info" aria-hidden="true"></i>
+            Ganas <strong>2 puntos</strong> por cada diapositiva nueva, <strong>10</strong> por actividad entregada y <strong>50</strong> extra la primera vez que entregas en un curso.
           </div>
 
           <!-- Todos los cursos, agrupados por categoría (Para profesores / Para alumnos) -->
@@ -158,25 +169,57 @@
       document.getElementById('welcomeModalBackdrop').style.display = 'flex';
     }
 
+    // Reabrir desde "¿Qué es Pharis Academy?" (menú de usuario, ver
+    // renderUserMenu en api.js): el modal era la única explicación del
+    // producto y no había forma de volver a verlo tras cerrarlo.
+    function abrirModalBienvenida() {
+      document.getElementById('welcomeModalBackdrop').style.display = 'flex';
+      document.getElementById('welcomeModalClose').focus();
+    }
+    if (location.hash === '#que-es') {
+      abrirModalBienvenida();
+      // Limpia el hash para que un F5 no lo reabra solo.
+      history.replaceState(null, '', location.pathname);
+    }
+    window.addEventListener('hashchange', () => {
+      if (location.hash === '#que-es') {
+        abrirModalBienvenida();
+        history.replaceState(null, '', location.pathname);
+      }
+    });
+
     document.getElementById('welcomeModalClose').addEventListener('click', () => {
       document.getElementById('welcomeModalBackdrop').style.display = 'none';
+    });
+    // Cerrar con Escape y con click en el fondo — antes el único camino era
+    // el botón "Entendido".
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') document.getElementById('welcomeModalBackdrop').style.display = 'none';
+    });
+    document.getElementById('welcomeModalBackdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'welcomeModalBackdrop') e.currentTarget.style.display = 'none';
     });
 
     const user = AcademyAuth.getUser();
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
+    // El link de Dashboard se revela ANTES del gate: aplicarGateSidebar()
+    // termina construyendo el nav móvil clonando los links visibles, así
+    // que un profesor se quedaría sin Dashboard ahí si se revelara después.
+    if (user.rol === 'profesor') {
+      document.getElementById('navDashboard').style.display = 'flex';
+    }
     AcademyAuth.aplicarGateSidebar();
     document.getElementById('helloMsg').textContent = `Hola, ${user.nombre.split(' ')[0]}!`;
     // Ya viene en localStorage desde el último login (POST /academy/login
     // ahora devuelve streakCount), no hace falta un fetch aparte para esto.
     document.getElementById('statStreak').textContent = user.streakCount ?? 0;
-    if (user.rol === 'profesor') {
-      document.getElementById('navDashboard').style.display = 'flex';
-    }
+    // Precarga desde localStorage igual que la racha; loadPuntos() lo
+    // refresca contra el servidor apenas responde.
+    document.getElementById('statPuntos').textContent = user.puntosTotales ?? 0;
 
     const categoriaGrid = document.getElementById('categoriaGrid');
     const heroCards = document.getElementById('heroCourseCards');
-    const statCourses = document.getElementById('statCourses');
     const statCoursesLabel = document.getElementById('statCoursesLabel');
 
     // Fracción/porcentaje de progreso de un curso. El % usa la MISMA
@@ -220,7 +263,6 @@
           academyFetch('/academy/courses'),
           academyFetch('/academy/me/avance').catch(() => ({})), // no bloquea el resto de la página si falla
         ]);
-        statCourses.textContent = data.courses.length;
         statCoursesLabel.textContent = `Tienes ${data.courses.length} curso${data.courses.length === 1 ? '' : 's'} por explorar`;
 
         if (!data.courses.length) {
@@ -272,6 +314,19 @@
       } catch {}
     }
 
+    // Puntos y racha frescos del servidor. El Overview los precargaba solo
+    // desde localStorage (caché del último login), así que podían discrepar
+    // con lo que muestra el Perfil, que sí hace este fetch. Refrescar acá
+    // también deja los dos números siempre iguales.
+    async function loadPuntosYRacha() {
+      try {
+        const data = await academyFetch('/academy/me');
+        AcademyAuth.updateUser(data.user);
+        document.getElementById('statPuntos').textContent = data.user.puntosTotales ?? 0;
+        document.getElementById('statStreak').textContent = data.user.streakCount ?? 0;
+      } catch {}
+    }
+
     // Noticias, sección "opcional": si falla el fetch, se muestra el
     // mensaje de error ahí mismo pero no bloquea el resto del Overview
     // (Estadísticas/Leaderboard/Cursos ya cargan con su propio try/catch
@@ -283,7 +338,7 @@
       try {
         const data = await academyFetch('/academy/news');
         if (!data.news.length) {
-          newsList.innerHTML = '<div class="empty-state" style="padding:8px 0;">Nada para contar por ahora :(</div>';
+          newsList.innerHTML = '<div class="empty-state" style="padding:12px 0;">Nada para contar por ahora. Cuando haya novedades del equipo, aparecen acá.</div>';
           return;
         }
         // Quita empty-state (fijo en el HTML como estado inicial de
@@ -311,12 +366,24 @@
     }
 
     async function loadLeaderboard() {
-      const section = document.getElementById('leaderboardSection');
+      const panel = document.getElementById('leaderboardTop');
       try {
         const data = await academyFetch('/academy/leaderboard');
-        if (!data.top.length) { section.style.display = 'none'; return; }
+        // Vacío: se muestra la sección con una invitación en vez de
+        // desaparecerla. Antes, "sin datos" y "falló la red" hacían lo
+        // mismo (display:none), así que el Overview aparecía mutilado sin
+        // que el usuario supiera por qué.
+        if (!data.top.length) {
+          panel.innerHTML = `
+            <div class="empty-state empty-state-action">
+              <i class="ph ph-trophy" aria-hidden="true"></i>
+              <span>Nadie tiene puntos todavía. Recorre un curso y sé el primero en aparecer acá.</span>
+              <a class="btn btn-primary btn-small" href="curso.html#slug=introduccion">Empezar ahora</a>
+            </div>`;
+          return;
+        }
 
-        document.getElementById('leaderboardTop').innerHTML = data.top.map(row => `
+        panel.innerHTML = data.top.map(row => `
           <div class="wf-leader-row">
             <div class="rank">#${row.posicion}</div>
             <div class="wf-avatar" style="width:28px; height:28px; font-size:0.7rem;">${iniciales(row.nombre)}</div>
@@ -335,13 +402,21 @@
           document.getElementById('leaderboardYouPanel').style.display = 'flex';
         }
       } catch {
-        // No bloquea el Overview, mismo criterio que loadNews.
-        section.style.display = 'none';
+        // Error de red: se distingue del caso "vacío" (arriba) en vez de
+        // ocultar la sección entera, que dejaba al usuario viendo un
+        // Overview incompleto sin explicación.
+        panel.innerHTML = `
+          <div class="empty-state empty-state-action">
+            <i class="ph ph-cloud-slash" aria-hidden="true"></i>
+            <span>No pudimos cargar el ranking. Revisa tu conexión.</span>
+            <button class="btn btn-secondary btn-small" type="button" onclick="loadLeaderboard()">Reintentar</button>
+          </div>`;
       }
     }
 
     loadCourses();
     loadEntregas();
+    loadPuntosYRacha();
     loadNews();
     loadLeaderboard();
   </script>
