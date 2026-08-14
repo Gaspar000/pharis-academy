@@ -310,10 +310,11 @@
     if (!slug) window.location.href = 'index.html';
 
     async function loadCourse() {
-      const [coursesResult, meResult, quizResult] = await Promise.allSettled([
+      const [coursesResult, meResult, quizResult, avanceResult] = await Promise.allSettled([
         academyFetch('/academy/courses'),
         academyFetch('/academy/me'),
         academyFetch(`/academy/courses/${encodeURIComponent(slug)}/quiz`),
+        academyFetch('/academy/me/avance'),
       ]);
       // Si el fetch falla se asume no-aprobado (más restrictivo, no más
       // permisivo). Para un curso SIN quiz este fetch rechaza con 404 —
@@ -321,6 +322,12 @@
       // (ver goToSlide). Se sobrescribe con un valor real apenas se aprueba
       // (ver el submit del quiz más abajo).
       quizAprobado = quizResult.status === 'fulfilled' && quizResult.value.tengoAprobado;
+      // { [slug]: maxSlideIndex } para TODOS los cursos del alumno — si este
+      // curso nunca tuvo avance registrado, queda en -1 (ningún índice real
+      // es < 0, así que el candado del quiz se comporta igual que "nada visto").
+      if (avanceResult.status === 'fulfilled' && typeof avanceResult.value[slug] === 'number') {
+        maxSlideIndexAvance = avanceResult.value[slug];
+      }
 
       if (coursesResult.status === 'rejected') {
         document.getElementById('courseTitle').textContent = `Error al cargar el curso: ${coursesResult.reason.message}`;
@@ -421,6 +428,15 @@
     // defina quiz, no solo 'introduccion'.
     let quizAprobado = false;
     let currentCourse = null;
+    // Candado sobre el capítulo de Quiz: no se puede entrar sin haber visto
+    // TODAS las diapositivas anteriores. A diferencia de currentSlideIndex
+    // (se reinicia en cada carga de página, siempre arranca en goToSlide(0)),
+    // esto viene del avance PERSISTIDO en el backend (GET /academy/me/avance,
+    // resuelto en loadCourse) — si el alumno ya había llegado a la 5 en una
+    // sesión anterior, el quiz aparece desbloqueado de entrada, sin tener que
+    // re-navegar. Se actualiza en caliente en cada goToSlide con
+    // Math.max, igual que GREATEST en el backend: nunca baja al repasar.
+    let maxSlideIndexAvance = -1;
 
     // Lista de RENDERIZADO del panel de Capítulos — nunca muta `slides`
     // (el array real del catálogo, del que dependen avance/puntos/ARIA).
@@ -450,6 +466,7 @@
             <li class="chapter-item" data-tipo="quiz">
               <span class="chapter-time">${String(pos + 1).padStart(2, '0')}</span>
               <span class="chapter-label"><i class="ph ph-exam" aria-hidden="true"></i> Quiz</span>
+              <i class="ph ph-lock-simple chapter-lock-icon" aria-hidden="true"></i>
             </li>
           `;
         }
@@ -470,11 +487,18 @@
     }
 
     // Único punto de entrada de clicks del panel de Capítulos: distingue
-    // entre el ítem virtual de quiz, una diapositiva real libre, y "Cierre"
-    // bloqueada (candado visual, sin navegar — ver también la barrera dura
-    // dentro de goToSlide, que cubre teclado/seek).
+    // entre el ítem virtual de quiz (bloqueado o no), una diapositiva real
+    // libre, y "Cierre" bloqueada (candado visual, sin navegar — ver también
+    // la barrera dura dentro de goToSlide, que cubre teclado/seek).
     function handleChapterClick(el) {
-      if (el.dataset.tipo === 'quiz') { mostrarQuiz(); return; }
+      if (el.dataset.tipo === 'quiz') {
+        if (el.classList.contains('is-locked')) {
+          mostrarSlideToast('Ve todas las diapositivas anteriores para desbloquear el quiz.');
+          return;
+        }
+        mostrarQuiz();
+        return;
+      }
       const index = Number(el.dataset.index);
       if (el.classList.contains('is-locked')) {
         mostrarSlideToast('Aprueba el quiz para desbloquear esta diapositiva.');
@@ -487,13 +511,28 @@
       return Boolean(currentCourse && currentCourse.quiz) && !quizAprobado;
     }
 
+    // Bloqueado hasta ver TODAS las diapositivas anteriores a su posición
+    // (índices 0..posicionQuiz-1, ver buildChapterList). maxSlideIndexAvance
+    // viene del avance PERSISTIDO (GET /academy/me/avance en loadCourse), no
+    // de currentSlideIndex — así el desbloqueo sobrevive a un recargo de
+    // página. Ya aprobado no vuelve a bloquearse (permite repasar).
+    function quizEstaBloqueado() {
+      if (!currentCourse || !currentCourse.quiz || quizAprobado) return false;
+      const posicionQuiz = currentSlides.length - 1;
+      return maxSlideIndexAvance < posicionQuiz - 1;
+    }
+
     // Reutiliza el CSS .chapter-item.is-locked / .chapter-lock-icon ya
     // existente en styles.css (sobreviviente de la barrera 6→7 anterior,
     // quedó desconectado — no hace falta CSS nuevo). Se llama al final de
     // renderChapters (candado correcto desde la primera carga) y de nuevo
-    // justo tras aprobar el quiz, para quitarlo en caliente sin recargar.
+    // en cada goToSlide / justo tras aprobar el quiz, para actualizarlo en
+    // caliente sin recargar.
     function updateChapterLockState() {
       if (!currentSlides.length) return;
+      const quizEl = document.querySelector('#chaptersList .chapter-item[data-tipo="quiz"]');
+      if (quizEl) quizEl.classList.toggle('is-locked', quizEstaBloqueado());
+
       const ultimoIndice = currentSlides.length - 1;
       const bloqueada = cierreEstaBloqueada();
       document.querySelectorAll('#chaptersList .chapter-item[data-tipo="slide"]').forEach(el => {
@@ -847,6 +886,14 @@
       const progress = currentSlides.length > 1 ? (currentSlideIndex / (currentSlides.length - 1)) * 100 : 100;
       document.getElementById('viewerProgressFill').style.width = `${progress}%`;
       updateChapterActiveState();
+
+      // Actualiza el avance EN CALIENTE (Math.max, mismo criterio que
+      // GREATEST en el backend) antes de esperar la respuesta del POST de
+      // abajo — así el candado del quiz se quita en el mismo instante en
+      // que el alumno llega a la última diapositiva anterior, no un
+      // round-trip después.
+      maxSlideIndexAvance = Math.max(maxSlideIndexAvance, currentSlideIndex);
+      updateChapterLockState();
 
       // Persiste el avance (máximo índice alcanzado, GREATEST en el
       // backend — retroceder a repasar nunca hace bajar lo guardado).
