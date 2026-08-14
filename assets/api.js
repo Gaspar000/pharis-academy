@@ -181,7 +181,7 @@ const AcademyAuth = {
         return;
       }
       empty.style.display = 'none';
-      const ICONO_POR_TIPO = { 'logro': 'ph-medal', 'curso-completado': 'ph-trophy' };
+      const ICONO_POR_TIPO = { 'logro': 'ph-medal', 'curso-completado': 'ph-trophy', 'curso-terminado': 'ph-graduation-cap' };
       list.innerHTML = data.notifications.map(n => `
         <div class="notif-item ${n.leidaAt ? '' : 'is-unread'}">
           <i class="ph ${ICONO_POR_TIPO[n.tipo] || 'ph-bell'}"></i>

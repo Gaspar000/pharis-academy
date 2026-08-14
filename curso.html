@@ -90,6 +90,28 @@
                 <div class="slide-points-layer" id="slidePointsLayer"></div>
               </div>
 
+              <!-- Quiz de curso, hermano de #slideViewer dentro del mismo
+                   .embed-frame — NO es una diapositiva más del array
+                   currentSlides (eso rompería avance/puntos/ARIA, que ya
+                   dependen del índice real de diapositivas). Aparece como
+                   paso extra al llegar a la última diapositiva y hacer
+                   click en "Continuar al quiz" (ver goToSlide / mostrarQuiz
+                   en el script). Oculto por defecto. -->
+              <div class="quiz-viewer" id="quizViewer" style="display:none;">
+                <div class="quiz-header">
+                  <i class="ph ph-exam" aria-hidden="true"></i>
+                  <div>
+                    <div class="quiz-title">Quiz del curso</div>
+                    <div class="quiz-subtitle" id="quizSubtitle"></div>
+                  </div>
+                </div>
+                <form id="quizForm"></form>
+                <div class="quiz-actions">
+                  <button class="btn btn-primary" id="quizSubmitBtn" type="submit" form="quizForm">Enviar respuestas</button>
+                </div>
+                <div class="quiz-result" id="quizResult"></div>
+              </div>
+
               <!-- Barra de controles, superpuesta sobre la imagen, dentro
                    de .embed-frame (position:absolute). Oculta por defecto,
                    aparece con hover/foco sobre el frame (ver CSS), así no
@@ -212,8 +234,11 @@
     </section>
 
     <section class="course-section course-section-narrow" id="uploadSection">
-      <h2>Subir actividad</h2>
-      <p>Sube tu actividad en PDF o imagen (JPG/PNG). Pharis la revisará automáticamente contra la rúbrica del curso.</p>
+      <!-- El quiz (arriba, dentro del visor) reemplazó a esto como
+           requisito de avance — ya no bloquea nada, el texto pasa de
+           imperativo a informativo. -->
+      <h2>Subir actividad (opcional)</h2>
+      <p>Si quieres, sube tu actividad en PDF o imagen (JPG/PNG). Pharis la revisará como retroalimentación adicional.</p>
 
       <div class="upload-box">
         <!-- Dropzone: arrastrar-y-soltar real (ver JS, DataTransfer arma
@@ -262,23 +287,18 @@
     const slug = params.get('slug');
     if (!slug) window.location.href = 'index.html';
 
-    // Historial local de esta sesión de navegador, el backend no expone
-    // GET /academy/mis-entregas (fuera de alcance de esta primera versión),
-    // así que solo se listan las entregas hechas en esta pestaña/sesión.
-    const localHistory = [];
-
     async function loadCourse() {
-      const [coursesResult, meResult, entregaResult] = await Promise.allSettled([
+      const [coursesResult, meResult, quizResult] = await Promise.allSettled([
         academyFetch('/academy/courses'),
         academyFetch('/academy/me'),
-        academyFetch(`/academy/courses/${encodeURIComponent(slug)}/tengo-entrega`),
+        academyFetch(`/academy/courses/${encodeURIComponent(slug)}/quiz`),
       ]);
-      // Barrera 6→7 del curso "introduccion" (ver goToSlide), si el fetch
-      // falla se asume false (más restrictivo, no más permisivo: mejor
-      // pedirle de nuevo que suba la actividad que dejar pasar por un error
-      // de red). Se sobrescribe con un valor real apenas termina un submit
-      // exitoso, sin esperar a otro round-trip (ver uploadBtn más abajo).
-      tieneEntregaCurso = entregaResult.status === 'fulfilled' && entregaResult.value.tengoEntrega;
+      // Si el fetch falla se asume no-aprobado (más restrictivo, no más
+      // permisivo). Para un curso SIN quiz este fetch rechaza con 404 —
+      // inofensivo, quizAprobado solo importa si currentCourse.quiz existe
+      // (ver goToSlide). Se sobrescribe con un valor real apenas se aprueba
+      // (ver el submit del quiz más abajo).
+      quizAprobado = quizResult.status === 'fulfilled' && quizResult.value.tengoAprobado;
 
       if (coursesResult.status === 'rejected') {
         document.getElementById('courseTitle').textContent = `Error al cargar el curso: ${coursesResult.reason.message}`;
@@ -291,6 +311,7 @@
         document.getElementById('courseTitle').textContent = 'Curso no encontrado';
         return;
       }
+      currentCourse = course;
       document.getElementById('courseTitle').textContent = course.titulo;
       document.getElementById('breadcrumbCurrent').textContent = course.titulo;
       setLikeBtnActive(course.meGusta, course.totalLikes);
@@ -335,6 +356,8 @@
         const guardados = meResult.value.user.cursosGuardados || [];
         setSaveBtnActive(guardados.includes(slug));
       }
+
+      if (course.slides && course.slides.length) loadHistory();
     }
 
     // Curso sin diapositivas todavía: se ocultan las partes que no aplican
@@ -370,33 +393,37 @@
     let currentSlides = [];
     // Barrera entre diapositivas 6→7 (índices 5→6) del curso "introduccion":
     // no deja avanzar a la 7 sin al menos una entrega para este curso. Se
-    // resuelve en loadCourse() (GET .../tengo-entrega) y se actualiza en
-    // caliente tras un submit exitoso, ver goToSlide() para la barrera en
-    // sí y uploadBtn más abajo para dónde se pone en true.
-    let tieneEntregaCurso = false;
-    const SLIDE_INDEX_BARRERA_ENTREGA = 5; // 0-based: diapositiva 6
+    // Se resuelve en loadCourse() (GET .../quiz → tengoAprobado) y se
+    // actualiza en caliente tras aprobar (ver mostrarResultadoQuiz). El
+    // quiz reemplazó a "tiene entrega" como requisito — currentCourse (no
+    // solo slug) permite que la barrera se active en CUALQUIER curso que
+    // defina quiz, no solo 'introduccion' (antes hardcodeado al slug).
+    let quizAprobado = false;
+    let currentCourse = null;
 
     function renderChapters(slides) {
       const listEl = document.getElementById('chaptersList');
       listEl.innerHTML = slides.map((s, i) => `
         <li class="chapter-item" data-index="${i}">
           <span class="chapter-time">${String(i + 1).padStart(2, '0')}</span>
-          <i class="ph ph-lock-simple chapter-lock-icon" aria-hidden="true"></i>
           <span class="chapter-label">${s.titulo}</span>
         </li>
       `).join('');
 
+      // Sin candado ni bloqueo de capítulos: la barrera ya no depende de
+      // en qué diapositiva estás (antes bloqueaba diapositivas intermedias
+      // más allá de la 6), sino de si aprobaste el quiz que aparece DESPUÉS
+      // de la última — cualquier diapositiva individual sigue siendo libre
+      // de visitar en cualquier orden.
       listEl.querySelectorAll('.chapter-item').forEach(item => {
         item.addEventListener('click', () => goToSlide(Number(item.dataset.index)));
       });
     }
 
     function updateChapterActiveState() {
-      const bloqueado = slug === 'introduccion' && !tieneEntregaCurso;
       document.querySelectorAll('#chaptersList .chapter-item').forEach(item => {
         const index = Number(item.dataset.index);
         item.classList.toggle('is-current', index === currentSlideIndex);
-        item.classList.toggle('is-locked', bloqueado && index > SLIDE_INDEX_BARRERA_ENTREGA);
       });
     }
 
@@ -564,30 +591,108 @@
       slideToastTimeout = setTimeout(() => toast.classList.remove('is-visible'), 3000);
     }
 
-    function goToSlide(index) {
-      if (index < 0 || index >= currentSlides.length) return;
-      // Barrera 6→7, solo en el curso "introduccion": bloquea cualquier
-      // salto que cruce la diapositiva 6 hacia adelante (botón siguiente,
-      // teclado, barra de progreso, o click directo en el capítulo
-      // "Cierre") si todavía no hay una entrega para este curso puntual.
-      // Explícitamente atada al slug (no solo a "más de 6 diapositivas")
-      // para no heredar la barrera sin querer si otro curso llega a tener
-      // 7+ diapositivas reales en el futuro.
-      if (slug === 'introduccion' && index > SLIDE_INDEX_BARRERA_ENTREGA && !tieneEntregaCurso) {
-        mostrarSlideToast('Sube tu actividad para continuar.');
-        // El toast solo daba la orden: el formulario vive más abajo, después
-        // de la fila de autor y de la sección de recursos, así que el
-        // usuario tenía que adivinar que debía bajar. Llevarlo ahí convierte
-        // el bloqueo en guía. El foco va al dropzone para que quien navega
-        // por teclado también llegue, no solo quien ve el scroll.
-        const dropzone = document.getElementById('dropzone');
-        if (dropzone) {
-          dropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          dropzone.classList.add('is-highlighted');
-          setTimeout(() => dropzone.classList.remove('is-highlighted'), 2000);
+    // ── Quiz ──────────────────────────────────────────────────────────────────
+    // Reemplaza a "tiene entrega" como paso final del curso. Vive como
+    // vista hermana de #slideViewer dentro del mismo .embed-frame — no
+    // como una diapositiva más, para no tocar el modelo de índices del que
+    // depende avance/puntos/ARIA.
+    let quizPreguntas = [];
+
+    async function mostrarQuiz() {
+      document.getElementById('slideViewer').style.display = 'none';
+      const quizViewer = document.getElementById('quizViewer');
+      quizViewer.style.display = 'flex';
+      document.getElementById('quizResult').innerHTML = '';
+
+      try {
+        const data = await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/quiz`);
+        quizPreguntas = data.preguntas;
+        quizAprobado = data.tengoAprobado;
+
+        document.getElementById('quizSubtitle').textContent = quizAprobado
+          ? 'Ya aprobaste este quiz — puedes repasarlo cuando quieras.'
+          : `Responde las ${quizPreguntas.length} preguntas para completar el curso.`;
+
+        renderQuizForm();
+      } catch (err) {
+        document.getElementById('quizForm').innerHTML = '';
+        document.getElementById('quizResult').innerHTML =
+          `<div class="quiz-feedback quiz-feedback-err">${err.message}</div>`;
+      }
+    }
+
+    function volverAlVisor() {
+      document.getElementById('quizViewer').style.display = 'none';
+      document.getElementById('slideViewer').style.display = 'block';
+    }
+
+    function renderQuizForm() {
+      const form = document.getElementById('quizForm');
+      form.innerHTML = quizPreguntas.map((p, pi) => `
+        <fieldset class="quiz-question">
+          <legend>${pi + 1}. ${p.texto}</legend>
+          ${p.opciones.map((o, oi) => `
+            <label class="quiz-option">
+              <input type="radio" name="${p.id}" value="${oi}" required />
+              <span>${o}</span>
+            </label>
+          `).join('')}
+        </fieldset>
+      `).join('');
+    }
+
+    document.getElementById('quizForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('quizSubmitBtn');
+      const formData = new FormData(e.target);
+      const respuestas = {};
+      for (const [id, valor] of formData.entries()) respuestas[id] = Number(valor);
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando...';
+      try {
+        const result = await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/quiz/intentar`, {
+          method: 'POST', body: JSON.stringify({ respuestas }),
+        });
+
+        const resultEl = document.getElementById('quizResult');
+        if (result.aprobado) {
+          quizAprobado = true;
+          resultEl.innerHTML = `
+            <div class="quiz-feedback quiz-feedback-ok">
+              <i class="ph ph-check-circle" aria-hidden="true"></i>
+              ¡Aprobaste! ${result.puntaje}/${result.total} correctas.
+              <button class="btn btn-secondary btn-small" type="button" id="quizVolverBtn">Volver al curso</button>
+            </div>`;
+          if (result.puntosGanados > 0) celebrarPuntos(result.puntosGanados);
+        } else {
+          resultEl.innerHTML = `
+            <div class="quiz-feedback quiz-feedback-warn">
+              <i class="ph ph-warning-circle" aria-hidden="true"></i>
+              ${result.puntaje}/${result.total} correctas — necesitas más para aprobar. Repasa las diapositivas y vuelve a intentar, no hay límite de intentos.
+            </div>`;
         }
+        document.getElementById('quizVolverBtn')?.addEventListener('click', volverAlVisor);
+      } catch (err) {
+        document.getElementById('quizResult').innerHTML =
+          `<div class="quiz-feedback quiz-feedback-err">${err.message}</div>`;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enviar respuestas';
+      }
+    });
+
+    function goToSlide(index) {
+      // index === currentSlides.length (un paso más allá de la última
+      // diapositiva) es el punto donde antes vivía la barrera 6→7. Ahora,
+      // si el curso define quiz, ese "paso siguiente" muestra el quiz en
+      // vez de simplemente no hacer nada — ya no hay diapositivas
+      // intermedias bloqueadas, cualquier diapositiva es libre de visitar.
+      if (index === currentSlides.length && currentCourse?.quiz) {
+        mostrarQuiz();
         return;
       }
+      if (index < 0 || index >= currentSlides.length) return;
       currentSlideIndex = index;
 
       const slide = currentSlides[currentSlideIndex];
@@ -609,7 +714,20 @@
       progressEl.setAttribute('aria-valuemax', String(currentSlides.length));
       progressEl.setAttribute('aria-valuetext', `Diapositiva ${currentSlideIndex + 1} de ${currentSlides.length}: ${slide.titulo}`);
       document.getElementById('slidePrevBtn').disabled = currentSlideIndex === 0;
-      document.getElementById('slideNextBtn').disabled = currentSlideIndex === currentSlides.length - 1;
+      // En la última diapositiva, "siguiente" queda habilitado y cambia de
+      // rol a "continuar al quiz" si el curso define uno — deja de ser un
+      // botón muerto y pasa a ser la entrada al paso final.
+      const esUltima = currentSlideIndex === currentSlides.length - 1;
+      const nextBtn = document.getElementById('slideNextBtn');
+      if (esUltima && currentCourse?.quiz) {
+        nextBtn.disabled = false;
+        nextBtn.setAttribute('aria-label', 'Continuar al quiz');
+        nextBtn.querySelector('i').className = 'ph ph-exam';
+      } else {
+        nextBtn.disabled = esUltima;
+        nextBtn.setAttribute('aria-label', 'Diapositiva siguiente');
+        nextBtn.querySelector('i').className = 'ph ph-caret-right';
+      }
       // Progreso = diapositivas completadas, no "posición actual", en la
       // 1 de 7 arranca en 0%, en la 7 de 7 llega a 100%.
       const progress = currentSlides.length > 1 ? (currentSlideIndex / (currentSlides.length - 1)) * 100 : 100;
@@ -804,19 +922,28 @@
       return '<span class="badge badge-pendiente">Pendiente</span>';
     }
 
-    function renderHistory() {
+    // Historial persistente vía GET /academy/mis-entregas — antes era un
+    // array en memoria de la pestaña que se perdía al recargar. De paso
+    // arregla un bug: el archivo siempre aparecía como "Actividad" porque
+    // el RETURNING del submit no incluía archivo_nombre; este SELECT sí.
+    async function loadHistory() {
       const el = document.getElementById('submissionHistory');
-      if (!localHistory.length) { el.innerHTML = ''; return; }
-      el.innerHTML = localHistory.map(s => `
-        <div class="submission-item">
-          <div>
-            <div class="name">${s.archivo_nombre || 'Actividad'}</div>
-            <div class="date">${new Date(s.created_at).toLocaleString('es-MX')}</div>
-            ${s.feedback_claude ? `<div class="date" style="margin-top:4px;">${s.feedback_claude}</div>` : ''}
+      try {
+        const data = await academyFetch(`/academy/mis-entregas?curso=${encodeURIComponent(slug)}`);
+        if (!data.entregas.length) { el.innerHTML = ''; return; }
+        el.innerHTML = data.entregas.map(s => `
+          <div class="submission-item">
+            <div>
+              <div class="name">${s.archivoNombre || 'Actividad'}</div>
+              <div class="date">${new Date(s.createdAt).toLocaleString('es-MX')}</div>
+              ${s.feedbackClaude ? `<div class="date" style="margin-top:4px;">${s.feedbackClaude}</div>` : ''}
+            </div>
+            ${badgeFor(s.calificacion)}
           </div>
-          ${badgeFor(s.calificacion)}
-        </div>
-      `).join('');
+        `).join('');
+      } catch {
+        el.innerHTML = ''; // no bloquea el resto de la página, mismo criterio que loadNews en index.html
+      }
     }
 
     const MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -852,12 +979,7 @@
         });
 
         const sub = result.submission;
-        localHistory.unshift(sub);
-        renderHistory();
-        // Desbloquea la barrera 6→7 en caliente, sin esto, el alumno
-        // tendría que recargar la página para poder seguir viendo el curso
-        // después de subir la actividad.
-        tieneEntregaCurso = true;
+        await loadHistory();
 
         if (sub.calificacion) {
           showStatus('ok', `Evaluación: ${sub.calificacion}. ${sub.feedback_claude || ''}`);

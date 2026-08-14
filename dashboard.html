@@ -131,11 +131,23 @@
         `;
       }).join('');
 
+      // Select en vez de badge estático: el profesor puede corregir el
+      // veredicto de Claude directamente acá (ver PATCH /academy/submissions/:id).
+      // Preseleccionado con la calificación actual — si está en NULL
+      // (evaluación automática falló), no hay opción seleccionada, el
+      // profesor elige la primera vez que corrige.
       const entregasRows = entregas.map(e => `
         <tr>
           <td>${e.user_nombre}<br><span style="color:var(--text-faint); font-size:0.78rem;">${e.user_email}</span></td>
           <td>${e.curso}</td>
-          <td>${badgeFor(e.calificacion)}</td>
+          <td>
+            <select class="grade-select" data-id="${e.id}">
+              <option value="Completado" ${e.calificacion === 'Completado' ? 'selected' : ''}>Completado</option>
+              <option value="Necesita mejoras" ${e.calificacion === 'Necesita mejoras' ? 'selected' : ''}>Necesita mejoras</option>
+              <option value="Incompleto" ${e.calificacion === 'Incompleto' ? 'selected' : ''}>Incompleto</option>
+            </select>
+            ${e.calificadoPorNombre ? `<div class="grade-edited-hint">Editado por ${e.calificadoPorNombre}</div>` : ''}
+          </td>
           <td class="feedback-cell">${e.feedback_claude || ''}</td>
           <td>${new Date(e.created_at).toLocaleString('es-MX')}</td>
         </tr>
@@ -191,6 +203,27 @@
         document.getElementById('dashContent').innerHTML = `<div class="empty-state">${err.message}</div>`;
       }
     }
+
+    // Delegación de evento en vez de un listener por <select>: la tabla se
+    // re-renderiza completa en cada loadDashboard() (mismo patrón que
+    // savedCoursesList en perfil.html), así que engancharlo por fila se
+    // perdería en cada refresco.
+    document.getElementById('dashContent').addEventListener('change', async (e) => {
+      const select = e.target.closest('.grade-select');
+      if (!select) return;
+      select.disabled = true;
+      try {
+        await academyFetch(`/academy/submissions/${select.dataset.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ calificacion: select.value }),
+        });
+        AcademyAuth.mostrarToast('Calificación actualizada.');
+        await loadDashboard(); // refresca "Editado por" y las stats agregadas
+      } catch (err) {
+        AcademyAuth.mostrarToast(err.message);
+        select.disabled = false;
+      }
+    });
 
     document.getElementById('exportBtn').addEventListener('click', exportCsv);
     loadDashboard();
