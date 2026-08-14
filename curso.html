@@ -801,6 +801,17 @@
         return;
       }
       if (index < 0 || index >= currentSlides.length) return;
+
+      // Si el quiz está activo (#quizViewer visible), cualquier navegación a
+      // una diapositiva real debe volver al visor primero — de lo contrario
+      // slideImage/estado interno cambian "por debajo" mientras el alumno
+      // sigue viendo el quiz en pantalla, atascado ahí. Cubre las 4 vías de
+      // entrada a goToSlide (panel de Capítulos, teclado, seek de la barra
+      // de progreso, botones prev/next) en un solo lugar.
+      if (document.getElementById('quizViewer').style.display !== 'none') {
+        volverAlVisor();
+      }
+
       currentSlideIndex = index;
 
       const slide = currentSlides[currentSlideIndex];
