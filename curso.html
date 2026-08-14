@@ -81,9 +81,10 @@
                      goToSlide() según slide.hotspots. Vacío para
                      diapositivas sin interactividad (la mayoría). -->
                 <div class="slide-hotspots" id="slideHotspots"></div>
-                <!-- Aviso de barrera 6→7 (ver goToSlide), oculto por
-                     defecto, aparece un instante cuando se intenta avanzar
-                     sin haber subido una actividad todavía. -->
+                <!-- Aviso de candado sobre "Cierre" (ver goToSlide /
+                     handleChapterClick), oculto por defecto, aparece un
+                     instante cuando se intenta avanzar sin haber aprobado
+                     el quiz todavía. -->
                 <div class="slide-toast" id="slideToast"></div>
                 <!-- Capa de celebración de puntos (ver celebrarPuntos), sus
                      hijos los crea y borra el JS en cada diapositiva nueva. -->
@@ -93,23 +94,44 @@
               <!-- Quiz de curso, hermano de #slideViewer dentro del mismo
                    .embed-frame — NO es una diapositiva más del array
                    currentSlides (eso rompería avance/puntos/ARIA, que ya
-                   dependen del índice real de diapositivas). Aparece como
-                   paso extra al llegar a la última diapositiva y hacer
-                   click en "Continuar al quiz" (ver goToSlide / mostrarQuiz
-                   en el script). Oculto por defecto. -->
+                   dependen del índice real de diapositivas). Es su propio
+                   capítulo, intercalado visualmente en el panel de
+                   Capítulos por buildChapterList() (ver script) entre la
+                   penúltima y última diapositiva real. Dos sub-vistas
+                   internas alternadas por display: intro (texto + botón
+                   "Continuar al Quiz") y formulario — mostrarQuiz() siempre
+                   entra por la intro, incluso si ya se aprobó antes (permite
+                   repasar). Oculto por defecto. -->
               <div class="quiz-viewer" id="quizViewer" style="display:none;">
-                <div class="quiz-header">
-                  <i class="ph ph-exam" aria-hidden="true"></i>
-                  <div>
-                    <div class="quiz-title">Quiz del curso</div>
-                    <div class="quiz-subtitle" id="quizSubtitle"></div>
+                <div class="quiz-intro" id="quizIntro">
+                  <div class="quiz-header">
+                    <i class="ph ph-exam" aria-hidden="true"></i>
+                    <div>
+                      <div class="quiz-title">Quiz del curso</div>
+                      <div class="quiz-subtitle" id="quizIntroSubtitle"></div>
+                    </div>
+                  </div>
+                  <div class="quiz-intro-actions">
+                    <button class="btn btn-primary" id="quizContinuarBtn" type="button">
+                      Continuar al Quiz <i class="ph ph-arrow-right"></i>
+                    </button>
                   </div>
                 </div>
-                <form id="quizForm"></form>
-                <div class="quiz-actions">
-                  <button class="btn btn-primary" id="quizSubmitBtn" type="submit" form="quizForm">Enviar respuestas</button>
+
+                <div class="quiz-form-wrap" id="quizFormWrap" style="display:none;">
+                  <div class="quiz-header">
+                    <i class="ph ph-exam" aria-hidden="true"></i>
+                    <div>
+                      <div class="quiz-title">Quiz del curso</div>
+                      <div class="quiz-subtitle" id="quizSubtitle"></div>
+                    </div>
+                  </div>
+                  <form id="quizForm"></form>
+                  <div class="quiz-actions">
+                    <button class="btn btn-primary" id="quizSubmitBtn" type="submit" form="quizForm">Enviar respuestas</button>
+                  </div>
+                  <div class="quiz-result" id="quizResult"></div>
                 </div>
-                <div class="quiz-result" id="quizResult"></div>
               </div>
 
               <!-- Barra de controles, superpuesta sobre la imagen, dentro
@@ -391,37 +413,97 @@
 
     let currentSlideIndex = 0;
     let currentSlides = [];
-    // Barrera entre diapositivas 6→7 (índices 5→6) del curso "introduccion":
-    // no deja avanzar a la 7 sin al menos una entrega para este curso. Se
-    // Se resuelve en loadCourse() (GET .../quiz → tengoAprobado) y se
-    // actualiza en caliente tras aprobar (ver mostrarResultadoQuiz). El
-    // quiz reemplazó a "tiene entrega" como requisito — currentCourse (no
-    // solo slug) permite que la barrera se active en CUALQUIER curso que
-    // defina quiz, no solo 'introduccion' (antes hardcodeado al slug).
+    // Candado sobre la última diapositiva real ("Cierre" en introduccion):
+    // no se puede visitar sin aprobar antes el quiz del curso. Se resuelve
+    // en loadCourse() (GET .../quiz → tengoAprobado) y se actualiza en
+    // caliente tras aprobar (ver el submit del quiz). currentCourse (no
+    // solo slug) permite que el candado se active en CUALQUIER curso que
+    // defina quiz, no solo 'introduccion'.
     let quizAprobado = false;
     let currentCourse = null;
 
+    // Lista de RENDERIZADO del panel de Capítulos — nunca muta `slides`
+    // (el array real del catálogo, del que dependen avance/puntos/ARIA).
+    // Cada ítem tipo 'slide' conserva su slideIndex real (0-based); cada
+    // ítem tipo 'quiz' es puramente visual, sin índice real asociado. Sin
+    // quiz, o sin diapositivas, devuelve la lista plana de siempre.
+    function buildChapterList(slides, course) {
+      const tieneQuiz = Boolean(course && course.quiz);
+      if (!tieneQuiz || !slides.length) {
+        return slides.map((s, i) => ({ tipo: 'slide', slideIndex: i, titulo: s.titulo }));
+      }
+      const posicionQuiz = slides.length - 1; // justo antes del último índice real ("Cierre")
+      const items = [];
+      slides.forEach((s, i) => {
+        if (i === posicionQuiz) items.push({ tipo: 'quiz' });
+        items.push({ tipo: 'slide', slideIndex: i, titulo: s.titulo });
+      });
+      return items;
+    }
+
     function renderChapters(slides) {
       const listEl = document.getElementById('chaptersList');
-      listEl.innerHTML = slides.map((s, i) => `
-        <li class="chapter-item" data-index="${i}">
-          <span class="chapter-time">${String(i + 1).padStart(2, '0')}</span>
-          <span class="chapter-label">${s.titulo}</span>
-        </li>
-      `).join('');
+      const items = buildChapterList(slides, currentCourse);
+      listEl.innerHTML = items.map((item, pos) => {
+        if (item.tipo === 'quiz') {
+          return `
+            <li class="chapter-item" data-tipo="quiz">
+              <span class="chapter-time">${String(pos + 1).padStart(2, '0')}</span>
+              <span class="chapter-label"><i class="ph ph-exam" aria-hidden="true"></i> Quiz</span>
+            </li>
+          `;
+        }
+        return `
+          <li class="chapter-item" data-tipo="slide" data-index="${item.slideIndex}">
+            <span class="chapter-time">${String(pos + 1).padStart(2, '0')}</span>
+            <span class="chapter-label">${item.titulo}</span>
+            <i class="ph ph-lock-simple chapter-lock-icon" aria-hidden="true"></i>
+          </li>
+        `;
+      }).join('');
 
-      // Sin candado ni bloqueo de capítulos: la barrera ya no depende de
-      // en qué diapositiva estás (antes bloqueaba diapositivas intermedias
-      // más allá de la 6), sino de si aprobaste el quiz que aparece DESPUÉS
-      // de la última — cualquier diapositiva individual sigue siendo libre
-      // de visitar en cualquier orden.
       listEl.querySelectorAll('.chapter-item').forEach(item => {
-        item.addEventListener('click', () => goToSlide(Number(item.dataset.index)));
+        item.addEventListener('click', () => handleChapterClick(item));
+      });
+
+      updateChapterLockState();
+    }
+
+    // Único punto de entrada de clicks del panel de Capítulos: distingue
+    // entre el ítem virtual de quiz, una diapositiva real libre, y "Cierre"
+    // bloqueada (candado visual, sin navegar — ver también la barrera dura
+    // dentro de goToSlide, que cubre teclado/seek).
+    function handleChapterClick(el) {
+      if (el.dataset.tipo === 'quiz') { mostrarQuiz(); return; }
+      const index = Number(el.dataset.index);
+      if (el.classList.contains('is-locked')) {
+        mostrarSlideToast('Aprueba el quiz para desbloquear esta diapositiva.');
+        return;
+      }
+      goToSlide(index);
+    }
+
+    function cierreEstaBloqueada() {
+      return Boolean(currentCourse && currentCourse.quiz) && !quizAprobado;
+    }
+
+    // Reutiliza el CSS .chapter-item.is-locked / .chapter-lock-icon ya
+    // existente en styles.css (sobreviviente de la barrera 6→7 anterior,
+    // quedó desconectado — no hace falta CSS nuevo). Se llama al final de
+    // renderChapters (candado correcto desde la primera carga) y de nuevo
+    // justo tras aprobar el quiz, para quitarlo en caliente sin recargar.
+    function updateChapterLockState() {
+      if (!currentSlides.length) return;
+      const ultimoIndice = currentSlides.length - 1;
+      const bloqueada = cierreEstaBloqueada();
+      document.querySelectorAll('#chaptersList .chapter-item[data-tipo="slide"]').forEach(el => {
+        const esUltima = Number(el.dataset.index) === ultimoIndice;
+        el.classList.toggle('is-locked', esUltima && bloqueada);
       });
     }
 
     function updateChapterActiveState() {
-      document.querySelectorAll('#chaptersList .chapter-item').forEach(item => {
+      document.querySelectorAll('#chaptersList .chapter-item[data-tipo="slide"]').forEach(item => {
         const index = Number(item.dataset.index);
         item.classList.toggle('is-current', index === currentSlideIndex);
       });
@@ -592,22 +674,36 @@
     }
 
     // ── Quiz ──────────────────────────────────────────────────────────────────
-    // Reemplaza a "tiene entrega" como paso final del curso. Vive como
-    // vista hermana de #slideViewer dentro del mismo .embed-frame — no
-    // como una diapositiva más, para no tocar el modelo de índices del que
-    // depende avance/puntos/ARIA.
+    // Capítulo propio del curso, intercalado visualmente en el panel de
+    // Capítulos (ver buildChapterList). Vive como vista hermana de
+    // #slideViewer dentro del mismo .embed-frame — no como una diapositiva
+    // más, para no tocar el modelo de índices del que depende avance/
+    // puntos/ARIA. Dos sub-vistas alternadas por display: intro (texto +
+    // botón) y formulario.
     let quizPreguntas = [];
 
     async function mostrarQuiz() {
       document.getElementById('slideViewer').style.display = 'none';
+      document.getElementById('viewerControls').style.display = 'none';
       const quizViewer = document.getElementById('quizViewer');
       quizViewer.style.display = 'flex';
       document.getElementById('quizResult').innerHTML = '';
+
+      // Siempre entra por la intro, aunque ya se haya aprobado antes —
+      // permite repasar sin saltar directo al formulario.
+      document.getElementById('quizIntro').style.display = 'flex';
+      document.getElementById('quizFormWrap').style.display = 'none';
+      document.getElementById('quizIntroSubtitle').textContent = quizAprobado
+        ? 'Ya aprobaste este quiz — puedes repasarlo cuando quieras.'
+        : 'Responde estas preguntas para comprobar lo que aprendiste. Necesitas al menos 3 de 5 correctas para continuar.';
+
+      updateChapterActiveState();
 
       try {
         const data = await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/quiz`);
         quizPreguntas = data.preguntas;
         quizAprobado = data.tengoAprobado;
+        updateChapterLockState();
 
         document.getElementById('quizSubtitle').textContent = quizAprobado
           ? 'Ya aprobaste este quiz — puedes repasarlo cuando quieras.'
@@ -621,9 +717,15 @@
       }
     }
 
+    document.getElementById('quizContinuarBtn').addEventListener('click', () => {
+      document.getElementById('quizIntro').style.display = 'none';
+      document.getElementById('quizFormWrap').style.display = 'flex';
+    });
+
     function volverAlVisor() {
       document.getElementById('quizViewer').style.display = 'none';
       document.getElementById('slideViewer').style.display = 'block';
+      document.getElementById('viewerControls').style.display = 'flex';
     }
 
     function renderQuizForm() {
@@ -658,11 +760,12 @@
         const resultEl = document.getElementById('quizResult');
         if (result.aprobado) {
           quizAprobado = true;
+          updateChapterLockState();
           resultEl.innerHTML = `
             <div class="quiz-feedback quiz-feedback-ok">
               <i class="ph ph-check-circle" aria-hidden="true"></i>
               ¡Aprobaste! ${result.puntaje}/${result.total} correctas.
-              <button class="btn btn-secondary btn-small" type="button" id="quizVolverBtn">Volver al curso</button>
+              <button class="btn btn-secondary btn-small" type="button" id="quizVolverBtn">Ir a Cierre</button>
             </div>`;
           if (result.puntosGanados > 0) celebrarPuntos(result.puntosGanados);
         } else {
@@ -672,7 +775,13 @@
               ${result.puntaje}/${result.total} correctas — necesitas más para aprobar. Repasa las diapositivas y vuelve a intentar, no hay límite de intentos.
             </div>`;
         }
-        document.getElementById('quizVolverBtn')?.addEventListener('click', volverAlVisor);
+        // Al aprobar, "Cierre" ya quedó desbloqueada (updateChapterLockState
+        // arriba) — vuelve al visor y navega directo ahí, en vez de a donde
+        // estaba el alumno antes de entrar al quiz.
+        document.getElementById('quizVolverBtn')?.addEventListener('click', () => {
+          volverAlVisor();
+          goToSlide(currentSlides.length - 1);
+        });
       } catch (err) {
         document.getElementById('quizResult').innerHTML =
           `<div class="quiz-feedback quiz-feedback-err">${err.message}</div>`;
@@ -683,13 +792,12 @@
     });
 
     function goToSlide(index) {
-      // index === currentSlides.length (un paso más allá de la última
-      // diapositiva) es el punto donde antes vivía la barrera 6→7. Ahora,
-      // si el curso define quiz, ese "paso siguiente" muestra el quiz en
-      // vez de simplemente no hacer nada — ya no hay diapositivas
-      // intermedias bloqueadas, cualquier diapositiva es libre de visitar.
-      if (index === currentSlides.length && currentCourse?.quiz) {
-        mostrarQuiz();
+      // Barrera dura del candado: "Cierre" (último índice real) es
+      // inalcanzable mientras el quiz no esté aprobado, sin importar la vía
+      // (click del panel ya la filtra en handleChapterClick, esto cubre
+      // además teclado ArrowRight/End y el seek de la barra de progreso).
+      if (index === currentSlides.length - 1 && cierreEstaBloqueada()) {
+        mostrarSlideToast('Aprueba el quiz para desbloquear esta diapositiva.');
         return;
       }
       if (index < 0 || index >= currentSlides.length) return;
@@ -714,20 +822,15 @@
       progressEl.setAttribute('aria-valuemax', String(currentSlides.length));
       progressEl.setAttribute('aria-valuetext', `Diapositiva ${currentSlideIndex + 1} de ${currentSlides.length}: ${slide.titulo}`);
       document.getElementById('slidePrevBtn').disabled = currentSlideIndex === 0;
-      // En la última diapositiva, "siguiente" queda habilitado y cambia de
-      // rol a "continuar al quiz" si el curso define uno — deja de ser un
-      // botón muerto y pasa a ser la entrada al paso final.
+      // El quiz ya no se entra desde este botón (deja de tener una rama
+      // especial en la última diapositiva) — se entra solo desde su propio
+      // capítulo en el panel de Capítulos, para no duplicar la entrada con
+      // dos textos distintos para la misma acción.
       const esUltima = currentSlideIndex === currentSlides.length - 1;
       const nextBtn = document.getElementById('slideNextBtn');
-      if (esUltima && currentCourse?.quiz) {
-        nextBtn.disabled = false;
-        nextBtn.setAttribute('aria-label', 'Continuar al quiz');
-        nextBtn.querySelector('i').className = 'ph ph-exam';
-      } else {
-        nextBtn.disabled = esUltima;
-        nextBtn.setAttribute('aria-label', 'Diapositiva siguiente');
-        nextBtn.querySelector('i').className = 'ph ph-caret-right';
-      }
+      nextBtn.disabled = esUltima;
+      nextBtn.setAttribute('aria-label', 'Diapositiva siguiente');
+      nextBtn.querySelector('i').className = 'ph ph-caret-right';
       // Progreso = diapositivas completadas, no "posición actual", en la
       // 1 de 7 arranca en 0%, en la 7 de 7 llega a 100%.
       const progress = currentSlides.length > 1 ? (currentSlideIndex / (currentSlides.length - 1)) * 100 : 100;
