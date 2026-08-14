@@ -437,6 +437,14 @@
     // re-navegar. Se actualiza en caliente en cada goToSlide con
     // Math.max, igual que GREATEST en el backend: nunca baja al repasar.
     let maxSlideIndexAvance = -1;
+    // Se pone en true si el alumno hizo click en el hotspot genérico de una
+    // diapositiva (ej. "Abrir actividad" en "Actividad de prueba") o si ya
+    // tiene al menos una entrega subida para este curso (ver loadHistory).
+    // NO bloquea el avance al quiz — solo decide si intentarAvanzar() pide
+    // una confirmación extra antes de dejarlo saltar sin haber probado la
+    // actividad. Empieza en false y solo puede subir a true en esta carga
+    // de página (no se persiste ni se lee del backend).
+    let actividadPrevaUsada = false;
 
     // Lista de RENDERIZADO del panel de Capítulos — nunca muta `slides`
     // (el array real del catálogo, del que dependen avance/puntos/ARIA).
@@ -486,19 +494,40 @@
       updateChapterLockState();
     }
 
-    // Único punto de entrada de clicks del panel de Capítulos: distingue
-    // entre el ítem virtual de quiz (bloqueado o no), una diapositiva real
-    // libre, y "Cierre" bloqueada (candado visual, sin navegar — ver también
-    // la barrera dura dentro de goToSlide, que cubre teclado/seek).
-    function handleChapterClick(el) {
-      if (el.dataset.tipo === 'quiz') {
-        if (el.classList.contains('is-locked')) {
-          mostrarSlideToast('Ve todas las diapositivas anteriores para desbloquear el quiz.');
-          return;
-        }
-        mostrarQuiz();
+    // Punto único de entrada al quiz (click en su capítulo o en "Siguiente"
+    // desde la penúltima diapositiva, ver goToSlide/intentarAvanzar más
+    // abajo). Dos barreras distintas, en orden: el candado duro (bloqueado
+    // hasta ver las diapositivas anteriores, sin confirmación posible —
+    // quizEstaBloqueado) y un aviso suave si no se probó la actividad
+    // (actividadPrevaUsada) que requiere un segundo click para confirmar
+    // el salto. confirmacionSaltoPendiente expira sola tras unos segundos:
+    // un click mucho después no debe contar como confirmación de uno viejo.
+    let confirmacionSaltoPendiente = false;
+    let confirmacionSaltoTimeout = null;
+
+    function intentarAvanzar() {
+      if (quizEstaBloqueado()) {
+        mostrarSlideToast('Ve todas las diapositivas anteriores para desbloquear el quiz.');
         return;
       }
+      if (!actividadPrevaUsada && !confirmacionSaltoPendiente) {
+        mostrarSlideToast('¿Seguro? Prueba la actividad antes de continuar — vuelve a hacer click para saltarla.');
+        confirmacionSaltoPendiente = true;
+        clearTimeout(confirmacionSaltoTimeout);
+        confirmacionSaltoTimeout = setTimeout(() => { confirmacionSaltoPendiente = false; }, 4000);
+        return;
+      }
+      confirmacionSaltoPendiente = false;
+      clearTimeout(confirmacionSaltoTimeout);
+      mostrarQuiz();
+    }
+
+    // Único punto de entrada de clicks del panel de Capítulos: distingue
+    // entre el ítem virtual de quiz, una diapositiva real libre, y "Cierre"
+    // bloqueada (candado visual, sin navegar — ver también la barrera dura
+    // dentro de goToSlide, que cubre teclado/seek).
+    function handleChapterClick(el) {
+      if (el.dataset.tipo === 'quiz') { intentarAvanzar(); return; }
       const index = Number(el.dataset.index);
       if (el.classList.contains('is-locked')) {
         mostrarSlideToast('Aprueba el quiz para desbloquear esta diapositiva.');
@@ -608,6 +637,10 @@
           a.href = h.href;
           a.target = '_blank';
           a.rel = 'noopener noreferrer';
+          // Hotspot genérico (ej. "Abrir actividad" en "Actividad de
+          // prueba") — cuenta como señal de que el alumno probó la
+          // actividad antes de saltar al quiz (ver intentarAvanzar).
+          a.addEventListener('click', () => { actividadPrevaUsada = true; });
         }
 
         container.appendChild(a);
@@ -872,15 +905,24 @@
       progressEl.setAttribute('aria-valuemax', String(currentSlides.length));
       progressEl.setAttribute('aria-valuetext', `Diapositiva ${currentSlideIndex + 1} de ${currentSlides.length}: ${slide.titulo}`);
       document.getElementById('slidePrevBtn').disabled = currentSlideIndex === 0;
-      // El quiz ya no se entra desde este botón (deja de tener una rama
-      // especial en la última diapositiva) — se entra solo desde su propio
-      // capítulo en el panel de Capítulos, para no duplicar la entrada con
-      // dos textos distintos para la misma acción.
+      // En la penúltima diapositiva real (justo antes de la posición del
+      // quiz en el panel, ver buildChapterList), "Siguiente" pasa a llevar
+      // al quiz en vez de quedar deshabilitado — mismo destino que hacer
+      // click en el capítulo "Quiz", pasando por la misma verificación de
+      // actividad usada (ver intentarAvanzar). En la última diapositiva
+      // real ("Cierre") sigue deshabilitado como siempre.
       const esUltima = currentSlideIndex === currentSlides.length - 1;
+      const esPenultimaConQuiz = currentCourse?.quiz && currentSlideIndex === currentSlides.length - 2;
       const nextBtn = document.getElementById('slideNextBtn');
-      nextBtn.disabled = esUltima;
-      nextBtn.setAttribute('aria-label', 'Diapositiva siguiente');
-      nextBtn.querySelector('i').className = 'ph ph-caret-right';
+      if (esPenultimaConQuiz) {
+        nextBtn.disabled = false;
+        nextBtn.setAttribute('aria-label', 'Continuar al quiz');
+        nextBtn.querySelector('i').className = 'ph ph-exam';
+      } else {
+        nextBtn.disabled = esUltima;
+        nextBtn.setAttribute('aria-label', 'Diapositiva siguiente');
+        nextBtn.querySelector('i').className = 'ph ph-caret-right';
+      }
       // Progreso = diapositivas completadas, no "posición actual", en la
       // 1 de 7 arranca en 0%, en la 7 de 7 llega a 100%.
       const progress = currentSlides.length > 1 ? (currentSlideIndex / (currentSlides.length - 1)) * 100 : 100;
@@ -948,7 +990,15 @@
     });
 
     document.getElementById('slidePrevBtn').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
-    document.getElementById('slideNextBtn').addEventListener('click', () => goToSlide(currentSlideIndex + 1));
+    document.getElementById('slideNextBtn').addEventListener('click', () => {
+      // En la penúltima diapositiva real, "Siguiente" lleva al quiz (mismo
+      // destino que su capítulo en el panel), pasando por las mismas
+      // barreras — no un goToSlide(currentSlideIndex + 1) directo, que
+      // saltaría el candado/aviso.
+      const esPenultimaConQuiz = currentCourse?.quiz && currentSlideIndex === currentSlides.length - 2;
+      if (esPenultimaConQuiz) { intentarAvanzar(); return; }
+      goToSlide(currentSlideIndex + 1);
+    });
 
     document.addEventListener('keydown', (e) => {
       if (!currentSlides.length) return;
@@ -959,7 +1009,13 @@
       if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
 
       if (e.key === 'ArrowLeft')  goToSlide(currentSlideIndex - 1);
-      if (e.key === 'ArrowRight') goToSlide(currentSlideIndex + 1);
+      // Mismo destino que el botón "Siguiente" (ver su listener): en la
+      // penúltima diapositiva real, ArrowRight lleva al quiz en vez de a
+      // "Cierre" directo, para no divergir del botón visual.
+      if (e.key === 'ArrowRight') {
+        const esPenultimaConQuiz = currentCourse?.quiz && currentSlideIndex === currentSlides.length - 2;
+        if (esPenultimaConQuiz) { intentarAvanzar(); } else { goToSlide(currentSlideIndex + 1); }
+      }
       if (e.key === 'Home')       { e.preventDefault(); goToSlide(0); }
       if (e.key === 'End')        { e.preventDefault(); goToSlide(currentSlides.length - 1); }
     });
@@ -1091,6 +1147,10 @@
       const el = document.getElementById('submissionHistory');
       try {
         const data = await academyFetch(`/academy/mis-entregas?curso=${encodeURIComponent(slug)}`);
+        // Una entrega ya subida también cuenta como "probó la actividad"
+        // (ver intentarAvanzar) — cubre al alumno que sube su archivo sin
+        // haber hecho click primero en el hotspot "Abrir actividad".
+        if (data.entregas.length) actividadPrevaUsada = true;
         if (!data.entregas.length) { el.innerHTML = ''; return; }
         el.innerHTML = data.entregas.map(s => `
           <div class="submission-item">
