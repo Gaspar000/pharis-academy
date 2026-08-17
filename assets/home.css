@@ -63,8 +63,8 @@ body { display: flex; min-height: 100vh; }
    útil del card (240px de sidebar - 2*18px de padding del aside - 2*16px
    de padding del card ≈ 172px), igual que la referencia. background-color
    de respaldo por si la imagen tarda en cargar o falla. background-size
-   y posición horizontal +6px, ajustados a ojo — 130% cortaba las cabezas
-   por arriba, bajado a 115%. */
+   y posición horizontal, ajustados a ojo — 130% cortaba las cabezas por
+   arriba, bajado a 115%; +9px es +6px original +3px de un ajuste posterior. */
 .wf-sidebar-promo-art {
   aspect-ratio: 1 / 1;
   border-radius: 14px;
@@ -72,7 +72,7 @@ body { display: flex; min-height: 100vh; }
   background-image: url('https://pub-8dbbde7f94954173b9eaa1e10f3a0aa0.r2.dev/assets/Imagen%20Card%20-%20Dato.png');
   background-repeat: no-repeat;
   background-size: 115%;
-  background-position: calc(50% + 6px) center;
+  background-position: calc(50% + 9px) center;
 }
 .wf-sidebar-promo-text {
   font-size: 0.92rem;
