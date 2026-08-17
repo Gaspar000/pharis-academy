@@ -324,7 +324,14 @@ body { display: flex; min-height: 100vh; }
   font-size: 0.78rem;
   line-height: 1.6;
 }
+/* min-width:0 en el texto: sin esto, un flex item sin ancho explícito no
+   se encoge por debajo de su contenido "natural" (min-content) y puede
+   desbordar el contenedor en vez de envolver la línea cuando el espacio
+   disponible se angosta. El breakpoint de .wf-stats-row arriba resuelve
+   la causa raíz del ancho, esto es la red de seguridad del propio
+   componente para cualquier contenedor angosto futuro. */
 .stats-hint i { color: var(--accent-bright); font-size: 0.95rem; margin-top: 1px; flex-shrink: 0; }
+.stats-hint > *:not(i) { min-width: 0; }
 .stats-hint strong { color: var(--text); font-weight: 700; }
 
 @media (max-width: 900px) {
@@ -386,6 +393,17 @@ body { display: flex; min-height: 100vh; }
    cómodo en el rango recomendado (3-5) para una barra al alcance del
    pulgar. */
 .wf-mobile-nav { display: none; }
+
+/* Breakpoint intermedio, antes del colapso a 1 columna de
+   .wf-grid-stats-leaders (900px): entre ~1150px y 900px, la columna
+   izquierda de ese grid (Estadísticas) se sigue angostando sin piso
+   mínimo (ver el cálculo asimétrico de arriba), y .wf-stats-row seguía
+   forzado a 4 columnas ahí. El texto de .stats-hint (y los números de
+   cada tarjeta) se apretaban cada vez más hasta verse rotos. Pasar a 2
+   columnas antes de llegar a ese punto evita la ventana de colapso. */
+@media (max-width: 1150px) {
+  .wf-stats-row { grid-template-columns: repeat(2, 1fr); }
+}
 
 @media (max-width: 900px) {
   .wf-sidebar { display: none; }
