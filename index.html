@@ -298,13 +298,20 @@
 
         // "Todos los cursos": una tarjeta por categoría (Para profesores /
         // Para alumnos), cada una lleva a categoria.html con sus 2 cursos.
+        // Ícono a la derecha del título, uno por categoría, para
+        // diferenciarlas de un vistazo (antes eran dos tarjetas idénticas
+        // en forma, solo el texto las distinguía).
         const DESCRIPCION_CATEGORIA = {
           profesores: 'Cursos para mejorar y agilizar el proceso de docencia por medio de la implementación de nuevas tecnologías.',
           alumnos: 'Cursos para incrementar la cantidad de información retenida por medio de la implementación de la inteligencia artificial.',
         };
+        const ICONO_CATEGORIA = {
+          profesores: 'ph-chalkboard-teacher',
+          alumnos: 'ph-graduation-cap',
+        };
         categoriaGrid.innerHTML = (data.categorias || []).map(cat => `
           <a class="course-card" href="categoria.html#slug=${encodeURIComponent(cat.slug)}">
-            <h2>${cat.titulo}</h2>
+            <h2><span>${cat.titulo}</span><i class="ph ${ICONO_CATEGORIA[cat.slug] || 'ph-books'} course-card-icon" aria-hidden="true"></i></h2>
             <p>${DESCRIPCION_CATEGORIA[cat.slug] || ''}</p>
             <span class="btn btn-primary btn-small">Ver cursos</span>
           </a>
