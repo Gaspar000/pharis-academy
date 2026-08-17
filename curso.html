@@ -511,7 +511,7 @@
         return;
       }
       if (!actividadPrevaUsada && !confirmacionSaltoPendiente) {
-        mostrarSlideToast('¿Seguro? Prueba la actividad antes de continuar. Vuelve a hacer click para saltarla.');
+        mostrarSlideToast('Prueba la actividad antes de continuar. Vuelve a hacer click para saltarla de todos modos.');
         confirmacionSaltoPendiente = true;
         clearTimeout(confirmacionSaltoTimeout);
         confirmacionSaltoTimeout = setTimeout(() => { confirmacionSaltoPendiente = false; }, 4000);
