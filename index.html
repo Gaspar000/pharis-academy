@@ -249,9 +249,16 @@
               <div class="wf-progress-bar"><span style="width:${porcentaje}%"></span></div>
             `;
           })();
+      // imagenCard es opcional en el catálogo — sin ella, la ilustración
+      // sigue siendo el ícono placeholder genérico (ver .wf-hero-card-
+      // illustration en home.css).
+      const illustrationStyle = c.imagenCard
+        ? ` style="background-image:url('${c.imagenCard}')"`
+        : '';
+      const illustrationIcon = c.imagenCard ? '' : '<i class="ph ph-image"></i>';
       return `
         <a class="wf-hero-card" href="curso.html#slug=${encodeURIComponent(c.slug)}">
-          <div class="wf-hero-card-illustration"><i class="ph ph-image"></i></div>
+          <div class="wf-hero-card-illustration"${illustrationStyle}>${illustrationIcon}</div>
           <div class="wf-hero-card-body">${cardBody}</div>
         </a>
       `;
