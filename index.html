@@ -251,9 +251,14 @@
           })();
       // imagenCard es opcional en el catálogo — sin ella, la ilustración
       // sigue siendo el ícono placeholder genérico (ver .wf-hero-card-
-      // illustration en home.css).
+      // illustration en home.css). imagenCardPosicion (0-100, % vertical)
+      // ajusta qué parte de la foto se recorta con background-size:cover
+      // — cada imagen trae al sujeto a una altura distinta, no hay un
+      // valor único que sirva para todas. Sin este campo cae a top (0%),
+      // más seguro que center para no cortar cabezas por defecto.
+      const posicionY = typeof c.imagenCardPosicion === 'number' ? c.imagenCardPosicion : 0;
       const illustrationStyle = c.imagenCard
-        ? ` style="background-image:url('${c.imagenCard}')"`
+        ? ` style="background-image:url('${c.imagenCard}');background-position:center ${posicionY}%"`
         : '';
       const illustrationIcon = c.imagenCard ? '' : '<i class="ph ph-image"></i>';
       return `

@@ -231,7 +231,12 @@ body { display: flex; min-height: 100vh; }
   flex: 1;
   background: var(--panel-2);
   background-size: cover;
-  background-position: center;
+  /* Fallback solo para un curso sin imagenCardPosicion en el catálogo
+     (ver renderHeroCard en index.html, que sobrescribe esto inline por
+     curso). top, no center: las fotos de personas en estas tarjetas
+     suelen ser verticales y más altas que el hueco disponible — con
+     center, cover recorta las cabezas por igual arriba y abajo. */
+  background-position: top;
   display: flex;
   align-items: center;
   justify-content: center;
