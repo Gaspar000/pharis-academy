@@ -62,11 +62,17 @@ body { display: flex; min-height: 100vh; }
    pharis-presentaciones, prefijo assets/). Proporción ~1:1 sobre el ancho
    útil del card (240px de sidebar - 2*18px de padding del aside - 2*16px
    de padding del card ≈ 172px), igual que la referencia. background-color
-   de respaldo por si la imagen tarda en cargar o falla. */
+   de respaldo por si la imagen tarda en cargar o falla. background-size:
+   130% (contain + 30%) y posición horizontal +6px, ajuste pedido a ojo
+   sobre el recorte por defecto. */
 .wf-sidebar-promo-art {
   aspect-ratio: 1 / 1;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.10) url('https://pub-8dbbde7f94954173b9eaa1e10f3a0aa0.r2.dev/assets/Imagen%20Card%20-%20Dato.png') center / contain no-repeat;
+  background-color: rgba(255, 255, 255, 0.10);
+  background-image: url('https://pub-8dbbde7f94954173b9eaa1e10f3a0aa0.r2.dev/assets/Imagen%20Card%20-%20Dato.png');
+  background-repeat: no-repeat;
+  background-size: 130%;
+  background-position: calc(50% + 6px) center;
 }
 .wf-sidebar-promo-text {
   font-size: 0.92rem;
