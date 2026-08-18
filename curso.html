@@ -86,7 +86,7 @@
                      handleChapterClick), oculto por defecto, aparece un
                      instante cuando se intenta avanzar sin haber aprobado
                      el quiz todavía. -->
-                <div class="slide-toast" id="slideToast"></div>
+                <div class="slide-toast" id="slideToast" role="status"></div>
                 <!-- Capa de celebración de puntos (ver celebrarPuntos), sus
                      hijos los crea y borra el JS en cada diapositiva nueva. -->
                 <div class="slide-points-layer" id="slidePointsLayer"></div>
@@ -286,6 +286,7 @@
       <!-- Oculto por defecto, solo se muestra si user.esAdmin === true. -->
       <div class="upload-box" id="resourceUploadBox" style="display:none;">
         <div class="field" style="margin-bottom:10px;">
+          <label for="resourceTitulo" class="sr-only">Título del recurso</label>
           <input type="text" id="resourceTitulo" placeholder="Título del recurso (ej. Lista de cotejo)" style="width:100%; background:var(--bg-deep); border:1px solid var(--rule); border-radius:var(--radius-sm); padding:11px 13px; color:var(--text); font-size:0.9rem;" />
         </div>
         <div class="file-picker">
@@ -674,6 +675,19 @@
       container.innerHTML = '';
       if (!slide.hotspots || !slide.hotspots.length) return;
 
+      // Fallback de texto accesible por tipo de hotspot — si el catálogo no
+      // trae `label` (la mayoría son "invisibles", posicionados sobre una
+      // zona de la imagen sin texto visual propio), el <a> quedaba
+      // completamente vacío: un lector de pantalla lo anunciaba sin
+      // contexto ("enlace") o lo saltaba directo. aria-label (no
+      // textContent) para no arriesgar que un cambio futuro de CSS en
+      // .slide-hotspot-invisible lo vuelva visible por error.
+      function fallbackLabelHotspot(h) {
+        if (h.style === 'download') return 'Descargar';
+        if (h.href === 'acceso.html') return 'Acceder a Pharis';
+        return 'Abrir enlace de esta diapositiva';
+      }
+
       slide.hotspots.forEach(h => {
         const a = document.createElement('a');
         a.className = `slide-hotspot slide-hotspot-${h.style || 'invisible'}`;
@@ -681,7 +695,11 @@
         a.style.left = `${h.left}%`;
         a.style.width = `${h.width}%`;
         a.style.height = `${h.height}%`;
-        if (h.label) a.textContent = h.label;
+        if (h.label) {
+          a.textContent = h.label;
+        } else {
+          a.setAttribute('aria-label', fallbackLabelHotspot(h));
+        }
 
         if (h.style === 'download') {
           // Descarga privada autenticada (ej. instalador de Pharis App),
@@ -1197,10 +1215,36 @@
       const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
       goToSlide(Math.round(ratio * (currentSlides.length - 1)));
     }
-    // El foco por teclado (ArrowLeft/ArrowRight) ya lo cubre el listener
-    // global de document más abajo, no se duplica acá para evitar que,
-    // con foco en la barra, una flecha dispare goToSlide() dos veces.
     document.getElementById('viewerProgress').addEventListener('click', (e) => seekToProgressPosition(e.clientX));
+    // role="slider" propio de teclado — antes dependía enteramente del
+    // listener global de document (más abajo) para responder a flechas
+    // aunque tuviera el foco, sin ninguna garantía real de que ambos se
+    // mantuvieran sincronizados. e.stopPropagation() evita que el listener
+    // global vuelva a procesar el mismo evento (que dispararía goToSlide
+    // dos veces con el foco puesto acá). PageUp/PageDown además de Home/End
+    // — un slider ARIA estándar responde a los 4, no solo a los extremos.
+    document.getElementById('viewerProgress').addEventListener('keydown', (e) => {
+      if (!currentSlides.length) return;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        e.stopPropagation();
+        goToSlide(currentSlideIndex - 1);
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        e.stopPropagation();
+        const esPenultimaConQuiz = currentCourse?.quiz
+          && currentSlideIndex === posicionQuizDelCurso(currentSlides, currentCourse) - 1;
+        if (esPenultimaConQuiz) { intentarAvanzar(); } else { goToSlide(currentSlideIndex + 1); }
+      } else if (e.key === 'Home') {
+        e.preventDefault();
+        e.stopPropagation();
+        goToSlide(0);
+      } else if (e.key === 'End') {
+        e.preventDefault();
+        e.stopPropagation();
+        goToSlide(currentSlides.length - 1);
+      }
+    });
 
     document.getElementById('fullscreenBtn').addEventListener('click', () => {
       const shell = document.getElementById('viewerShell');
@@ -1234,6 +1278,11 @@
       goToSlide(currentSlideIndex + 1);
     });
 
+    // Atajo global de página (funciona con el foco en cualquier lugar no
+    // interactivo — body, un botón, etc.). Cuando el foco está puesto
+    // específicamente en #viewerProgress, su propio listener de keydown
+    // (arriba) atiende el evento primero y llama stopPropagation(), así
+    // que este bloque no se re-ejecuta para el mismo evento.
     document.addEventListener('keydown', (e) => {
       if (!currentSlides.length) return;
       // Ignorar cuando el foco está en un campo de texto: sin esto, mover el
