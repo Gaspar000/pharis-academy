@@ -740,7 +740,10 @@ fieldset.field > legend {
 
 /* ── Home / course list ── */
 .page-header { padding: 40px 0 8px; }
-.page-header h1 { font-size: 1.8rem; }
+/* h2, no h1 — categoria.html y curso.html ya tienen su h1 real en
+   .wf-topbar (fijo, "Cursos"/"Curso"), dos h1 en la misma página rompe
+   la jerarquía de encabezados. */
+.page-header h2 { font-size: 1.8rem; }
 
 /* ── Breadcrumb ──
    Ruta de navegación en la topbar, a la derecha del título de la sección
@@ -839,9 +842,14 @@ fieldset.field > legend {
 /* Curso completado (última diapositiva + quiz aprobado, ver
    cursosCompletadosSlugs en GET /academy/me/progreso-resumen) — borde de
    acento verde y check en el título, para distinguirlo de un vistazo de
-   uno recién empezado o sin tocar. Mismo verde semántico que .badge-
-   completado (ya usado para calificaciones de entregas). */
-.course-card.is-completed { border: 1px solid var(--green); }
+   uno recién empezado o sin tocar. --green-text (no --green): --green es
+   un único valor fijo sin variante por tema, y contra fondo blanco (modo
+   claro) da apenas 1.92:1 de contraste — casi invisible, bajo el mínimo
+   3:1 de WCAG para indicadores no textuales. --green-text ya está
+   calibrado por tema (12.68:1 oscuro, 5.15:1 claro) porque el resto del
+   sitio lo usa para texto sobre --green-soft, mismo criterio de
+   legibilidad que necesita un borde. */
+.course-card.is-completed { border: 1px solid var(--green-text); }
 .course-card-check { color: var(--green-text); font-size: 1.2rem; flex-shrink: 0; }
 
 /* Resumen real arriba de la grilla (categoria.html) — reemplaza el

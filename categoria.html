@@ -47,10 +47,10 @@
       <h1>Cursos</h1>
       <nav class="breadcrumb" aria-label="Ruta de navegación">
         <a href="index.html">Overview</a>
-        <span>/</span>
+        <span aria-hidden="true">/</span>
         <a href="categoria.html">Cursos</a>
-        <span>/</span>
-        <span class="current" id="breadcrumbCurrent">Cargando…</span>
+        <span aria-hidden="true">/</span>
+        <span class="current" id="breadcrumbCurrent" aria-current="page">Cargando…</span>
       </nav>
       <div class="topbar-actions">
         <div id="notifMenu"></div>
@@ -60,7 +60,7 @@
 
     <main class="shell" style="padding-top:28px;">
     <div class="page-header">
-      <h1 id="categoriaTitle">Cargando…</h1>
+      <h2 id="categoriaTitle">Cargando…</h2>
       <p id="categoriaSummary"><i class="ph ph-books categoria-summary-icon" aria-hidden="true"></i>Cualquier alumno o profesor puede tomar cualquiera de estos cursos.</p>
     </div>
 
@@ -169,26 +169,41 @@
       const completado = cursosCompletadosSet.has(c.slug);
       const maxSlideIndex = avance[c.slug];
       const empezado = !sinContenido && !completado && typeof maxSlideIndex === 'number';
+      const progreso = empezado ? calcularProgreso(totalSlides, maxSlideIndex) : null;
       let progresoHtml = '';
       if (completado) {
         progresoHtml = `<div class="course-card-progress-label"><i class="ph ph-check-circle" aria-hidden="true"></i> Completado</div>`;
-      } else if (empezado) {
-        const { completadas, porcentaje } = calcularProgreso(totalSlides, maxSlideIndex);
+      } else if (progreso) {
         progresoHtml = `
-          <div class="course-card-progress-label">${completadas} / ${totalSlides} secciones completadas</div>
-          <div class="course-card-progress-bar"><span style="width:${porcentaje}%"></span></div>
+          <div class="course-card-progress-label">${progreso.completadas} / ${totalSlides} secciones completadas</div>
+          <div class="course-card-progress-bar"><span style="width:${progreso.porcentaje}%"></span></div>
         `;
       }
 
+      // aria-label resume toda la tarjeta en una sola frase — sin esto,
+      // un lector de pantalla anuncia el <a> leyendo TODO su contenido de
+      // texto interno de corrido (título + descripción + "Completado" del
+      // label de progreso + el ícono con texto oculto que también se lee
+      // + el texto del botón), repitiendo el estado dos veces. Con el
+      // label puesto, el resto del contenido interno se marca
+      // aria-hidden para que no se lea por partida doble.
+      const estadoLabel = completado
+        ? 'Completado'
+        : progreso
+          ? `${progreso.completadas} de ${totalSlides} secciones completadas`
+          : sinContenido ? 'Próximamente' : 'Sin empezar';
+      const accionLabel = sinContenido ? '' : `, ${empezado ? 'continuar' : 'entrar al curso'}`;
+      const cardLabel = `${c.titulo}. ${c.descripcion || ''} ${estadoLabel}${accionLabel}.`;
+
       return `
-        <a class="course-card${sinContenido ? ' is-empty-course' : ''}${completado ? ' is-completed' : ''}" href="curso.html#slug=${encodeURIComponent(c.slug)}">
+        <a class="course-card${sinContenido ? ' is-empty-course' : ''}${completado ? ' is-completed' : ''}" href="curso.html#slug=${encodeURIComponent(c.slug)}" aria-label="${escapeHtml(cardLabel)}">
           ${imagenHtml}
-          <div class="course-card-body">
-            <h2>${c.titulo}${completado ? '<i class="ph ph-check-circle course-card-check" aria-hidden="true"></i>' : ''}</h2>
+          <div class="course-card-body" aria-hidden="true">
+            <h2>${c.titulo}${completado ? '<i class="ph ph-check-circle course-card-check"></i>' : ''}</h2>
             <p>${c.descripcion || ''}</p>
             ${progresoHtml}
             ${sinContenido
-              ? '<span class="course-card-soon"><i class="ph ph-hourglass-medium" aria-hidden="true"></i> Próximamente</span>'
+              ? '<span class="course-card-soon"><i class="ph ph-hourglass-medium"></i> Próximamente</span>'
               : `<span class="btn btn-primary">${empezado ? 'Continuar' : 'Entrar al curso'}</span>`}
           </div>
         </a>

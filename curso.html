@@ -48,12 +48,12 @@
       <h1>Curso</h1>
       <nav class="breadcrumb" aria-label="Ruta de navegación">
         <a href="index.html">Overview</a>
-        <span>/</span>
+        <span aria-hidden="true">/</span>
         <a href="categoria.html">Cursos</a>
-        <span>/</span>
+        <span aria-hidden="true">/</span>
         <a href="categoria.html" id="breadcrumbCategoria">…</a>
-        <span>/</span>
-        <span class="current" id="breadcrumbCurrent">Cargando…</span>
+        <span aria-hidden="true">/</span>
+        <span class="current" id="breadcrumbCurrent" aria-current="page">Cargando…</span>
       </nav>
       <div class="topbar-actions">
         <div id="notifMenu"></div>
@@ -220,7 +220,7 @@
           <div class="course-meta-tags" id="courseTags"></div>
 
           <div class="page-header">
-            <h1 id="courseTitle">Cargando curso...</h1>
+            <h2 id="courseTitle">Cargando curso...</h2>
           </div>
 
           <!-- Autor (mock fijo, no existe ese campo en el curso, ver README) +
