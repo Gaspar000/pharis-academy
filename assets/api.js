@@ -43,6 +43,15 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+/** Cierra cualquier dropdown de topbar (usuario/notificaciones) distinto de
+ * `except` — sin esto, abrir uno mientras el otro ya está abierto los deja
+ * a ambos superpuestos en pantalla al mismo tiempo. */
+function closeOtherTopbarMenus(except) {
+  document.querySelectorAll('.user-menu.open, .notif-menu.open').forEach(el => {
+    if (el !== except) el.classList.remove('open');
+  });
+}
+
 const AcademyAuth = {
   TOKEN_KEY: 'academy_token',
   USER_KEY: 'academy_user',
@@ -114,7 +123,6 @@ const AcademyAuth = {
               <div class="user-dropdown-name">${escapeHtml(user.nombre)}</div>
               <span class="role-chip">${escapeHtml(user.rol)}</span>
             </div>
-            <div class="user-dropdown-email">${escapeHtml(user.email)}</div>
           </div>
         </div>
         <div class="user-dropdown-item theme-row">
@@ -142,7 +150,9 @@ const AcademyAuth = {
     const trigger = container.querySelector('#userMenuTrigger');
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
-      container.classList.toggle('open');
+      const abriendo = !container.classList.contains('open');
+      closeOtherTopbarMenus(container);
+      container.classList.toggle('open', abriendo);
     });
     container.querySelector('#userMenuLogout').addEventListener('click', () => this.logout());
 
@@ -224,8 +234,10 @@ const AcademyAuth = {
 
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
-      container.classList.toggle('open');
-      if (container.classList.contains('open') && noLeidasPendientes) {
+      const abriendo = !container.classList.contains('open');
+      closeOtherTopbarMenus(container);
+      container.classList.toggle('open', abriendo);
+      if (abriendo && noLeidasPendientes) {
         noLeidasPendientes = false;
         document.getElementById('notifBadge').style.display = 'none';
         // Best-effort, si falla, la próxima carga de página las vuelve a

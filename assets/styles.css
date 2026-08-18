@@ -619,6 +619,11 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   border-radius: var(--radius);
   padding: 20px;
 }
+/* Separación entre un .wf-panel y el .wf-section-title que le sigue —
+   antes esto vivía como margin-bottom inline en un solo .wf-panel de
+   perfil.html, así que el espacio faltaba entre paneles que no lo tenían
+   puesto a mano (ej. "Cambiar contraseña" → "Seguridad", pegados). */
+.wf-panel + .wf-section-title { margin-top: 24px; }
 .wf-chip {
   display: inline-flex;
   align-items: center;
