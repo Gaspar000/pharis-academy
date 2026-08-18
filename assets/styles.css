@@ -676,8 +676,11 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 /* Ícono por categoría (ver ICONO_CATEGORIA en index.html), a la derecha
    del título. Distingue "Para profesores" de "Para alumnos" de un
-   vistazo, antes eran dos tarjetas con la misma forma exacta. */
-.course-card-icon { flex-shrink: 0; font-size: 1.4rem; color: var(--accent-bright); }
+   vistazo, antes eran dos tarjetas con la misma forma exacta. Reusado
+   también para los logos SVG de Pharis App/Extension en acceso.html:
+   height fijo, width:auto preserva la proporción real de cada SVG (el
+   logo de rayos es angosto, el de la extensión es casi cuadrado). */
+.course-card-icon { flex-shrink: 0; font-size: 1.4rem; height: 1.4em; width: auto; color: var(--accent-bright); }
 .course-card p { font-size: 0.88rem; margin-bottom: 0; flex: 1; }
 .course-card .btn { margin-top: 8px; }
 /* Curso sin diapositivas todavía: sigue siendo clickeable (adentro explica
