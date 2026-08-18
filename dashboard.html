@@ -34,13 +34,14 @@
     </nav>
 
     <!-- Card motivacional — el div .wf-sidebar-promo-art es el hueco
-         reservado para la ilustración, sin contenido propio. Texto propio
-         para este rol (a diferencia de las demás páginas, acá el usuario
-         siempre es profesor). -->
-    <div class="wf-sidebar-promo">
+         reservado para la ilustración, sin contenido propio. Texto de
+         respaldo de profesor (acá el usuario siempre lo es); igual se
+         sobreescribe con AcademyAuth.renderSidebarPromo() para no
+         mantener el copy en dos lugares. -->
+    <div class="wf-sidebar-promo" id="sidebarPromo">
       <div class="wf-sidebar-promo-art"></div>
-      <div class="wf-sidebar-promo-text">Cada duda que resuelves con Pharis es una clase que ya no tienes que repetir.</div>
-      <div class="wf-sidebar-promo-sub">Enseñar con IA, sin perder el control</div>
+      <div class="wf-sidebar-promo-text">Cada minuto que Pharis te devuelve es un minuto más para lo que de verdad importa: tus alumnos.</div>
+      <div class="wf-sidebar-promo-sub">Enseñar con más tiempo, no con más prisa.</div>
     </div>
   </aside>
 
@@ -73,6 +74,7 @@
     const user = AcademyAuth.getUser();
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
+    AcademyAuth.renderSidebarPromo(document.getElementById('sidebarPromo'));
     // El link de Dashboard se revela ANTES del gate: aplicarGateSidebar()
     // termina construyendo el nav móvil clonando los links visibles, así
     // que un profesor se quedaría sin Dashboard ahí si se revelara después.

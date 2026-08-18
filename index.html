@@ -37,10 +37,10 @@
 
     <!-- Card motivacional — el div .wf-sidebar-promo-art es el hueco
          reservado para la ilustración, sin contenido propio. -->
-    <div class="wf-sidebar-promo">
+    <div class="wf-sidebar-promo" id="sidebarPromo">
       <div class="wf-sidebar-promo-art"></div>
       <div class="wf-sidebar-promo-text">Cada pregunta que le haces a Pharis te acerca a entenderlo de verdad.</div>
-      <div class="wf-sidebar-promo-sub">Aprender con IA, a tu ritmo</div>
+      <div class="wf-sidebar-promo-sub">Tu tutor, siempre a un clic.</div>
     </div>
   </aside>
 
@@ -204,6 +204,7 @@
     const user = AcademyAuth.getUser();
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
+    AcademyAuth.renderSidebarPromo(document.getElementById('sidebarPromo'));
     // El link de Dashboard se revela ANTES del gate: aplicarGateSidebar()
     // termina construyendo el nav móvil clonando los links visibles, así
     // que un profesor se quedaría sin Dashboard ahí si se revelara después.

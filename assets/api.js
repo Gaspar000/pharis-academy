@@ -167,6 +167,35 @@ const AcademyAuth = {
   },
 
   /**
+   * Rellena el card motivacional del sidebar (`.wf-sidebar-promo-text` /
+   * `.wf-sidebar-promo-sub` dentro de `container`) con copy propio según el
+   * rol del usuario logueado — antes era el mismo texto de alumno fijo en
+   * el HTML de las 6 páginas que no son dashboard.html (que ya tenía el
+   * suyo hardcodeado, ahora también viene de acá para no mantener el copy
+   * en dos lugares). El markup del `.wf-sidebar-promo-art` (la ilustración)
+   * no lo toca, sigue siendo un div vacío pintado por CSS.
+   */
+  renderSidebarPromo(container) {
+    const user = this.getUser();
+    if (!user || !container) return;
+
+    const copy = user.rol === 'profesor'
+      ? {
+          texto: 'Cada minuto que Pharis te devuelve es un minuto más para lo que de verdad importa: tus alumnos.',
+          sub: 'Enseñar con más tiempo, no con más prisa.',
+        }
+      : {
+          texto: 'Cada pregunta que le haces a Pharis te acerca a entenderlo de verdad.',
+          sub: 'Tu tutor, siempre a un clic.',
+        };
+
+    const textoEl = container.querySelector('.wf-sidebar-promo-text');
+    const subEl = container.querySelector('.wf-sidebar-promo-sub');
+    if (textoEl) textoEl.textContent = copy.texto;
+    if (subEl) subEl.textContent = copy.sub;
+  },
+
+  /**
    * Dibuja el botón de notificaciones (campana) + panel desplegable dentro
    * de `container`, y carga el historial real vía GET /academy/notifications
    *, se consulta una sola vez al llamar esta función (mismo criterio que
