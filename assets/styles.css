@@ -798,6 +798,37 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .quiz-intro { display: flex; flex-direction: column; gap: 18px; flex: 1; justify-content: center; align-items: flex-start; }
 .quiz-intro-actions { display: flex; }
 .quiz-form-wrap { display: flex; flex-direction: column; gap: 14px; }
+/* Entrega de actividad (texto o archivo) dentro del visor, ver
+   #entregaViewer en curso.html. Mismo lenguaje visual que .quiz-form-wrap. */
+.entrega-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--rule); }
+.entrega-tab {
+  padding: 10px 4px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.entrega-tab:hover { color: var(--text); }
+.entrega-tab.is-active { color: var(--accent-bright); border-bottom-color: var(--accent-bright); }
+.entrega-panel { display: flex; flex-direction: column; gap: 12px; }
+.entrega-textarea {
+  width: 100%;
+  min-height: 160px;
+  resize: vertical;
+  background: var(--bg-deep);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.entrega-textarea:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .quiz-question {
   border: 1px solid var(--rule);
   border-radius: var(--radius-sm);

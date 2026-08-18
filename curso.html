@@ -91,6 +91,50 @@
                 <div class="slide-points-layer" id="slidePointsLayer"></div>
               </div>
 
+              <!-- Entrega de actividad (texto o archivo), mismo criterio que
+                   #quizViewer: capítulo virtual, no una diapositiva real
+                   (ver entregaAntesDelQuiz en buildChapterList). Solo existe
+                   si course.entregaAntesDelQuiz, hoy únicamente curso-01.
+                   Dos modos alternados por tab: texto libre (textarea) o
+                   archivo (dropzone, mismo mecanismo que la sección externa
+                   "Subir actividad" que esto reemplaza en curso-01).
+                   Siempre opcional. El aviso de doble-click de
+                   intentarAvanzar ya cubre "saltarla sin usarla". -->
+              <div class="quiz-viewer" id="entregaViewer" style="display:none;">
+                <div class="quiz-header">
+                  <i class="ph ph-note-pencil" aria-hidden="true"></i>
+                  <div>
+                    <div class="quiz-title">Entrega tu actividad</div>
+                    <div class="quiz-subtitle">Opcional. Escribe tu resultado o sube un archivo, Pharis lo revisará como retroalimentación.</div>
+                  </div>
+                </div>
+
+                <div class="entrega-tabs">
+                  <button class="entrega-tab is-active" type="button" id="entregaTabTexto">Escribir texto</button>
+                  <button class="entrega-tab" type="button" id="entregaTabArchivo">Subir archivo</button>
+                </div>
+
+                <div class="entrega-panel" id="entregaPanelTexto">
+                  <textarea class="entrega-textarea" id="entregaTextarea" placeholder="Escribe aquí el resultado de tu actividad..." maxlength="20000"></textarea>
+                  <button class="btn btn-primary" id="entregaTextoBtn" style="width:auto; align-self:flex-end;">Enviar texto</button>
+                </div>
+
+                <div class="entrega-panel" id="entregaPanelArchivo" style="display:none;">
+                  <div class="upload-box" style="padding:0; border:none; background:none;">
+                    <label for="entregaFileInput" class="dropzone" id="entregaDropzone">
+                      <input type="file" id="entregaFileInput" accept="application/pdf,image/png,image/jpeg" class="file-picker-input" />
+                      <i class="ph ph-upload-simple dropzone-icon"></i>
+                      <p class="dropzone-text" id="entregaDropzoneText">Suelta tu archivo aquí, o <span class="dropzone-link">haz clic para subir</span></p>
+                      <p class="dropzone-hint">PDF, JPG o PNG, hasta 10MB</p>
+                    </label>
+                    <button class="btn btn-primary" id="entregaArchivoBtn">Subir actividad</button>
+                  </div>
+                </div>
+
+                <div class="upload-status" id="entregaStatus"></div>
+                <div class="submission-history" id="entregaHistory"></div>
+              </div>
+
               <!-- Quiz de curso, hermano de #slideViewer dentro del mismo
                    .embed-frame — NO es una diapositiva más del array
                    currentSlides (eso rompería avance/puntos/ARIA, que ya
@@ -352,6 +396,12 @@
         currentSlides = course.slides;
         renderChapters(course.slides);
         goToSlide(0);
+        // La entrega vive dentro del visor (capítulo "Entrega", ver
+        // mostrarEntrega) en cursos que declaran entregaAntesDelQuiz. La
+        // sección externa de abajo queda redundante y se oculta.
+        if (course.entregaAntesDelQuiz) {
+          document.getElementById('uploadSection').style.display = 'none';
+        }
       } else if (course.slidesEmbedUrl) {
         // Compatibilidad con el mecanismo anterior (iframe) para cursos que
         // algún día usen ese camino en vez de imágenes, no aplica hoy a
@@ -386,7 +436,7 @@
         setSaveBtnActive(guardados.includes(slug));
       }
 
-      if (course.slides && course.slides.length) loadHistory();
+      if (course.slides && course.slides.length && !course.entregaAntesDelQuiz) loadHistory();
     }
 
     // Curso sin diapositivas todavía: se ocultan las partes que no aplican
@@ -460,9 +510,13 @@
 
     // Lista de RENDERIZADO del panel de Capítulos — nunca muta `slides`
     // (el array real del catálogo, del que dependen avance/puntos/ARIA).
-    // Cada ítem tipo 'slide' conserva su slideIndex real (0-based); cada
-    // ítem tipo 'quiz' es puramente visual, sin índice real asociado. Sin
-    // quiz, o sin diapositivas, devuelve la lista plana de siempre.
+    // Cada ítem tipo 'slide' conserva su slideIndex real (0-based); los
+    // ítems tipo 'quiz' y 'entrega' son puramente visuales, sin índice real
+    // asociado, mismo criterio para ambos y por la misma razón (no
+    // perturbar avance/puntos ya guardados). Sin quiz, o sin diapositivas,
+    // devuelve la lista plana de siempre. course.entregaAntesDelQuiz
+    // (booleano opcional) inserta el ítem 'entrega' justo antes del quiz,
+    // solo curso-01 lo declara hoy.
     function buildChapterList(slides, course) {
       const tieneQuiz = Boolean(course && course.quiz);
       if (!tieneQuiz || !slides.length) {
@@ -471,7 +525,10 @@
       const posicionQuiz = posicionQuizDelCurso(slides, course);
       const items = [];
       slides.forEach((s, i) => {
-        if (i === posicionQuiz) items.push({ tipo: 'quiz' });
+        if (i === posicionQuiz) {
+          if (course.entregaAntesDelQuiz) items.push({ tipo: 'entrega' });
+          items.push({ tipo: 'quiz' });
+        }
         items.push({ tipo: 'slide', slideIndex: i, titulo: s.titulo });
       });
       return items;
@@ -481,6 +538,16 @@
       const listEl = document.getElementById('chaptersList');
       const items = buildChapterList(slides, currentCourse);
       listEl.innerHTML = items.map((item, pos) => {
+        if (item.tipo === 'entrega') {
+          // Nunca bloqueada (opcional, mismo aviso de doble-click que ya
+          // cubre "saltarla sin usarla" en intentarAvanzar), sin candado.
+          return `
+            <li class="chapter-item" data-tipo="entrega">
+              <span class="chapter-time">${String(pos + 1).padStart(2, '0')}</span>
+              <span class="chapter-label"><i class="ph ph-note-pencil" aria-hidden="true"></i> Entrega</span>
+            </li>
+          `;
+        }
         if (item.tipo === 'quiz') {
           return `
             <li class="chapter-item" data-tipo="quiz">
@@ -535,10 +602,12 @@
     }
 
     // Único punto de entrada de clicks del panel de Capítulos: distingue
-    // entre el ítem virtual de quiz, una diapositiva real libre, y "Cierre"
-    // bloqueada (candado visual, sin navegar — ver también la barrera dura
-    // dentro de goToSlide, que cubre teclado/seek).
+    // entre el ítem virtual de entrega, el de quiz, una diapositiva real
+    // libre, y una diapositiva bloqueada (candado visual, sin navegar,
+    // ver también la barrera dura dentro de goToSlide, que cubre
+    // teclado/seek).
     function handleChapterClick(el) {
+      if (el.dataset.tipo === 'entrega') { mostrarEntrega(); return; }
       if (el.dataset.tipo === 'quiz') { intentarAvanzar(); return; }
       const index = Number(el.dataset.index);
       if (el.classList.contains('is-locked')) {
@@ -761,6 +830,142 @@
       slideToastTimeout = setTimeout(() => toast.classList.remove('is-visible'), 3000);
     }
 
+    // ── Entrega de actividad ─────────────────────────────────────────────────
+    // Capítulo virtual (ver buildChapterList/entregaAntesDelQuiz), mismo
+    // criterio que el Quiz: vive como vista hermana de #slideViewer, sin
+    // ocupar un índice real de currentSlides. Reemplaza a la sección
+    // externa "Subir actividad" en cursos que la declaran (hoy solo
+    // curso-01). fileToBase64/MAX_FILE_BYTES/badgeFor se definen más abajo
+    // en este archivo, function hoisting los deja disponibles acá igual.
+    function mostrarEntrega() {
+      document.getElementById('slideViewer').style.display = 'none';
+      document.getElementById('quizViewer').style.display = 'none';
+      document.getElementById('viewerControls').style.display = 'none';
+      document.getElementById('entregaViewer').style.display = 'flex';
+      updateChapterActiveState();
+      loadEntregaHistory();
+    }
+
+    const entregaTabTexto = document.getElementById('entregaTabTexto');
+    const entregaTabArchivo = document.getElementById('entregaTabArchivo');
+    const entregaPanelTexto = document.getElementById('entregaPanelTexto');
+    const entregaPanelArchivo = document.getElementById('entregaPanelArchivo');
+
+    entregaTabTexto.addEventListener('click', () => {
+      entregaTabTexto.classList.add('is-active');
+      entregaTabArchivo.classList.remove('is-active');
+      entregaPanelTexto.style.display = 'flex';
+      entregaPanelArchivo.style.display = 'none';
+    });
+    entregaTabArchivo.addEventListener('click', () => {
+      entregaTabArchivo.classList.add('is-active');
+      entregaTabTexto.classList.remove('is-active');
+      entregaPanelArchivo.style.display = 'flex';
+      entregaPanelTexto.style.display = 'none';
+    });
+
+    const entregaStatusBox = document.getElementById('entregaStatus');
+    function showEntregaStatus(kind, msg) {
+      entregaStatusBox.className = `upload-status visible ${kind}`;
+      entregaStatusBox.textContent = msg;
+    }
+
+    // Historial propio de esta vista, mismo GET que loadHistory() (la
+    // sección externa que esto reemplaza en curso-01), pero renderizado
+    // dentro de #entregaViewer en vez de #submissionHistory.
+    async function loadEntregaHistory() {
+      const el = document.getElementById('entregaHistory');
+      try {
+        const data = await academyFetch(`/academy/mis-entregas?curso=${encodeURIComponent(slug)}`);
+        if (data.entregas.length) actividadPrevaUsada = true;
+        if (!data.entregas.length) { el.innerHTML = ''; return; }
+        el.innerHTML = data.entregas.map(s => `
+          <div class="submission-item">
+            <div>
+              <div class="name">${s.esTexto ? 'Texto entregado' : (s.archivoNombre || 'Actividad')}</div>
+              <div class="date">${new Date(s.createdAt).toLocaleString('es-MX')}</div>
+              ${s.feedbackClaude ? `<div class="date" style="margin-top:4px;">${s.feedbackClaude}</div>` : ''}
+            </div>
+            ${badgeFor(s.calificacion)}
+          </div>
+        `).join('');
+      } catch {
+        el.innerHTML = '';
+      }
+    }
+
+    document.getElementById('entregaTextoBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('entregaTextoBtn');
+      const textarea = document.getElementById('entregaTextarea');
+      const texto = textarea.value.trim();
+      if (!texto) { showEntregaStatus('warn', 'Escribe algo antes de enviar.'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Evaluando con Pharis...';
+      showEntregaStatus('warn', 'Enviando y evaluando tu actividad, puede tardar unos segundos...');
+
+      try {
+        const result = await academyFetch('/academy/submit', {
+          method: 'POST',
+          body: JSON.stringify({ curso: slug, textoEntrega: texto }),
+        });
+        const sub = result.submission;
+        await loadEntregaHistory();
+        if (sub.calificacion) {
+          showEntregaStatus('ok', `Evaluación: ${sub.calificacion}. ${sub.feedback_claude || ''}`);
+        } else {
+          showEntregaStatus('warn', sub.feedback_claude || 'Tu actividad se guardó. Un profesor la revisará.');
+        }
+        textarea.value = '';
+      } catch (err) {
+        showEntregaStatus('err', err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar texto';
+      }
+    });
+
+    document.getElementById('entregaArchivoBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('entregaArchivoBtn');
+      const file = document.getElementById('entregaFileInput').files[0];
+      if (!file) { showEntregaStatus('warn', 'Selecciona un archivo primero.'); return; }
+      if (file.size > MAX_FILE_BYTES) { showEntregaStatus('err', 'El archivo supera el límite de 10MB.'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Evaluando con Pharis...';
+      showEntregaStatus('warn', 'Subiendo y evaluando tu actividad, puede tardar unos segundos...');
+
+      try {
+        const dataUrl = await fileToBase64(file);
+        const esImagen = file.type.startsWith('image/');
+        const result = await academyFetch('/academy/submit', {
+          method: 'POST',
+          body: JSON.stringify({ curso: slug, archivoBase64: dataUrl, archivoNombre: file.name, esImagen }),
+        });
+        const sub = result.submission;
+        await loadEntregaHistory();
+        if (sub.calificacion) {
+          showEntregaStatus('ok', `Evaluación: ${sub.calificacion}. ${sub.feedback_claude || ''}`);
+        } else {
+          showEntregaStatus('warn', sub.feedback_claude || 'Tu actividad se guardó. Un profesor la revisará.');
+        }
+        document.getElementById('entregaFileInput').value = '';
+      } catch (err) {
+        showEntregaStatus('err', err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Subir actividad';
+      }
+    });
+
+    document.getElementById('entregaFileInput').addEventListener('change', (e) => {
+      const label = document.getElementById('entregaDropzoneText');
+      label.textContent = e.target.files[0] ? e.target.files[0].name : '';
+      if (!e.target.files[0]) {
+        label.innerHTML = 'Suelta tu archivo aquí, o <span class="dropzone-link">haz clic para subir</span>';
+      }
+    });
+
     // ── Quiz ──────────────────────────────────────────────────────────────────
     // Capítulo propio del curso, intercalado visualmente en el panel de
     // Capítulos (ver buildChapterList). Vive como vista hermana de
@@ -772,6 +977,7 @@
 
     async function mostrarQuiz() {
       document.getElementById('slideViewer').style.display = 'none';
+      document.getElementById('entregaViewer').style.display = 'none';
       document.getElementById('viewerControls').style.display = 'none';
       const quizViewer = document.getElementById('quizViewer');
       quizViewer.style.display = 'flex';
@@ -810,8 +1016,11 @@
       document.getElementById('quizFormWrap').style.display = 'flex';
     });
 
+    // Genérico: oculta cualquier vista alterna activa (quiz o entrega) y
+    // restaura el visor normal de diapositivas.
     function volverAlVisor() {
       document.getElementById('quizViewer').style.display = 'none';
+      document.getElementById('entregaViewer').style.display = 'none';
       document.getElementById('slideViewer').style.display = 'block';
       document.getElementById('viewerControls').style.display = 'flex';
     }
@@ -894,13 +1103,14 @@
       }
       if (index < 0 || index >= currentSlides.length) return;
 
-      // Si el quiz está activo (#quizViewer visible), cualquier navegación a
-      // una diapositiva real debe volver al visor primero — de lo contrario
+      // Si el quiz o la entrega están activos, cualquier navegación a una
+      // diapositiva real debe volver al visor primero. De lo contrario
       // slideImage/estado interno cambian "por debajo" mientras el alumno
-      // sigue viendo el quiz en pantalla, atascado ahí. Cubre las 4 vías de
-      // entrada a goToSlide (panel de Capítulos, teclado, seek de la barra
-      // de progreso, botones prev/next) en un solo lugar.
-      if (document.getElementById('quizViewer').style.display !== 'none') {
+      // sigue viendo esa vista en pantalla, atascado ahí. Cubre las 4 vías
+      // de entrada a goToSlide (panel de Capítulos, teclado, seek de la
+      // barra de progreso, botones prev/next) en un solo lugar.
+      if (document.getElementById('quizViewer').style.display !== 'none'
+        || document.getElementById('entregaViewer').style.display !== 'none') {
         volverAlVisor();
       }
 
