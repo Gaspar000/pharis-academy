@@ -683,8 +683,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-card-icon { flex-shrink: 0; font-size: 1.4rem; height: 1.4em; width: auto; color: var(--accent-bright); }
 /* Compensa la forma casi cuadrada del ícono de Pharis Extension contra
    la angosta del logo de rayos. Con el mismo height ambos se ven
-   desparejos, este ajuste los empareja a ojo. */
-.course-card-icon-lg { height: 1.7em; }
+   desparejos, este ajuste los empareja a ojo. top:-12px sube el ícono
+   respecto a su posición natural en la línea del título. */
+.course-card-icon-lg { height: 1.7em; position: relative; top: -12px; }
 .course-card p { font-size: 0.88rem; margin-bottom: 0; flex: 1; }
 .course-card .btn { margin-top: 8px; }
 /* Curso sin diapositivas todavía: sigue siendo clickeable (adentro explica
