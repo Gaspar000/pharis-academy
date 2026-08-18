@@ -215,10 +215,10 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .user-chip {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 0.85rem;
   color: var(--text-muted);
-  padding: 6px 12px;
+  padding: 5px 12px 5px 6px;
   border: 1px solid var(--rule);
   border-radius: 999px;
   background: transparent;
@@ -243,10 +243,28 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .user-menu.open .user-dropdown { display: block; }
 
-.user-dropdown-header { padding: 10px 12px 12px; border-bottom: 1px solid var(--rule); margin-bottom: 6px; }
+.user-dropdown-header { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px 12px; border-bottom: 1px solid var(--rule); margin-bottom: 6px; }
+.user-dropdown-header-text { min-width: 0; flex: 1; }
 .user-dropdown-name-row { display: flex; align-items: center; gap: 8px; }
 .user-dropdown-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
 .user-dropdown-email { font-size: 0.78rem; color: var(--text-faint); margin-top: 2px; word-break: break-all; }
+
+/* Avatar con iniciales — sin upload de foto: el color viene de un hash
+   determinístico del nombre (ver avatarColor() en api.js), así que el
+   mismo usuario siempre tiene el mismo color entre sesiones y páginas. */
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-family: "Manrope", sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+}
+.user-avatar-sm { width: 26px; height: 26px; font-size: 0.7rem; }
+.user-avatar-lg { width: 40px; height: 40px; font-size: 1rem; }
 /* Chip de rol, mismo componente visual que .badge, pero sin semántica de
    estado (no es éxito/error/advertencia, solo distingue estudiante/profesor),
    así que usa el acento en vez de las variantes verde/ámbar/rojo. */
@@ -527,6 +545,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .btn-primary { background: var(--accent); color: #fff; }
 .btn-primary:hover { background: var(--accent-bright); }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-danger { background: transparent; border-color: var(--red); color: var(--red-text); }
+.btn-danger:hover { background: var(--red-soft); }
+.btn-danger:disabled { opacity: 0.6; cursor: not-allowed; }
 /* Notoriamente más chico que .btn, solo para "Ver cursos" en las
    tarjetas de categoría de "Todos los cursos". */
 .btn-small { width: fit-content; padding: 4px 12px; font-size: 0.72rem; }

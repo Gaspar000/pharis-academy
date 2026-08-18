@@ -4,6 +4,45 @@
 // Cambia API_BASE si despliegas pharis-api en otra URL.
 const API_BASE = 'https://pharis-api-production.up.railway.app';
 
+// Paleta fija (no CSS var — se necesita el hex real para el hash, y estos
+// tonos ya están calibrados para contraste con texto blanco encima en
+// ambos temas). El índice sale de un hash simple del nombre, así que el
+// mismo usuario tiene siempre el mismo color entre sesiones y páginas sin
+// guardar nada en la DB.
+const AVATAR_COLORS = ['#508ff8', '#34a17c', '#c2703d', '#8a5cd6', '#c0447a', '#3d97a8'];
+
+function avatarColor(nombre) {
+  let hash = 0;
+  for (let i = 0; i < nombre.length; i++) hash = (hash * 31 + nombre.charCodeAt(i)) | 0;
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
+
+function avatarIniciales(nombre) {
+  const partes = nombre.trim().split(/\s+/).filter(Boolean);
+  if (!partes.length) return '?';
+  const primeras = partes.length > 1 ? [partes[0], partes[partes.length - 1]] : [partes[0]];
+  return primeras.map(p => p[0].toUpperCase()).join('');
+}
+
+/** Avatar redondo con iniciales — `size` es 'sm' (chip/topbar) o 'lg' (dropdown/perfil).
+ * Un nombre de puros espacios (falsy solo cubre '', null, undefined) debe
+ * normalizarse ACÁ antes de tocar avatarColor/avatarIniciales — si no, el
+ * trim().split() de avatarIniciales sobre un string ya vacío tras el trim
+ * revienta con TypeError al leer partes[0][0] de un array vacío. */
+function avatarHtml(nombre, size = 'sm') {
+  const safe = (nombre || '').trim() || '?';
+  return `<div class="user-avatar user-avatar-${size}" style="background:${avatarColor(safe)}">${escapeHtml(avatarIniciales(safe))}</div>`;
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const AcademyAuth = {
   TOKEN_KEY: 'academy_token',
   USER_KEY: 'academy_user',
@@ -64,15 +103,19 @@ const AcademyAuth = {
     container.className = 'user-menu';
     container.innerHTML = `
       <button class="user-chip" id="userMenuTrigger">
-        ${user.nombre} <i class="ph ph-caret-down"></i>
+        ${avatarHtml(user.nombre, 'sm')}
+        ${escapeHtml(user.nombre)} <i class="ph ph-caret-down"></i>
       </button>
       <div class="user-dropdown">
         <div class="user-dropdown-header">
-          <div class="user-dropdown-name-row">
-            <div class="user-dropdown-name">${user.nombre}</div>
-            <span class="role-chip">${user.rol}</span>
+          ${avatarHtml(user.nombre, 'lg')}
+          <div class="user-dropdown-header-text">
+            <div class="user-dropdown-name-row">
+              <div class="user-dropdown-name">${escapeHtml(user.nombre)}</div>
+              <span class="role-chip">${escapeHtml(user.rol)}</span>
+            </div>
+            <div class="user-dropdown-email">${escapeHtml(user.email)}</div>
           </div>
-          <div class="user-dropdown-email">${user.email}</div>
         </div>
         <div class="user-dropdown-item theme-row">
           <span data-theme-label>Modo oscuro</span>

@@ -61,6 +61,7 @@
       <div class="wf-panel" style="margin-bottom:24px;">
         <div class="success-box" id="perfilSuccessBox"></div>
         <div class="error-box" id="perfilErrorBox"></div>
+        <div id="perfilAvatar" style="margin-bottom:18px;"></div>
         <form id="perfilForm">
           <div class="field">
             <label for="nombre">Nombre completo</label>
@@ -69,6 +70,7 @@
           <div class="field">
             <label for="email">Correo</label>
             <input type="email" id="email" required autocomplete="email" />
+            <div class="field-hint">Es el correo con el que inicias sesión. Si lo cambias, usa el nuevo la próxima vez.</div>
           </div>
           <div class="field">
             <label>Soy</label>
@@ -108,6 +110,20 @@
           </div>
           <button type="submit" class="btn btn-primary" id="passwordSubmitBtn" style="width:auto; padding:10px 20px;">Cambiar contraseña</button>
         </form>
+      </div>
+
+      <!-- Seguridad: única acción de "zona de peligro" que aplica acá — no
+           hay eliminar cuenta (la cuenta está atada al alta institucional,
+           no es self-service) ni 2FA (fricción desproporcionada para el
+           riesgo real de un LMS institucional sin datos financieros). -->
+      <div class="wf-section-title">Seguridad</div>
+      <div class="wf-panel">
+        <div class="success-box" id="sesionesSuccessBox"></div>
+        <div class="error-box" id="sesionesErrorBox"></div>
+        <div class="field-hint" style="margin-bottom:14px;">
+          Si dejaste tu sesión abierta en una computadora compartida o perdiste tu equipo, cierra tu sesión en todos los dispositivos. Vas a tener que volver a iniciar sesión acá también.
+        </div>
+        <button type="button" class="btn btn-danger" id="cerrarSesionesBtn" style="width:auto; padding:10px 20px;">Cerrar sesión en todos los dispositivos</button>
       </div>
     </main>
   </div>
@@ -151,6 +167,7 @@
     document.getElementById('email').value = user.email;
     const categoriaInicial = perfilForm.querySelector(`input[name="categoriaPreferida"][value="${user.categoriaPreferida || 'alumnos'}"]`);
     if (categoriaInicial) categoriaInicial.checked = true;
+    document.getElementById('perfilAvatar').innerHTML = avatarHtml(user.nombre, 'lg');
 
     async function loadPerfil() {
       try {
@@ -181,6 +198,7 @@
         });
         AcademyAuth.updateUser(data.user);
         AcademyAuth.renderUserMenu(document.getElementById('userMenu')); // refresca el chip con el nombre nuevo
+        document.getElementById('perfilAvatar').innerHTML = avatarHtml(data.user.nombre, 'lg');
         showBox(perfilSuccessBox, 'Perfil actualizado.');
       } catch (err) {
         showBox(perfilErrorBox, err.message);
@@ -216,10 +234,15 @@
       passwordSubmitBtn.textContent = 'Cambiando...';
 
       try {
-        await academyFetch('/academy/me/password', {
+        const data = await academyFetch('/academy/me/password', {
           method: 'POST',
           body: JSON.stringify({ passwordActual, passwordNueva }),
         });
+        // El backend sube token_version al cambiar la contraseña (invalida
+        // sesiones en otros dispositivos) y devuelve un token nuevo para
+        // este mismo dispositivo — sin guardarlo, la siguiente request de
+        // esta pestaña fallaría con 401 pese a que la contraseña sí cambió.
+        if (data.token) AcademyAuth.setSession(data.token, AcademyAuth.getUser());
         showBox(passwordSuccessBox, 'Contraseña actualizada.');
         passwordForm.reset();
       } catch (err) {
@@ -227,6 +250,32 @@
       } finally {
         passwordSubmitBtn.disabled = false;
         passwordSubmitBtn.textContent = 'Cambiar contraseña';
+      }
+    });
+
+    // ── Seguridad: cerrar sesión en todos los dispositivos ──────────────────
+    const cerrarSesionesBtn = document.getElementById('cerrarSesionesBtn');
+    const sesionesErrorBox = document.getElementById('sesionesErrorBox');
+    const sesionesSuccessBox = document.getElementById('sesionesSuccessBox');
+
+    cerrarSesionesBtn.addEventListener('click', async () => {
+      if (!confirm('Vas a cerrar tu sesión en todos los dispositivos, incluido este. ¿Continuar?')) return;
+
+      hideBox(sesionesErrorBox);
+      hideBox(sesionesSuccessBox);
+      cerrarSesionesBtn.disabled = true;
+      cerrarSesionesBtn.textContent = 'Cerrando...';
+
+      try {
+        await academyFetch('/academy/me/cerrar-sesiones', { method: 'POST' });
+        // El JWT de este mismo dispositivo también quedó invalidado en el
+        // servidor — no tiene sentido seguir en la página, se cierra sesión
+        // local y se manda a login igual que en cualquier otro dispositivo.
+        AcademyAuth.logout();
+      } catch (err) {
+        showBox(sesionesErrorBox, err.message);
+        cerrarSesionesBtn.disabled = false;
+        cerrarSesionesBtn.textContent = 'Cerrar sesión en todos los dispositivos';
       }
     });
 
