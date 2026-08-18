@@ -61,7 +61,7 @@
     <main class="shell" style="padding-top:28px;">
     <div class="page-header">
       <h1 id="categoriaTitle">Cargando…</h1>
-      <p>Cualquier alumno o profesor puede tomar cualquiera de estos cursos.</p>
+      <p id="categoriaSummary"><i class="ph ph-books categoria-summary-icon" aria-hidden="true"></i>Cualquier alumno o profesor puede tomar cualquiera de estos cursos.</p>
     </div>
 
     <!-- Invitación cruzada a la otra categoría, no oculta, solo promociona.
@@ -122,10 +122,22 @@
       return grupos;
     }
 
+    // Misma fórmula que calcularProgreso en index.html — maxSlideIndex es
+    // 0-based, "completadas" (texto) es 1-based ("3/7 secciones", no
+    // "índice 2 de 7"). Duplicada acá a propósito: categoria.html no
+    // carga el script de index.html, y es una fórmula de 2 líneas, no
+    // vale la pena un archivo compartido nuevo por esto.
+    function calcularProgreso(totalSlides, maxSlideIndex) {
+      const idx = Math.min(maxSlideIndex ?? -1, totalSlides - 1);
+      const completadas = Math.max(idx + 1, 0);
+      const porcentaje = totalSlides > 1 ? (Math.max(idx, 0) / (totalSlides - 1)) * 100 : (completadas > 0 ? 100 : 0);
+      return { completadas, porcentaje };
+    }
+
     // Un curso sin diapositivas se marca ANTES de entrar: hasta ahora su
     // tarjeta decía "Entrar al curso" igual que la de un curso real, y el
     // usuario descubría que estaba vacío recién adentro.
-    function renderCourseCard(c) {
+    function renderCourseCard(c, avance, cursosCompletadosSet) {
       const sinContenido = !(c.slides || []).length && !c.slidesEmbedUrl;
       // imagenCard es opcional en el catálogo (mismo campo ya usado en el
       // hero de Overview, ver renderHeroCard en index.html). Un curso sin
@@ -146,26 +158,49 @@
       const imagenHtml = c.imagenCard
         ? `<div class="course-card-image" style="background-image:url('${c.imagenCard}');background-position:center ${posicionY}%;background-size:${ajuste}"></div>`
         : '';
+
+      // Progreso real — solo para cursos con contenido y con al menos una
+      // diapositiva vista (maxSlideIndex existe en `avance`). Completado
+      // usa cursosCompletadosSet (calculado server-side en
+      // GET /academy/me/progreso-resumen, mismo criterio que el logro
+      // curso-terminado) en vez de recalcular acá "última diapositiva +
+      // quiz aprobado" — evita que este archivo y el backend diverjan.
+      const totalSlides = (c.slides || []).length;
+      const completado = cursosCompletadosSet.has(c.slug);
+      const maxSlideIndex = avance[c.slug];
+      const empezado = !sinContenido && !completado && typeof maxSlideIndex === 'number';
+      let progresoHtml = '';
+      if (completado) {
+        progresoHtml = `<div class="course-card-progress-label"><i class="ph ph-check-circle" aria-hidden="true"></i> Completado</div>`;
+      } else if (empezado) {
+        const { completadas, porcentaje } = calcularProgreso(totalSlides, maxSlideIndex);
+        progresoHtml = `
+          <div class="course-card-progress-label">${completadas} / ${totalSlides} secciones completadas</div>
+          <div class="course-card-progress-bar"><span style="width:${porcentaje}%"></span></div>
+        `;
+      }
+
       return `
-        <a class="course-card${sinContenido ? ' is-empty-course' : ''}" href="curso.html#slug=${encodeURIComponent(c.slug)}">
+        <a class="course-card${sinContenido ? ' is-empty-course' : ''}${completado ? ' is-completed' : ''}" href="curso.html#slug=${encodeURIComponent(c.slug)}">
           ${imagenHtml}
           <div class="course-card-body">
-            <h2>${c.titulo}</h2>
+            <h2>${c.titulo}${completado ? '<i class="ph ph-check-circle course-card-check" aria-hidden="true"></i>' : ''}</h2>
             <p>${c.descripcion || ''}</p>
+            ${progresoHtml}
             ${sinContenido
               ? '<span class="course-card-soon"><i class="ph ph-hourglass-medium" aria-hidden="true"></i> Próximamente</span>'
-              : '<span class="btn btn-primary">Entrar al curso</span>'}
+              : `<span class="btn btn-primary">${empezado ? 'Continuar' : 'Entrar al curso'}</span>`}
           </div>
         </a>
       `;
     }
 
-    function renderGrupos(grupos) {
+    function renderGrupos(grupos, avance, cursosCompletadosSet) {
       sectionsEl.innerHTML = grupos.map(g => `
         <div class="tema-section">
           <div class="wf-section-title">${g.tema.titulo}</div>
           <div class="course-grid">
-            ${g.cursos.map(renderCourseCard).join('')}
+            ${g.cursos.map(c => renderCourseCard(c, avance, cursosCompletadosSet)).join('')}
           </div>
         </div>
       `).join('');
@@ -191,12 +226,37 @@
       return params.get('slug') || user.categoriaPreferida || 'alumnos';
     }
 
+    // Resumen real arriba de la grilla — cuántos cursos CON contenido tiene
+    // esta categoría y cuántos ya completó, contra el subtítulo genérico
+    // fijo de antes. Cuenta solo sobre `cursos` (ya filtrados a la
+    // categoría actual), no sobre el total global de cursosCompletadosSet
+    // (que puede incluir cursos de la otra categoría).
+    function renderCategoriaSummary(cursos, cursosCompletadosSet) {
+      const conContenido = cursos.filter(c => (c.slides || []).length || c.slidesEmbedUrl);
+      const completados = conContenido.filter(c => cursosCompletadosSet.has(c.slug)).length;
+      const el = document.getElementById('categoriaSummary');
+      const plural = conContenido.length === 1 ? 'curso disponible' : 'cursos disponibles';
+      const sufijoCompletados = completados > 0
+        ? `, ${completados} completado${completados === 1 ? '' : 's'}`
+        : '';
+      el.innerHTML = `<i class="ph ph-books categoria-summary-icon" aria-hidden="true"></i>${conContenido.length} ${plural}${sufijoCompletados}`;
+    }
+
     async function loadCategoria() {
       const categoriaSlug = categoriaSlugActual();
       try {
-        const data = await academyFetch('/academy/courses');
+        // avance y progreso-resumen no bloquean la grilla si fallan — el
+        // catch vacío degrada a "sin progreso mostrado", mismo criterio
+        // que el resto de fetches secundarios de Academy (ver
+        // loadCursosGuardados en progreso.html).
+        const [data, avance, resumen] = await Promise.all([
+          academyFetch('/academy/courses'),
+          academyFetch('/academy/me/avance').catch(() => ({})),
+          academyFetch('/academy/me/progreso-resumen').catch(() => ({ cursosCompletadosSlugs: [] })),
+        ]);
         const categorias = data.categorias || [];
         const temas = data.temas || [];
+        const cursosCompletadosSet = new Set(resumen.cursosCompletadosSlugs || []);
 
         const categoria = categorias.find(c => c.slug === categoriaSlug);
         if (!categoria) {
@@ -216,7 +276,8 @@
           return;
         }
 
-        renderGrupos(agruparPorTema(cursos, temas));
+        renderCategoriaSummary(cursos, cursosCompletadosSet);
+        renderGrupos(agruparPorTema(cursos, temas), avance, cursosCompletadosSet);
       } catch (err) {
         titleEl.textContent = 'Error al cargar';
         sectionsEl.innerHTML = `<div class="empty-state">${err.message}</div>`;

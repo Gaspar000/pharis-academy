@@ -752,6 +752,27 @@ p { margin: 0 0 1em; color: var(--text-muted); }
    lea de un vistazo en la grilla. */
 .course-card.is-empty-course { opacity: 0.85; }
 .course-card.is-empty-course:hover { transform: none; }
+
+/* Progreso real dentro de la tarjeta (categoria.html) — mismo componente
+   visual que .wf-progress-bar/.wf-progress-label (home.css) pero
+   nombrado aparte porque .course-card no carga home.css en todas las
+   páginas que lo usan (index.html/curso.html sí, categoria.html no). */
+.course-card-progress-label { font-size: 0.76rem; color: var(--text-faint); }
+.course-card-progress-bar { height: 5px; border-radius: 999px; background: var(--rule); overflow: hidden; margin-top: 2px; }
+.course-card-progress-bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+
+/* Curso completado (última diapositiva + quiz aprobado, ver
+   cursosCompletadosSlugs en GET /academy/me/progreso-resumen) — borde de
+   acento verde y check en el título, para distinguirlo de un vistazo de
+   uno recién empezado o sin tocar. Mismo verde semántico que .badge-
+   completado (ya usado para calificaciones de entregas). */
+.course-card.is-completed { border: 1px solid var(--green); }
+.course-card-check { color: var(--green-text); font-size: 1.2rem; flex-shrink: 0; }
+
+/* Resumen real arriba de la grilla (categoria.html) — reemplaza el
+   subtítulo genérico fijo ("Cualquier alumno puede tomar..."). Mismo
+   .page-header de siempre, solo el texto del <p> se vuelve dinámico. */
+.categoria-summary-icon { color: var(--accent-bright); margin-right: 4px; }
 .course-card-soon {
   margin-top: 8px;
   align-self: flex-start;
