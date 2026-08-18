@@ -681,10 +681,10 @@ p { margin: 0 0 1em; color: var(--text-muted); }
    height fijo, width:auto preserva la proporción real de cada SVG (el
    logo de rayos es angosto, el de la extensión es casi cuadrado). */
 .course-card-icon { flex-shrink: 0; font-size: 1.4rem; height: 1.4em; width: auto; color: var(--accent-bright); }
-/* El ícono de Pharis Extension se veía chico junto al de rayos (casi
-   cuadrado, ocupa menos alto visual que uno angosto a la misma altura
-   de línea). Más grande específicamente, sin afectar el otro. */
-.course-card-icon-lg { height: 2.4em; }
+/* Compensa la forma casi cuadrada del ícono de Pharis Extension contra
+   la angosta del logo de rayos — mismo height que ambos se verían
+   desparejos, este ajuste los empareja a ojo. */
+.course-card-icon-lg { height: 1.7em; }
 .course-card p { font-size: 0.88rem; margin-bottom: 0; flex: 1; }
 .course-card .btn { margin-top: 8px; }
 /* Curso sin diapositivas todavía: sigue siendo clickeable (adentro explica
