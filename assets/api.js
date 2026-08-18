@@ -283,6 +283,20 @@ const AcademyAuth = {
     const subEl = container.querySelector('.wf-sidebar-promo-sub');
     if (textoEl) textoEl.textContent = copy.texto;
     if (subEl) subEl.textContent = copy.sub;
+
+    // Imagen del card — la de alumnos queda fija en CSS (.wf-sidebar-promo-art,
+    // sin tocar), esto solo la sobrescribe inline para profesores. Recorte
+    // calibrado contra las dimensiones reales de esta imagen (768x1024,
+    // vertical) en un contenedor cuadrado: cover con top:0% deja ver la
+    // tiza completa + las 2 figuras iluminadas, sin cortar la punta de la
+    // tiza como sí pasaba con posiciones más bajas.
+    if (user.rol === 'profesor') {
+      const artEl = container.querySelector('.wf-sidebar-promo-art');
+      if (artEl) {
+        artEl.style.backgroundImage = "url('https://pub-8dbbde7f94954173b9eaa1e10f3a0aa0.r2.dev/assets/Image-Card%20-%20Dato2.png')";
+        artEl.style.backgroundPosition = 'center 0%';
+      }
+    }
   },
 
   /**
