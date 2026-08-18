@@ -146,9 +146,9 @@
   <!-- Modal de bienvenida, solo aparece tras login/registro exitoso, ver
        sessionStorage 'academy_just_authenticated' en login.html/register.html. -->
   <div class="welcome-modal-backdrop" id="welcomeModalBackdrop" style="display:none;">
-    <div class="welcome-modal">
-      <h2>Pharis ya conoce tu plataforma</h2>
-      <p>
+    <div class="welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcomeModalTitle" aria-describedby="welcomeModalMsg">
+      <h2 id="welcomeModalTitle">Pharis ya conoce tu plataforma</h2>
+      <p id="welcomeModalMsg">
         Pharis Academy replica el funcionamiento de la plataforma estudiantil que usa tu
         universidad. Así demostramos cómo Pharis puede leer el contexto en tiempo real de tu
         LMS, ya sea Moodle, Canvas, Blackboard o cualquier otro, para acompañarte mientras
@@ -162,21 +162,39 @@
   <script>
     AcademyAuth.requireAuth();
 
-    // Modal de bienvenida, solo tras login/registro exitoso (flag seteado en
-    // login.html/register.html justo antes del redirect). Se borra apenas se
-    // lee para que un F5 posterior en Overview no lo vuelva a mostrar.
+    // Modal de bienvenida — antes sin role/aria-modal (un lector de
+    // pantalla no se enteraba de que apareció un diálogo) y sin foco
+    // atrapado (Tab podía escaparse hacia el resto de la página aunque el
+    // backdrop la bloqueara visualmente). Guarda quién tenía el foco antes
+    // de abrir, para devolvérselo al cerrar — mismo principio que
+    // confirmDialog() en api.js, pero este modal no es una confirmación
+    // (solo "Entendido" + cierres alternativos), así que no vale la pena
+    // forzarlo dentro de esa función genérica.
+    const welcomeBackdrop = document.getElementById('welcomeModalBackdrop');
+    const welcomeCloseBtn = document.getElementById('welcomeModalClose');
+    let welcomeDisparador = null;
+
+    function abrirModalBienvenida() {
+      welcomeDisparador = document.activeElement;
+      welcomeBackdrop.style.display = 'flex';
+      welcomeCloseBtn.focus();
+    }
+    function cerrarModalBienvenida() {
+      welcomeBackdrop.style.display = 'none';
+      if (welcomeDisparador && document.contains(welcomeDisparador)) welcomeDisparador.focus();
+    }
+
+    // Solo tras login/registro exitoso (flag seteado en login.html/
+    // register.html justo antes del redirect). Se borra apenas se lee
+    // para que un F5 posterior en Overview no lo vuelva a mostrar.
     if (sessionStorage.getItem('academy_just_authenticated')) {
       sessionStorage.removeItem('academy_just_authenticated');
-      document.getElementById('welcomeModalBackdrop').style.display = 'flex';
+      abrirModalBienvenida();
     }
 
     // Reabrir desde "¿Qué es Pharis Academy?" (menú de usuario, ver
     // renderUserMenu en api.js): el modal era la única explicación del
     // producto y no había forma de volver a verlo tras cerrarlo.
-    function abrirModalBienvenida() {
-      document.getElementById('welcomeModalBackdrop').style.display = 'flex';
-      document.getElementById('welcomeModalClose').focus();
-    }
     if (location.hash === '#que-es') {
       abrirModalBienvenida();
       // Limpia el hash para que un F5 no lo reabra solo.
@@ -189,16 +207,19 @@
       }
     });
 
-    document.getElementById('welcomeModalClose').addEventListener('click', () => {
-      document.getElementById('welcomeModalBackdrop').style.display = 'none';
-    });
+    welcomeCloseBtn.addEventListener('click', cerrarModalBienvenida);
     // Cerrar con Escape y con click en el fondo — antes el único camino era
     // el botón "Entendido".
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') document.getElementById('welcomeModalBackdrop').style.display = 'none';
+      if (welcomeBackdrop.style.display === 'none') return;
+      if (e.key === 'Escape') { cerrarModalBienvenida(); return; }
+      // Foco atrapado: este modal tiene un único elemento focoable (el
+      // botón "Entendido"), así que Tab/Shift+Tab siempre vuelve a él, sin
+      // escaparse hacia el resto de la página mientras el modal está abierto.
+      if (e.key === 'Tab') { e.preventDefault(); welcomeCloseBtn.focus(); }
     });
-    document.getElementById('welcomeModalBackdrop').addEventListener('click', (e) => {
-      if (e.target.id === 'welcomeModalBackdrop') e.currentTarget.style.display = 'none';
+    welcomeBackdrop.addEventListener('click', (e) => {
+      if (e.target.id === 'welcomeModalBackdrop') cerrarModalBienvenida();
     });
 
     const user = AcademyAuth.getUser();
@@ -212,7 +233,11 @@
       document.getElementById('navDashboard').style.display = 'flex';
     }
     AcademyAuth.aplicarGateSidebar();
-    document.getElementById('helloMsg').textContent = `Hola, ${user.nombre.split(' ')[0]}!`;
+    // (user.nombre || '') — un nombre vacío/null en localStorage (estado
+    // corrupto, no debería pasar en el flujo normal) tumbaría toda la
+    // página acá si no se cubre: el resto del script es síncrono desde
+    // este punto, un TypeError acá corta todo lo que sigue.
+    document.getElementById('helloMsg').textContent = `Hola, ${(user.nombre || '').split(' ')[0]}!`;
     // Ya viene en localStorage desde el último login (POST /academy/login
     // ahora devuelve streakCount), no hace falta un fetch aparte para esto.
     document.getElementById('statStreak').textContent = user.streakCount ?? 0;
