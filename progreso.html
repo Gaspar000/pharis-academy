@@ -52,18 +52,22 @@
     </div>
 
     <main class="shell" style="padding-top:28px; max-width:760px;">
-      <!-- Bienvenida — resumen de una línea, contexto inmediato antes de
-           los números sueltos. Dato real: nombre de localStorage (ya
-           disponible sin esperar ningún fetch), racha/puntos de GET
-           /academy/me (mismo request que ya se hacía). -->
+      <!-- Bienvenida — saludo por nombre, sin repetir racha/puntos (esos
+           ya tienen su propia sección abajo con el mismo dato en detalle,
+           duplicarlos acá no agregaba nada). h2, no h1: la página ya
+           tiene su h1 real en .wf-topbar (línea de arriba) — dos h1 en la
+           misma página rompe la jerarquía de encabezados. -->
       <div class="progreso-header">
-        <h1 id="saludoNombre">Hola</h1>
-        <p id="saludoResumen">Cargando tu progreso…</p>
+        <h2 id="saludoNombre">Hola</h2>
+        <p id="saludoResumen">Así va tu progreso en Pharis Academy.</p>
       </div>
 
       <!-- Continuar donde quedaste — dato real, viene de GET
            /academy/me/progreso-resumen. Oculto si no hay ningún curso en
-           progreso (recién registrado, o los completó todos). -->
+           progreso (recién registrado, o los completó todos). Distinto
+           de #continuarError (abajo): "sin curso en progreso" y "no se
+           pudo cargar" antes se veían idénticos (ambos = nada en
+           pantalla), sin forma de saber cuál de los dos pasó. -->
       <a class="wf-panel continuar-card" id="continuarCard" style="display:none; margin-bottom:24px;">
         <div class="continuar-card-icon"><i class="ph ph-play" aria-hidden="true"></i></div>
         <div class="continuar-card-body">
@@ -73,6 +77,9 @@
           <div class="wf-progress-bar"><span id="continuarBarra"></span></div>
         </div>
       </a>
+      <p class="error-box" id="continuarError" style="margin-bottom:24px;">
+        <i class="ph ph-warning-circle" aria-hidden="true"></i> No se pudo cargar tu progreso. Recargá la página para intentar de nuevo.
+      </p>
 
       <!-- Racha + puntos, dato real, viene de GET /academy/me. La racha
            ahora es un anillo (progreso hacia el próximo múltiplo de 7) en
@@ -105,9 +112,12 @@
 
       <!-- Resumen de actividad — dato real, viene de GET
            /academy/me/progreso-resumen + GET /academy/me/entregas. Cada
-           métrica con su ícono de categoría (verde = logro/completado,
-           ámbar = evaluación, acento = actividad neutra) en vez de
-           tarjetas idénticas de solo número. -->
+           métrica con su propio ícono en un chip de color, en vez de
+           tarjetas idénticas de solo número — el color es acento visual
+           para diferenciar tarjetas de un vistazo, NO codifica una
+           categoría que el usuario necesite descifrar (cada tarjeta ya
+           se explica sola por su .label, el color no es la única fuente
+           de esa información). -->
       <div class="wf-section-title">Tu actividad</div>
       <div class="dash-stats" style="grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); margin-bottom:24px;">
         <div class="stat-tile">
@@ -156,6 +166,7 @@
           <!-- Cursos guardados, dato real, viene de GET /academy/me/cursos-guardados -->
           <div class="wf-section-title">Cursos guardados</div>
           <div class="wf-panel" id="savedCoursesPanel">
+            <p class="error-box" id="removeCourseError">No se pudo quitar el curso. Intentá de nuevo.</p>
             <div class="empty-state empty-state-action" style="padding:20px 8px;" id="savedCoursesEmpty">
               <i class="ph ph-bookmark-simple" aria-hidden="true"></i>
               <span>Guarda un curso con el botón "Guardar" para tenerlo a mano acá.</span>
@@ -217,8 +228,6 @@
     // página se queda con estos valores (no es un error bloqueante).
     renderStreakRing(user.streakCount ?? 0);
     pointsNum.textContent = user.puntosTotales ?? 0;
-    document.getElementById('saludoResumen').textContent =
-      `Llevas ${user.streakCount ?? 0} ${(user.streakCount ?? 0) === 1 ? 'día' : 'días'} de racha y ${user.puntosTotales ?? 0} puntos.`;
     renderLogros(user.logros || []);
 
     // Ícono Phosphor por defecto si el logro no trae su propio campo
@@ -263,8 +272,6 @@
         AcademyAuth.updateUser(data.user);
         renderStreakRing(data.user.streakCount ?? 0);
         pointsNum.textContent = data.user.puntosTotales ?? 0;
-        document.getElementById('saludoResumen').textContent =
-          `Llevas ${data.user.streakCount ?? 0} ${(data.user.streakCount ?? 0) === 1 ? 'día' : 'días'} de racha y ${data.user.puntosTotales ?? 0} puntos.`;
         renderLogros(data.user.logros || []);
       } catch { /* se queda con los datos de localStorage, no bloquea la página */ }
     }
@@ -317,11 +324,14 @@
     // cada loadCursosGuardados(), un listener por botón se perdería en cada
     // refresco, delegar en el contenedor padre (que nunca se reemplaza)
     // evita tener que re-enganchar listeners.
+    const removeCourseError = document.getElementById('removeCourseError');
+
     savedCoursesList.addEventListener('click', async (e) => {
       const btn = e.target.closest('.remove-btn');
       if (!btn) return;
       const slug = btn.dataset.slug;
       btn.disabled = true;
+      removeCourseError.classList.remove('visible');
       try {
         await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/guardar`, {
           method: 'POST',
@@ -329,7 +339,11 @@
         });
         await loadCursosGuardados(); // refresca la lista completa tras quitar
       } catch {
+        // Antes solo se rehabilitaba el botón sin ningún mensaje — quien
+        // hacía clic y la fila seguía ahí no tenía forma de saber si
+        // había fallado o si tardaba.
         btn.disabled = false;
+        removeCourseError.classList.add('visible');
       }
     });
 
@@ -359,7 +373,14 @@
         document.getElementById('slidesVistasNum').textContent = data.slidesVistas;
         document.getElementById('preguntasPharisNum').textContent = data.preguntasPharis;
         renderContinuar(data.continuarCurso);
-      } catch { /* no bloquea el resto de la página */ }
+      } catch {
+        // Antes "sin curso en progreso" y "falló la carga" se veían
+        // idénticos (el card oculto en ambos casos, sin pista de cuál
+        // pasó) — este mensaje distingue el caso de error real. El resto
+        // de la página (racha, puntos, logros) sigue funcionando, no es
+        // bloqueante.
+        document.getElementById('continuarError').classList.add('visible');
+      }
 
       try {
         const entregas = await academyFetch('/academy/me/entregas');
