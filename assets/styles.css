@@ -799,6 +799,16 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-card-compact-title { font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 2px; }
 .course-card-compact p { font-size: 0.78rem; }
 .course-card-compact .btn { padding: 8px 12px; font-size: 0.8rem; }
+/* Imagen del curso sugerido — mismo campo imagenCard del catálogo que ya
+   usan .course-card-image en categoria.html/index.html, pero el margen
+   negativo es -20px (no -24px): el padding que compensa acá es el del
+   .wf-panel que envuelve la tarjeta (20px), no el propio .course-card
+   (que en esta variante compacta es 0, ver arriba). border-radius solo
+   arriba para no salirse del radio del panel contenedor. */
+.course-card-compact .course-card-image {
+  margin: -20px -20px 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
 
 /* ── Categoría: banner de invitación cruzada ──
    Invita a ver la OTRA categoría (alumnos↔profesores) sin ocultarla.

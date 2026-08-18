@@ -1266,13 +1266,25 @@
       if (!suggested.length) { section.style.display = 'none'; return; }
 
       section.style.display = '';
-      document.getElementById('suggestedGrid').innerHTML = suggested.map(c => `
-        <a class="course-card course-card-compact" href="curso.html#slug=${encodeURIComponent(c.slug)}">
-          <p class="course-card-compact-title">${c.titulo}</p>
-          <p>${c.descripcion || ''}</p>
-          <span class="btn btn-primary">Entrar al curso</span>
-        </a>
-      `).join('');
+      document.getElementById('suggestedGrid').innerHTML = suggested.map(c => {
+        // Mismo campo imagenCard/imagenCardPosicionAmplia/imagenCardAjuste
+        // del catálogo que ya usa renderCourseCard en categoria.html — acá
+        // sin fallback a imagenCardPosicion (ese es para el hero casi
+        // cuadrado de index.html, no para esta franja 16:9).
+        const posicionY = typeof c.imagenCardPosicionAmplia === 'number' ? c.imagenCardPosicionAmplia : 0;
+        const ajuste = c.imagenCardAjuste === 'contain' ? 'contain' : 'cover';
+        const imagenHtml = c.imagenCard
+          ? `<div class="course-card-image" style="background-image:url('${c.imagenCard}');background-position:center ${posicionY}%;background-size:${ajuste}"></div>`
+          : '';
+        return `
+          <a class="course-card course-card-compact" href="curso.html#slug=${encodeURIComponent(c.slug)}">
+            ${imagenHtml}
+            <p class="course-card-compact-title">${c.titulo}</p>
+            <p>${c.descripcion || ''}</p>
+            <span class="btn btn-primary">Entrar al curso</span>
+          </a>
+        `;
+      }).join('');
     }
 
     // ── Acciones sociales ──
