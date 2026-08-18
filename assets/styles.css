@@ -160,7 +160,7 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .shell {
   max-width: var(--maxw);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 24px 48px;
 }
 /* curso.html: ocupa todo el ancho de .wf-main en vez de centrarse con un
    tope fijo, con margin:0 auto + max-width:1120px sobraba espacio tanto
@@ -1800,7 +1800,7 @@ tbody tr:hover { background: var(--accent-soft); }
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-  .shell { padding: 0 16px; }
+  .shell { padding: 0 16px 48px; }
   .topbar-inner { padding: 14px 16px; }
   .auth-card { padding: 28px 22px; }
   .course-grid { grid-template-columns: 1fr; }
