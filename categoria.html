@@ -125,11 +125,17 @@
     // usuario descubría que estaba vacío recién adentro.
     function renderCourseCard(c) {
       const sinContenido = !(c.slides || []).length && !c.slidesEmbedUrl;
-      // imagenCard/imagenCardPosicion son opcionales en el catálogo (mismo
-      // campo ya usado en el hero de Overview, ver renderHeroCard en
-      // index.html). Un curso sin imagen sigue mostrando la tarjeta de
-      // solo texto de siempre, sin franja.
-      const posicionY = typeof c.imagenCardPosicion === 'number' ? c.imagenCardPosicion : 0;
+      // imagenCard es opcional en el catálogo (mismo campo ya usado en el
+      // hero de Overview, ver renderHeroCard en index.html). Un curso sin
+      // imagen sigue mostrando la tarjeta de solo texto de siempre, sin
+      // franja. imagenCardPosicionAmplia es un valor aparte de
+      // imagenCardPosicion. Esta franja (.course-card-image, 16:9) es
+      // mucho más ancha/baja que el contenedor casi cuadrado del hero, el
+      // mismo % de recorte no sirve para ambos (ver el campo en el
+      // catálogo). Cae a imagenCardPosicion si no se declara.
+      const posicionY = typeof c.imagenCardPosicionAmplia === 'number'
+        ? c.imagenCardPosicionAmplia
+        : (typeof c.imagenCardPosicion === 'number' ? c.imagenCardPosicion : 0);
       const imagenHtml = c.imagenCard
         ? `<div class="course-card-image" style="background-image:url('${c.imagenCard}');background-position:center ${posicionY}%"></div>`
         : '';
