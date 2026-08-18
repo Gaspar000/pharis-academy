@@ -663,6 +663,12 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .course-card-image {
   aspect-ratio: 16 / 9;
   background-size: cover;
+  background-repeat: no-repeat;
+  /* Respaldo para imagenCardAjuste:'contain' (ver renderCourseCard en
+     categoria.html). Fotos verticales en este marco horizontal dejan
+     franjas vacías a los lados, este color evita un corte blanco brusco
+     contra --panel. */
+  background-color: var(--panel-2);
   margin: -24px -24px 0;
 }
 .course-card-body { display: flex; flex-direction: column; gap: 10px; flex: 1; }

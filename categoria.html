@@ -136,8 +136,13 @@
       const posicionY = typeof c.imagenCardPosicionAmplia === 'number'
         ? c.imagenCardPosicionAmplia
         : (typeof c.imagenCardPosicion === 'number' ? c.imagenCardPosicion : 0);
+      // imagenCardAjuste: 'cover' (default, llena el marco recortando) o
+      // 'contain' (muestra la foto completa, sin recorte, a costa de dejar
+      // franjas vacías a los lados si la proporción no calza exacto,
+      // como fotos de retrato vertical en este marco 16:9 horizontal).
+      const ajuste = c.imagenCardAjuste === 'contain' ? 'contain' : 'cover';
       const imagenHtml = c.imagenCard
-        ? `<div class="course-card-image" style="background-image:url('${c.imagenCard}');background-position:center ${posicionY}%"></div>`
+        ? `<div class="course-card-image" style="background-image:url('${c.imagenCard}');background-position:center ${posicionY}%;background-size:${ajuste}"></div>`
         : '';
       return `
         <a class="course-card${sinContenido ? ' is-empty-course' : ''}" href="curso.html#slug=${encodeURIComponent(c.slug)}">
