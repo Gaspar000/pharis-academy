@@ -59,8 +59,8 @@
       <!-- Info de usuario -->
       <div class="wf-section-title">Información de usuario</div>
       <div class="wf-panel">
-        <div class="success-box" id="perfilSuccessBox"></div>
-        <div class="error-box" id="perfilErrorBox"></div>
+        <div class="success-box" id="perfilSuccessBox" role="status"></div>
+        <div class="error-box" id="perfilErrorBox" role="alert"></div>
         <div id="perfilAvatar" style="margin-bottom:18px;"></div>
         <form id="perfilForm">
           <div class="field">
@@ -72,8 +72,8 @@
             <input type="email" id="email" required autocomplete="email" />
             <div class="field-hint">Es el correo con el que inicias sesión. Si lo cambias, usa el nuevo la próxima vez.</div>
           </div>
-          <div class="field">
-            <label>Soy</label>
+          <fieldset class="field">
+            <legend>Soy</legend>
             <div class="category-toggle">
               <label>
                 <input type="radio" name="categoriaPreferida" value="alumnos" />
@@ -85,7 +85,7 @@
               </label>
             </div>
             <div class="field-hint">Solo para mostrarte cursos relevantes primero, puedes tomar cualquier curso de cualquier categoría.</div>
-          </div>
+          </fieldset>
           <button type="submit" class="btn btn-primary" id="perfilSubmitBtn" style="width:auto; padding:10px 20px;">Guardar cambios</button>
         </form>
       </div>
@@ -93,8 +93,8 @@
       <!-- Cambiar contraseña -->
       <div class="wf-section-title">Cambiar contraseña</div>
       <div class="wf-panel">
-        <div class="success-box" id="passwordSuccessBox"></div>
-        <div class="error-box" id="passwordErrorBox"></div>
+        <div class="success-box" id="passwordSuccessBox" role="status"></div>
+        <div class="error-box" id="passwordErrorBox" role="alert"></div>
         <form id="passwordForm">
           <div class="field">
             <label for="passwordActual">Contraseña actual</label>
@@ -118,8 +118,8 @@
            riesgo real de un LMS institucional sin datos financieros). -->
       <div class="wf-section-title">Seguridad</div>
       <div class="wf-panel">
-        <div class="success-box" id="sesionesSuccessBox"></div>
-        <div class="error-box" id="sesionesErrorBox"></div>
+        <div class="success-box" id="sesionesSuccessBox" role="status"></div>
+        <div class="error-box" id="sesionesErrorBox" role="alert"></div>
         <div class="field-hint" style="margin-bottom:14px;">
           Si dejaste tu sesión abierta en una computadora compartida o perdiste tu equipo, cierra tu sesión en todos los dispositivos. Vas a tener que volver a iniciar sesión acá también.
         </div>
@@ -260,7 +260,12 @@
     const sesionesSuccessBox = document.getElementById('sesionesSuccessBox');
 
     cerrarSesionesBtn.addEventListener('click', async () => {
-      if (!confirm('Vas a cerrar tu sesión en todos los dispositivos, incluido este. ¿Continuar?')) return;
+      const confirmado = await confirmDialog({
+        titulo: 'Cerrar sesión en todos los dispositivos',
+        mensaje: 'Vas a cerrar tu sesión en todos los dispositivos, incluido este. ¿Continuar?',
+        textoConfirmar: 'Cerrar sesiones',
+      });
+      if (!confirmado) return;
 
       hideBox(sesionesErrorBox);
       hideBox(sesionesSuccessBox);

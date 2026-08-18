@@ -43,6 +43,86 @@ function escapeHtml(str) {
     .replace(/'/g, '&#39;');
 }
 
+/**
+ * Modal de confirmación propio — reemplaza window.confirm() nativo (única
+ * excepción visual del sitio, que usa .wf-panel/.error-box en todo el
+ * resto de la UI). Devuelve una Promise<boolean>: true si el usuario
+ * confirmó, false si canceló, cerró con Escape, o clickeó el backdrop.
+ *
+ * Accesibilidad: role="alertdialog" + aria-modal, foco atrapado con Tab
+ * entre los 2 botones (loop, no se escapa al resto de la página mientras
+ * está abierto), foco inicial en "Cancelar" (la acción menos destructiva
+ * por defecto), y el foco vuelve al elemento que abrió el modal al
+ * cerrarse — sin esto, alguien navegando por teclado perdería su lugar
+ * en la página después de cerrar el diálogo.
+ */
+// Un solo diálogo a la vez a nivel de módulo — sin esto, un doble clic
+// rápido en el botón que abre el modal (antes de que el primer await
+// resuelva) apila dos overlays y registra dos listeners de keydown en
+// document. Cerrar el segundo (el visible, tapa al primero) no limpia el
+// primero: queda un overlay "fantasma" que reaparece, con su listener de
+// Tab/Escape filtrado en document indefinidamente. Abrir un diálogo
+// nuevo mientras uno está activo lo cierra primero (como cancelado),
+// nunca los apila.
+let cerrarDialogoActivo = null;
+
+function confirmDialog({ titulo, mensaje, textoConfirmar = 'Confirmar', textoCancelar = 'Cancelar', peligroso = true }) {
+  if (cerrarDialogoActivo) cerrarDialogoActivo();
+
+  return new Promise((resolve) => {
+    const disparador = document.activeElement;
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-overlay';
+    overlay.innerHTML = `
+      <div class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="confirmDialogTitle" aria-describedby="confirmDialogMsg">
+        <div class="confirm-dialog-title" id="confirmDialogTitle">${escapeHtml(titulo)}</div>
+        <p class="confirm-dialog-msg" id="confirmDialogMsg">${escapeHtml(mensaje)}</p>
+        <div class="confirm-dialog-actions">
+          <button type="button" class="btn btn-secondary" data-action="cancel">${escapeHtml(textoCancelar)}</button>
+          <button type="button" class="btn ${peligroso ? 'btn-danger' : 'btn-primary'}" data-action="confirm">${escapeHtml(textoConfirmar)}</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const cancelBtn = overlay.querySelector('[data-action="cancel"]');
+    const confirmBtn = overlay.querySelector('[data-action="confirm"]');
+    const focusables = [cancelBtn, confirmBtn];
+
+    function cerrar(resultado) {
+      overlay.remove();
+      document.removeEventListener('keydown', onKeydown);
+      cerrarDialogoActivo = null;
+      // Vuelve el foco a quien abrió el modal — si ese elemento ya no
+      // existe (ej. la fila se re-renderizó), no falla, simplemente no
+      // mueve el foco a ningún lado.
+      if (disparador && document.contains(disparador)) disparador.focus();
+      resolve(resultado);
+    }
+    cerrarDialogoActivo = () => cerrar(false);
+
+    function onKeydown(e) {
+      if (e.key === 'Escape') { cerrar(false); return; }
+      if (e.key !== 'Tab') return;
+      // Foco atrapado: Tab/Shift+Tab solo circula entre los 2 botones,
+      // nunca se escapa al resto de la página mientras el modal está abierto.
+      const idx = focusables.indexOf(document.activeElement);
+      e.preventDefault();
+      const siguiente = e.shiftKey
+        ? focusables[(idx <= 0 ? focusables.length : idx) - 1]
+        : focusables[(idx + 1) % focusables.length];
+      siguiente.focus();
+    }
+
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) cerrar(false); });
+    cancelBtn.addEventListener('click', () => cerrar(false));
+    confirmBtn.addEventListener('click', () => cerrar(true));
+    document.addEventListener('keydown', onKeydown);
+
+    cancelBtn.focus();
+  });
+}
+
 /** Cierra cualquier dropdown de topbar (usuario/notificaciones) distinto de
  * `except` — sin esto, abrir uno mientras el otro ya está abierto los deja
  * a ambos superpuestos en pantalla al mismo tiempo. */
