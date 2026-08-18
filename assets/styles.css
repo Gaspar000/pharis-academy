@@ -1368,7 +1368,11 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   border-top: 1px solid var(--rule);
 }
 .saved-course-row:first-child { border-top: none; padding-top: 0; }
-.saved-course-row .info { min-width: 0; }
+/* .info pasó de <div> a <a> (curso guardado ahora es clickeable hacia el
+   curso) — display:block para que ocupe el ancho disponible como div
+   normal dentro del flex (un <a> es inline por defecto, sin esto el
+   ellipsis de .titulo/.descripcion no tendría contra qué recortar). */
+.saved-course-row .info { display: block; min-width: 0; flex: 1; }
 .saved-course-row .info .titulo {
   font-size: 0.84rem;
   font-weight: 600;

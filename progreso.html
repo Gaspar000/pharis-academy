@@ -283,10 +283,10 @@
       savedCoursesEmpty.style.display = 'none';
       savedCoursesList.innerHTML = cursos.map(c => `
         <div class="saved-course-row" data-slug="${c.slug}">
-          <div class="info">
+          <a class="info" href="curso.html#slug=${encodeURIComponent(c.slug)}">
             <div class="titulo">${c.titulo}</div>
             <div class="descripcion">${c.descripcion || ''}</div>
-          </div>
+          </a>
           <button class="remove-btn" type="button" data-slug="${c.slug}" aria-label="Quitar ${c.titulo} de guardados">
             <i class="ph ph-x"></i>
           </button>
