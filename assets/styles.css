@@ -1369,10 +1369,25 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 }
 .saved-course-row:first-child { border-top: none; padding-top: 0; }
 /* .info pasó de <div> a <a> (curso guardado ahora es clickeable hacia el
-   curso) — display:block para que ocupe el ancho disponible como div
-   normal dentro del flex (un <a> es inline por defecto, sin esto el
-   ellipsis de .titulo/.descripcion no tendría contra qué recortar). */
-.saved-course-row .info { display: block; min-width: 0; flex: 1; }
+   curso) — display:flex (no block) para poner la miniatura y el texto
+   lado a lado dentro del mismo link. */
+.saved-course-row .info { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.saved-course-row .info-text { min-width: 0; }
+/* Miniatura — mismo campo imagenCard del catálogo que ya usan las
+   tarjetas grandes (categoria.html) y la de Curso sugerido (curso.html),
+   acá en un cuadrado chico en vez de una franja 16:9: la fila es angosta
+   y de una sola línea, un recorte ancho se vería demasiado achatado. Sin
+   imagenCard, el curso simplemente no tiene miniatura (mismo criterio de
+   "opcional" que en el resto del catálogo). */
+.saved-course-row .thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background-color: var(--panel-2);
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+}
 .saved-course-row .info .titulo {
   font-size: 0.84rem;
   font-weight: 600;

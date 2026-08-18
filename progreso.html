@@ -281,17 +281,27 @@
         return;
       }
       savedCoursesEmpty.style.display = 'none';
-      savedCoursesList.innerHTML = cursos.map(c => `
-        <div class="saved-course-row" data-slug="${c.slug}">
-          <a class="info" href="curso.html#slug=${encodeURIComponent(c.slug)}">
-            <div class="titulo">${c.titulo}</div>
-            <div class="descripcion">${c.descripcion || ''}</div>
-          </a>
-          <button class="remove-btn" type="button" data-slug="${c.slug}" aria-label="Quitar ${c.titulo} de guardados">
-            <i class="ph ph-x"></i>
-          </button>
-        </div>
-      `).join('');
+      savedCoursesList.innerHTML = cursos.map(c => {
+        const posicionY = typeof c.imagenCardPosicionAmplia === 'number' ? c.imagenCardPosicionAmplia : 0;
+        const ajuste = c.imagenCardAjuste === 'contain' ? 'contain' : 'cover';
+        const thumbHtml = c.imagenCard
+          ? `<div class="thumb" style="background-image:url('${c.imagenCard}');background-position:center ${posicionY}%;background-size:${ajuste}"></div>`
+          : '';
+        return `
+          <div class="saved-course-row" data-slug="${c.slug}">
+            <a class="info" href="curso.html#slug=${encodeURIComponent(c.slug)}">
+              ${thumbHtml}
+              <div class="info-text">
+                <div class="titulo">${c.titulo}</div>
+                <div class="descripcion">${c.descripcion || ''}</div>
+              </div>
+            </a>
+            <button class="remove-btn" type="button" data-slug="${c.slug}" aria-label="Quitar ${c.titulo} de guardados">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+        `;
+      }).join('');
     }
 
     async function loadCursosGuardados() {
