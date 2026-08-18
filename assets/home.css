@@ -69,10 +69,14 @@ body { display: flex; min-height: 100vh; }
   aspect-ratio: 1 / 1;
   border-radius: 14px;
   background-color: rgba(255, 255, 255, 0.10);
-  background-image: url('https://pub-8dbbde7f94954173b9eaa1e10f3a0aa0.r2.dev/assets/Imagen%20Card%20-%20Dato.png');
+  background-image: url('https://pub-8dbbde7f94954173b9eaa1e10f3a0aa0.r2.dev/assets/Image-Card-Dato.png');
   background-repeat: no-repeat;
-  background-size: 115%;
-  background-position: calc(50% + 9px) center;
+  /* Imagen nueva es cuadrada (1024x1024, misma proporción que el
+     contenedor). Cover al 100% centrado, sin los ajustes de tamaño/
+     posición calibrados para la imagen anterior (retratos verticales
+     de dos personas), que no aplican a esta composición distinta. */
+  background-size: 100%;
+  background-position: center;
 }
 .wf-sidebar-promo-text {
   font-size: 0.92rem;
