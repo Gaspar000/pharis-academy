@@ -446,6 +446,18 @@
     // de página (no se persiste ni se lee del backend).
     let actividadPrevaUsada = false;
 
+    // Posición (índice real 0-based) donde se inserta el quiz, ANTES de esa
+    // diapositiva. course.quizPosicion es opcional en el catálogo. La
+    // mayoría de los cursos (introduccion, introduccion-profesores) solo
+    // tienen 1 diapositiva después del quiz ("Cierre"), así que el
+    // fallback slides.length - 1 sigue siendo correcto sin declarar nada.
+    // curso-01 SÍ lo declara porque tiene 2 diapositivas después del quiz
+    // ("Felicidades" y "Referencias", ambas deben quedar bloqueadas).
+    function posicionQuizDelCurso(slides, course) {
+      if (typeof course?.quizPosicion === 'number') return course.quizPosicion;
+      return slides.length - 1;
+    }
+
     // Lista de RENDERIZADO del panel de Capítulos — nunca muta `slides`
     // (el array real del catálogo, del que dependen avance/puntos/ARIA).
     // Cada ítem tipo 'slide' conserva su slideIndex real (0-based); cada
@@ -456,7 +468,7 @@
       if (!tieneQuiz || !slides.length) {
         return slides.map((s, i) => ({ tipo: 'slide', slideIndex: i, titulo: s.titulo }));
       }
-      const posicionQuiz = slides.length - 1; // justo antes del último índice real ("Cierre")
+      const posicionQuiz = posicionQuizDelCurso(slides, course);
       const items = [];
       slides.forEach((s, i) => {
         if (i === posicionQuiz) items.push({ tipo: 'quiz' });
@@ -536,8 +548,15 @@
       goToSlide(index);
     }
 
-    function cierreEstaBloqueada() {
-      return Boolean(currentCourse && currentCourse.quiz) && !quizAprobado;
+    // Bloqueada mientras el quiz no esté aprobado cualquier diapositiva
+    // real desde posicionQuizDelCurso en adelante (rango, no solo la
+    // última). En introduccion/introduccion-profesores ese rango es 1
+    // sola diapositiva ("Cierre"); en curso-01 son 2 ("Felicidades" y
+    // "Referencias", ver quizPosicion en el catálogo).
+    function slideEstaBloqueada(index) {
+      if (!currentCourse || !currentCourse.quiz || quizAprobado) return false;
+      const posicionQuiz = posicionQuizDelCurso(currentSlides, currentCourse);
+      return index >= posicionQuiz;
     }
 
     // Bloqueado hasta ver TODAS las diapositivas anteriores a su posición
@@ -547,7 +566,7 @@
     // página. Ya aprobado no vuelve a bloquearse (permite repasar).
     function quizEstaBloqueado() {
       if (!currentCourse || !currentCourse.quiz || quizAprobado) return false;
-      const posicionQuiz = currentSlides.length - 1;
+      const posicionQuiz = posicionQuizDelCurso(currentSlides, currentCourse);
       return maxSlideIndexAvance < posicionQuiz - 1;
     }
 
@@ -562,11 +581,8 @@
       const quizEl = document.querySelector('#chaptersList .chapter-item[data-tipo="quiz"]');
       if (quizEl) quizEl.classList.toggle('is-locked', quizEstaBloqueado());
 
-      const ultimoIndice = currentSlides.length - 1;
-      const bloqueada = cierreEstaBloqueada();
       document.querySelectorAll('#chaptersList .chapter-item[data-tipo="slide"]').forEach(el => {
-        const esUltima = Number(el.dataset.index) === ultimoIndice;
-        el.classList.toggle('is-locked', esUltima && bloqueada);
+        el.classList.toggle('is-locked', slideEstaBloqueada(Number(el.dataset.index)));
       });
     }
 
@@ -837,7 +853,7 @@
             <div class="quiz-feedback quiz-feedback-ok">
               <i class="ph ph-check-circle" aria-hidden="true"></i>
               ¡Aprobaste! ${result.puntaje}/${result.total} correctas.
-              <button class="btn btn-secondary btn-small" type="button" id="quizVolverBtn">Ir a Cierre</button>
+              <button class="btn btn-secondary btn-small" type="button" id="quizVolverBtn">Continuar</button>
             </div>`;
           if (result.puntosGanados > 0) celebrarPuntos(result.puntosGanados);
         } else {
@@ -847,12 +863,15 @@
               ${result.puntaje}/${result.total} correctas — necesitas más para aprobar. Repasa las diapositivas y vuelve a intentar, no hay límite de intentos.
             </div>`;
         }
-        // Al aprobar, "Cierre" ya quedó desbloqueada (updateChapterLockState
-        // arriba) — vuelve al visor y navega directo ahí, en vez de a donde
-        // estaba el alumno antes de entrar al quiz.
+        // Al aprobar, todo el rango posterior al quiz ya quedó desbloqueado
+        // (updateChapterLockState arriba). Vuelve al visor y navega a la
+        // primera diapositiva de ese rango (posicionQuizDelCurso), en vez
+        // de a donde estaba el alumno antes de entrar al quiz. Para cursos
+        // con más de 1 diapositiva después del quiz (ver curso-01), esto
+        // aterriza en la primera, no salta directo a la última.
         document.getElementById('quizVolverBtn')?.addEventListener('click', () => {
           volverAlVisor();
-          goToSlide(currentSlides.length - 1);
+          goToSlide(posicionQuizDelCurso(currentSlides, currentCourse));
         });
       } catch (err) {
         document.getElementById('quizResult').innerHTML =
@@ -864,11 +883,12 @@
     });
 
     function goToSlide(index) {
-      // Barrera dura del candado: "Cierre" (último índice real) es
-      // inalcanzable mientras el quiz no esté aprobado, sin importar la vía
-      // (click del panel ya la filtra en handleChapterClick, esto cubre
-      // además teclado ArrowRight/End y el seek de la barra de progreso).
-      if (index === currentSlides.length - 1 && cierreEstaBloqueada()) {
+      // Barrera dura del candado: cualquier diapositiva del rango bloqueado
+      // (ver slideEstaBloqueada) es inalcanzable mientras el quiz no esté
+      // aprobado, sin importar la vía (click del panel ya la filtra en
+      // handleChapterClick, esto cubre además teclado ArrowRight/End y el
+      // seek de la barra de progreso).
+      if (slideEstaBloqueada(index)) {
         mostrarSlideToast('Aprueba el quiz para desbloquear esta diapositiva.');
         return;
       }
@@ -905,14 +925,15 @@
       progressEl.setAttribute('aria-valuemax', String(currentSlides.length));
       progressEl.setAttribute('aria-valuetext', `Diapositiva ${currentSlideIndex + 1} de ${currentSlides.length}: ${slide.titulo}`);
       document.getElementById('slidePrevBtn').disabled = currentSlideIndex === 0;
-      // En la penúltima diapositiva real (justo antes de la posición del
-      // quiz en el panel, ver buildChapterList), "Siguiente" pasa a llevar
+      // En la diapositiva justo antes de la posición del quiz (ver
+      // posicionQuizDelCurso/buildChapterList), "Siguiente" pasa a llevar
       // al quiz en vez de quedar deshabilitado — mismo destino que hacer
       // click en el capítulo "Quiz", pasando por la misma verificación de
       // actividad usada (ver intentarAvanzar). En la última diapositiva
-      // real ("Cierre") sigue deshabilitado como siempre.
+      // real sigue deshabilitado como siempre.
       const esUltima = currentSlideIndex === currentSlides.length - 1;
-      const esPenultimaConQuiz = currentCourse?.quiz && currentSlideIndex === currentSlides.length - 2;
+      const esPenultimaConQuiz = currentCourse?.quiz
+        && currentSlideIndex === posicionQuizDelCurso(currentSlides, currentCourse) - 1;
       const nextBtn = document.getElementById('slideNextBtn');
       if (esPenultimaConQuiz) {
         nextBtn.disabled = false;
@@ -991,11 +1012,12 @@
 
     document.getElementById('slidePrevBtn').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
     document.getElementById('slideNextBtn').addEventListener('click', () => {
-      // En la penúltima diapositiva real, "Siguiente" lleva al quiz (mismo
-      // destino que su capítulo en el panel), pasando por las mismas
-      // barreras — no un goToSlide(currentSlideIndex + 1) directo, que
-      // saltaría el candado/aviso.
-      const esPenultimaConQuiz = currentCourse?.quiz && currentSlideIndex === currentSlides.length - 2;
+      // En la diapositiva justo antes del quiz, "Siguiente" lleva al quiz
+      // (mismo destino que su capítulo en el panel), pasando por las
+      // mismas barreras. No un goToSlide(currentSlideIndex + 1) directo,
+      // que saltaría el candado/aviso.
+      const esPenultimaConQuiz = currentCourse?.quiz
+        && currentSlideIndex === posicionQuizDelCurso(currentSlides, currentCourse) - 1;
       if (esPenultimaConQuiz) { intentarAvanzar(); return; }
       goToSlide(currentSlideIndex + 1);
     });
@@ -1010,10 +1032,12 @@
 
       if (e.key === 'ArrowLeft')  goToSlide(currentSlideIndex - 1);
       // Mismo destino que el botón "Siguiente" (ver su listener): en la
-      // penúltima diapositiva real, ArrowRight lleva al quiz en vez de a
-      // "Cierre" directo, para no divergir del botón visual.
+      // diapositiva justo antes del quiz, ArrowRight lleva al quiz en vez
+      // de a la siguiente diapositiva bloqueada, para no divergir del
+      // botón visual.
       if (e.key === 'ArrowRight') {
-        const esPenultimaConQuiz = currentCourse?.quiz && currentSlideIndex === currentSlides.length - 2;
+        const esPenultimaConQuiz = currentCourse?.quiz
+          && currentSlideIndex === posicionQuizDelCurso(currentSlides, currentCourse) - 1;
         if (esPenultimaConQuiz) { intentarAvanzar(); } else { goToSlide(currentSlideIndex + 1); }
       }
       if (e.key === 'Home')       { e.preventDefault(); goToSlide(0); }
