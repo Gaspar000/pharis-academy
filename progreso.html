@@ -52,6 +52,19 @@
     </div>
 
     <main class="shell" style="padding-top:28px; max-width:760px;">
+      <!-- Continuar donde quedaste — dato real, viene de GET
+           /academy/me/progreso-resumen. Oculto si no hay ningún curso en
+           progreso (recién registrado, o los completó todos). -->
+      <a class="wf-panel continuar-card" id="continuarCard" style="display:none; margin-bottom:24px;">
+        <div class="continuar-card-icon"><i class="ph ph-play" aria-hidden="true"></i></div>
+        <div class="continuar-card-body">
+          <div class="wf-progress-label" style="margin-bottom:2px;">Continuar donde quedaste</div>
+          <h3 id="continuarTitulo" style="margin:0 0 4px;"></h3>
+          <div class="wf-progress-label" id="continuarSubtitulo"></div>
+          <div class="wf-progress-bar"><span id="continuarBarra"></span></div>
+        </div>
+      </a>
+
       <!-- Racha + puntos, dato real, viene de GET /academy/me -->
       <div class="wf-section-title">Racha y puntos</div>
       <div class="dash-stats" style="grid-template-columns:1fr 1fr; margin-bottom:12px;">
@@ -67,6 +80,32 @@
       <div class="stats-hint" style="margin-bottom:24px;">
         <i class="ph ph-info" aria-hidden="true"></i>
         <span>Ganas <strong>2 puntos</strong> por cada diapositiva nueva, <strong>10</strong> por actividad entregada y <strong>50</strong> extra la primera vez que entregas en un curso.</span>
+      </div>
+
+      <!-- Resumen de actividad — dato real, viene de GET
+           /academy/me/progreso-resumen + GET /academy/me/entregas. -->
+      <div class="wf-section-title">Tu actividad</div>
+      <div class="dash-stats" style="grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); margin-bottom:24px;">
+        <div class="stat-tile">
+          <div class="label">Cursos completados</div>
+          <div class="value" id="cursosCompletadosNum">–</div>
+        </div>
+        <div class="stat-tile">
+          <div class="label">Quizzes aprobados</div>
+          <div class="value" id="quizzesNum">–</div>
+        </div>
+        <div class="stat-tile">
+          <div class="label">Diapositivas vistas</div>
+          <div class="value" id="slidesVistasNum">–</div>
+        </div>
+        <div class="stat-tile">
+          <div class="label">Preguntas a Pharis</div>
+          <div class="value" id="preguntasPharisNum">–</div>
+        </div>
+        <div class="stat-tile">
+          <div class="label">Actividades entregadas</div>
+          <div class="value" id="entregasNum">–</div>
+        </div>
       </div>
 
       <!-- Logros y Cursos guardados, cada uno su propio bloque separado
@@ -225,8 +264,41 @@
       }
     });
 
+    // ── Continuar donde quedaste + resumen de actividad ─────────────────────
+    function renderContinuar(continuarCurso) {
+      const card = document.getElementById('continuarCard');
+      if (!continuarCurso) { card.style.display = 'none'; return; }
+
+      const { slug, titulo, maxSlideIndex, totalSlides } = continuarCurso;
+      const completadas = maxSlideIndex + 1;
+      const porcentaje = totalSlides > 0 ? Math.round((completadas / totalSlides) * 100) : 0;
+
+      card.href = `curso.html#slug=${encodeURIComponent(slug)}`;
+      document.getElementById('continuarTitulo').textContent = titulo;
+      document.getElementById('continuarSubtitulo').textContent = `${completadas} / ${totalSlides} secciones completadas`;
+      document.getElementById('continuarBarra').style.width = `${porcentaje}%`;
+      card.style.display = 'flex';
+    }
+
+    async function loadResumenActividad() {
+      try {
+        const data = await academyFetch('/academy/me/progreso-resumen');
+        document.getElementById('cursosCompletadosNum').textContent = `${data.cursosCompletados} / ${data.totalCursos}`;
+        document.getElementById('quizzesNum').textContent = data.quizzesAprobados;
+        document.getElementById('slidesVistasNum').textContent = data.slidesVistas;
+        document.getElementById('preguntasPharisNum').textContent = data.preguntasPharis;
+        renderContinuar(data.continuarCurso);
+      } catch { /* no bloquea el resto de la página */ }
+
+      try {
+        const entregas = await academyFetch('/academy/me/entregas');
+        document.getElementById('entregasNum').textContent = entregas.enviadas;
+      } catch { /* no bloquea el resto de la página */ }
+    }
+
     loadProgreso();
     loadCursosGuardados();
+    loadResumenActividad();
   </script>
 </body>
 </html>

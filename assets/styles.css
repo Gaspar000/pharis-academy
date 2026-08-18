@@ -619,6 +619,32 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   border-radius: var(--radius);
   padding: 20px;
 }
+
+/* "Continuar donde quedaste" (progreso.html) — un .wf-panel clickeable con
+   ícono + progreso, distinto de .wf-hero-card (que es vertical y de ancho
+   fijo, pensado para una fila de tarjetas, no para un banner de ancho
+   completo). */
+.continuar-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-decoration: none;
+  transition: transform 0.15s var(--ease);
+}
+.continuar-card:hover { transform: translateY(-2px); }
+.continuar-card-icon {
+  flex: 0 0 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+.continuar-card-body { flex: 1; min-width: 0; }
+.continuar-card-body h3 { font-size: 0.95rem; font-weight: 700; }
 /* Separación entre un .wf-panel y el .wf-section-title que le sigue —
    antes esto vivía como margin-bottom inline en un solo .wf-panel de
    perfil.html, así que el espacio faltaba entre paneles que no lo tenían
