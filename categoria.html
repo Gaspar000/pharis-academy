@@ -125,13 +125,24 @@
     // usuario descubría que estaba vacío recién adentro.
     function renderCourseCard(c) {
       const sinContenido = !(c.slides || []).length && !c.slidesEmbedUrl;
+      // imagenCard/imagenCardPosicion son opcionales en el catálogo (mismo
+      // campo ya usado en el hero de Overview, ver renderHeroCard en
+      // index.html). Un curso sin imagen sigue mostrando la tarjeta de
+      // solo texto de siempre, sin franja.
+      const posicionY = typeof c.imagenCardPosicion === 'number' ? c.imagenCardPosicion : 0;
+      const imagenHtml = c.imagenCard
+        ? `<div class="course-card-image" style="background-image:url('${c.imagenCard}');background-position:center ${posicionY}%"></div>`
+        : '';
       return `
         <a class="course-card${sinContenido ? ' is-empty-course' : ''}" href="curso.html#slug=${encodeURIComponent(c.slug)}">
-          <h2>${c.titulo}</h2>
-          <p>${c.descripcion || ''}</p>
-          ${sinContenido
-            ? '<span class="course-card-soon"><i class="ph ph-hourglass-medium" aria-hidden="true"></i> Próximamente</span>'
-            : '<span class="btn btn-primary">Entrar al curso</span>'}
+          ${imagenHtml}
+          <div class="course-card-body">
+            <h2>${c.titulo}</h2>
+            <p>${c.descripcion || ''}</p>
+            ${sinContenido
+              ? '<span class="course-card-soon"><i class="ph ph-hourglass-medium" aria-hidden="true"></i> Próximamente</span>'
+              : '<span class="btn btn-primary">Entrar al curso</span>'}
+          </div>
         </a>
       `;
     }

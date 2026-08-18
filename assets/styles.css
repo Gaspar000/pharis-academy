@@ -650,9 +650,22 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow: hidden;
   transition: transform 0.15s var(--ease);
 }
 .course-card:hover { transform: translateY(-2px); }
+/* Franja de imagen (opcional, ver imagenCard en el catálogo). Solo
+   introduccion y curso-01 la tienen hoy. Vive fuera del padding del
+   card (margin negativo lo compensa) para llegar a los 4 bordes;
+   .course-card-body agrupa el resto del contenido, que sí necesita el
+   padding normal. Sin imagen, .course-card sigue siendo solo texto
+   (index.html/curso.html no usan .course-card-body, no se ven afectados). */
+.course-card-image {
+  aspect-ratio: 16 / 9;
+  background-size: cover;
+  margin: -24px -24px 0;
+}
+.course-card-body { display: flex; flex-direction: column; gap: 10px; flex: 1; }
 .course-card h2 {
   display: flex;
   align-items: center;
