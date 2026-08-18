@@ -373,6 +373,13 @@ const AcademyAuth = {
     if (!this._toastEl) {
       this._toastEl = document.createElement('div');
       this._toastEl.className = 'academy-toast';
+      // role="status" (no "alert"): estos toasts son informativos, no
+      // errores urgentes — se anuncian sin interrumpir lo que el lector
+      // de pantalla esté leyendo. Puesto una sola vez acá, al crear el
+      // nodo — el textContent se reemplaza en llamadas siguientes sin
+      // recrear el elemento, y el cambio de contenido de un nodo que YA
+      // tiene role="status" en el DOM se sigue anunciando cada vez.
+      this._toastEl.setAttribute('role', 'status');
       document.body.appendChild(this._toastEl);
     }
     this._toastEl.textContent = mensaje;

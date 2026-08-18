@@ -75,8 +75,8 @@
             </svg>
           </h2>
           <p>El asistente de escritorio que te acompaña mientras estudias, ve tu pantalla, escucha tus dudas y responde con el contexto real de tu clase.</p>
-          <a class="btn btn-primary" id="downloadAppBtn" href="#"><i class="ph ph-download-simple"></i> Descargar para Windows</a>
-          <div class="download-status" id="downloadAppStatus"></div>
+          <button type="button" class="btn btn-primary" id="downloadAppBtn"><i class="ph ph-download-simple"></i> Descargar para Windows</button>
+          <div class="download-status" id="downloadAppStatus" role="status"></div>
         </div>
         <div class="course-card">
           <h2>
@@ -108,8 +108,8 @@
             </svg>
           </h2>
           <p>La extensión de Chrome para trabajar directo desde tu navegador, sin instalar nada, ideal si usás una laptop compartida o del colegio.</p>
-          <a class="btn btn-secondary" id="downloadExtensionBtn" href="#"><i class="ph ph-download-simple"></i> Descargar extensión</a>
-          <div class="download-status" id="downloadExtensionStatus"></div>
+          <button type="button" class="btn btn-secondary" id="downloadExtensionBtn"><i class="ph ph-download-simple"></i> Descargar extensión</button>
+          <div class="download-status" id="downloadExtensionStatus" role="status"></div>
         </div>
       </div>
     </section>
@@ -180,16 +180,23 @@
     // secciones correctas atenuadas). Falla abierto ante error de red (no
     // atenúa nada) — mismo criterio que aplicarGateSidebar, un timeout acá
     // no debe bloquear a un alumno que ya tenía acceso real.
+    // aria-disabled (no el atributo nativo `disabled`, que sacaría a los
+    // <a> del árbol de foco por completo) marca la acción como bloqueada
+    // para lectores de pantalla — antes la única señal era visual
+    // (opacity: 0.5 vía .is-locked-section), un usuario de teclado
+    // llegaba al botón sin ninguna pista previa de que estaba bloqueado.
+    function bloquearSeccion(sectionId) {
+      const section = document.getElementById(sectionId);
+      section.classList.add('is-locked-section');
+      section.querySelectorAll('a, button').forEach(el => el.setAttribute('aria-disabled', 'true'));
+    }
+
     academyFetch('/academy/me/acceso').then(acceso => {
-      if (!acceso.desbloqueadoApp) {
-        document.getElementById('downloadsSection').classList.add('is-locked-section');
-      }
+      if (!acceso.desbloqueadoApp) bloquearSeccion('downloadsSection');
       // Solo relevante si la sección de profesor ya está visible (rol
       // 'profesor') — para un alumno, teacherDashboardSection sigue oculta
       // por display:none y este atenuado no tiene efecto visible.
-      if (!acceso.desbloqueadoDashboard) {
-        document.getElementById('teacherDashboardSection').classList.add('is-locked-section');
-      }
+      if (!acceso.desbloqueadoDashboard) bloquearSeccion('teacherDashboardSection');
     }).catch(() => {});
 
     function interceptarSiBloqueado(sectionId, mensaje) {
