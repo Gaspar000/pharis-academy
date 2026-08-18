@@ -52,6 +52,15 @@
     </div>
 
     <main class="shell" style="padding-top:28px; max-width:760px;">
+      <!-- Bienvenida — resumen de una línea, contexto inmediato antes de
+           los números sueltos. Dato real: nombre de localStorage (ya
+           disponible sin esperar ningún fetch), racha/puntos de GET
+           /academy/me (mismo request que ya se hacía). -->
+      <div class="progreso-header">
+        <h1 id="saludoNombre">Hola</h1>
+        <p id="saludoResumen">Cargando tu progreso…</p>
+      </div>
+
       <!-- Continuar donde quedaste — dato real, viene de GET
            /academy/me/progreso-resumen. Oculto si no hay ningún curso en
            progreso (recién registrado, o los completó todos). -->
@@ -65,14 +74,26 @@
         </div>
       </a>
 
-      <!-- Racha + puntos, dato real, viene de GET /academy/me -->
+      <!-- Racha + puntos, dato real, viene de GET /academy/me. La racha
+           ahora es un anillo (progreso hacia el próximo múltiplo de 7) en
+           vez de un número plano — el backend solo guarda un contador de
+           días consecutivos, no qué días específicos de la semana, así
+           que el anillo marca "cuánto falta para tu próxima semana", no
+           un calendario L-M-M-J-V-S-D (eso inventaría un dato que no
+           existe). -->
       <div class="wf-section-title">Racha y puntos</div>
       <div class="dash-stats" style="grid-template-columns:1fr 1fr; margin-bottom:12px;">
         <div class="stat-tile">
-          <div class="label">Días de racha</div>
-          <div class="value" id="streakNum">–</div>
+          <div class="label">Racha</div>
+          <div class="streak-ring-wrap">
+            <div class="streak-ring" id="streakRing">
+              <div class="streak-ring-num" id="streakNum">–</div>
+            </div>
+            <div class="streak-ring-hint" id="streakHint"></div>
+          </div>
         </div>
         <div class="stat-tile">
+          <div class="stat-tile-icon is-amber"><i class="ph ph-sparkle" aria-hidden="true"></i></div>
           <div class="label">Puntos totales</div>
           <div class="value" id="pointsNum">–</div>
         </div>
@@ -83,26 +104,35 @@
       </div>
 
       <!-- Resumen de actividad — dato real, viene de GET
-           /academy/me/progreso-resumen + GET /academy/me/entregas. -->
+           /academy/me/progreso-resumen + GET /academy/me/entregas. Cada
+           métrica con su ícono de categoría (verde = logro/completado,
+           ámbar = evaluación, acento = actividad neutra) en vez de
+           tarjetas idénticas de solo número. -->
       <div class="wf-section-title">Tu actividad</div>
       <div class="dash-stats" style="grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); margin-bottom:24px;">
         <div class="stat-tile">
+          <div class="stat-tile-icon is-green"><i class="ph ph-graduation-cap" aria-hidden="true"></i></div>
           <div class="label">Cursos completados</div>
           <div class="value" id="cursosCompletadosNum">–</div>
+          <div class="stat-tile-bar"><span id="cursosCompletadosBarra"></span></div>
         </div>
         <div class="stat-tile">
+          <div class="stat-tile-icon is-amber"><i class="ph ph-exam" aria-hidden="true"></i></div>
           <div class="label">Quizzes aprobados</div>
           <div class="value" id="quizzesNum">–</div>
         </div>
         <div class="stat-tile">
+          <div class="stat-tile-icon is-accent"><i class="ph ph-books" aria-hidden="true"></i></div>
           <div class="label">Diapositivas vistas</div>
           <div class="value" id="slidesVistasNum">–</div>
         </div>
         <div class="stat-tile">
+          <div class="stat-tile-icon is-accent"><i class="ph ph-chat-circle-text" aria-hidden="true"></i></div>
           <div class="label">Preguntas a Pharis</div>
           <div class="value" id="preguntasPharisNum">–</div>
         </div>
         <div class="stat-tile">
+          <div class="stat-tile-icon is-green"><i class="ph ph-tray-arrow-up" aria-hidden="true"></i></div>
           <div class="label">Actividades entregadas</div>
           <div class="value" id="entregasNum">–</div>
         </div>
@@ -157,11 +187,38 @@
     const streakNum = document.getElementById('streakNum');
     const pointsNum = document.getElementById('pointsNum');
 
+    // Primer nombre solamente ("Hola Gaspar", no "Hola Gaspar Recarey") —
+    // más cercano al tono del resto del saludo, mismo criterio que
+    // cualquier producto que salude por nombre de pila.
+    document.getElementById('saludoNombre').textContent = `Hola, ${(user.nombre || '').split(' ')[0]}`;
+
+    // Anillo de racha: progreso hacia el próximo múltiplo de 7 (ver
+    // comentario en styles.css .streak-ring — no hay dato de qué días
+    // específicos estuvo activo, solo un contador consecutivo). Racha 0
+    // se muestra como anillo vacío, no como "0 de 7" confuso.
+    function renderStreakRing(streakCount) {
+      const dentroDeSemana = streakCount % 7;
+      const pct = streakCount > 0 ? (dentroDeSemana === 0 ? 100 : (dentroDeSemana / 7) * 100) : 0;
+      document.getElementById('streakRing').style.setProperty(
+        '--streak-ring-gradient',
+        `conic-gradient(var(--accent) 0 ${pct}%, var(--rule) ${pct}% 100%)`
+      );
+      streakNum.textContent = streakCount;
+      const faltan = streakCount > 0 && dentroDeSemana !== 0 ? 7 - dentroDeSemana : 0;
+      document.getElementById('streakHint').textContent = streakCount === 0
+        ? 'Entra hoy para empezar tu racha.'
+        : faltan > 0
+          ? `${faltan} ${faltan === 1 ? 'día' : 'días'} para tu próxima semana`
+          : '¡Semana completa!';
+    }
+
     // Precarga con los datos guardados en localStorage, evita una pantalla
     // vacía mientras responde GET /academy/me. Si /academy/me falla, la
     // página se queda con estos valores (no es un error bloqueante).
-    streakNum.textContent = user.streakCount ?? 0;
+    renderStreakRing(user.streakCount ?? 0);
     pointsNum.textContent = user.puntosTotales ?? 0;
+    document.getElementById('saludoResumen').textContent =
+      `Llevas ${user.streakCount ?? 0} ${(user.streakCount ?? 0) === 1 ? 'día' : 'días'} de racha y ${user.puntosTotales ?? 0} puntos.`;
     renderLogros(user.logros || []);
 
     // Ícono Phosphor por defecto si el logro no trae su propio campo
@@ -204,8 +261,10 @@
       try {
         const data = await academyFetch('/academy/me');
         AcademyAuth.updateUser(data.user);
-        streakNum.textContent = data.user.streakCount ?? 0;
+        renderStreakRing(data.user.streakCount ?? 0);
         pointsNum.textContent = data.user.puntosTotales ?? 0;
+        document.getElementById('saludoResumen').textContent =
+          `Llevas ${data.user.streakCount ?? 0} ${(data.user.streakCount ?? 0) === 1 ? 'día' : 'días'} de racha y ${data.user.puntosTotales ?? 0} puntos.`;
         renderLogros(data.user.logros || []);
       } catch { /* se queda con los datos de localStorage, no bloquea la página */ }
     }
@@ -284,6 +343,8 @@
       try {
         const data = await academyFetch('/academy/me/progreso-resumen');
         document.getElementById('cursosCompletadosNum').textContent = `${data.cursosCompletados} / ${data.totalCursos}`;
+        const pctCompletados = data.totalCursos > 0 ? Math.round((data.cursosCompletados / data.totalCursos) * 100) : 0;
+        document.getElementById('cursosCompletadosBarra').style.width = `${pctCompletados}%`;
         document.getElementById('quizzesNum').textContent = data.quizzesAprobados;
         document.getElementById('slidesVistasNum').textContent = data.slidesVistas;
         document.getElementById('preguntasPharisNum').textContent = data.preguntasPharis;

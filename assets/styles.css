@@ -1626,6 +1626,80 @@ p { margin: 0 0 1em; color: var(--text-muted); }
 .stat-tile .label { font-size: 0.78rem; color: var(--text-faint); margin-bottom: 4px; }
 .stat-tile .value { font-size: 1.6rem; font-weight: 700; font-family: "Manrope", sans-serif; }
 
+/* Ícono de categoría opcional arriba del número (progreso.html) — mismo
+   .stat-tile de siempre, solo agrega un chip de color antes del label.
+   Los 5 colores ya son tokens del proyecto (verde/ámbar/rojo/acento),
+   ninguno nuevo — cada métrica toma el que mejor la describe semánticamente
+   (verde = logro/completado, acento = actividad neutra). */
+.stat-tile-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  margin-bottom: 10px;
+}
+.stat-tile-icon.is-green  { background: var(--green-soft);  color: var(--green-text); }
+.stat-tile-icon.is-amber  { background: var(--amber-soft);  color: var(--amber-text); }
+.stat-tile-icon.is-accent { background: var(--accent-soft); color: var(--accent-bright); }
+
+/* Barra de progreso fina bajo el número, mismo look que .wf-progress-bar
+   (home.css) pero sin depender de esa hoja — progreso.html ya carga ambas,
+   pero esta variante vive en styles.css junto al resto de .stat-tile. */
+.stat-tile-bar {
+  height: 5px;
+  border-radius: 999px;
+  background: var(--rule);
+  overflow: hidden;
+  margin-top: 10px;
+}
+.stat-tile-bar span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+
+/* Anillo de racha — progreso hacia el próximo múltiplo de 7, no un
+   calendario semanal real (el backend solo guarda un contador de días
+   consecutivos, no qué días específicos estuvo activo, así que marcar
+   L-M-M-J-V-S-D individualmente inventaría un dato que no existe). El
+   círculo interior corta el conic-gradient para dejar solo el anillo,
+   mismo truco que .mp-donut de una feature anterior (revertida, pero el
+   patrón queda documentado acá porque se reusa). */
+.streak-ring-wrap { display: flex; align-items: center; gap: 16px; }
+.streak-ring {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--streak-ring-gradient, conic-gradient(var(--rule) 0 100%));
+  position: relative;
+}
+.streak-ring::after {
+  content: '';
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  background: var(--panel);
+}
+.streak-ring-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Manrope", sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  z-index: 1;
+}
+.streak-ring-hint { font-size: 0.78rem; color: var(--text-faint); }
+
+/* Header de bienvenida — resumen de una línea antes de "Continuar donde
+   quedaste", mismo criterio que .page-header ya usado en categoria.html
+   (h1 + subtítulo), no un componente nuevo desde cero. */
+.progreso-header { margin-bottom: 20px; }
+.progreso-header h1 { font-size: 1.4rem; margin-bottom: 4px; }
+.progreso-header p { margin: 0; }
+
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--rule);
