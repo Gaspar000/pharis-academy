@@ -171,12 +171,17 @@ const AcademyAuth = {
     window.location.href = 'login.html';
   },
   /** Mergea `partial` sobre el user guardado y refresca localStorage sin
-   * pedir un nuevo login, usado tras PATCH /academy/me, ya que el JWT
-   * solo lleva id/email/rol y nunca se re-emite en este flujo. */
-  updateUser(partial) {
+   * pedir un nuevo login, usado tras PATCH /academy/me. El JWT lleva
+   * id/email/rol/tokenVersion en su payload — si `partial` viene de una
+   * respuesta que cambió el rol, PATCH /academy/me también reemite el
+   * token (token_version sube) y lo pasa acá como `token`; sin
+   * reemplazarlo, este dispositivo seguiría mandando el JWT viejo y
+   * requireAcademyAuth lo rechazaría en la siguiente request por
+   * desajuste de tokenVersion. */
+  updateUser(partial, token) {
     const current = this.getUser();
     if (!current) return;
-    this.setSession(this.getToken(), { ...current, ...partial });
+    this.setSession(token || this.getToken(), { ...current, ...partial });
   },
 
   /**
