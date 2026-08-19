@@ -398,7 +398,18 @@
         document.getElementById('viewerControls').style.display = 'flex';
         currentSlides = course.slides;
         renderChapters(course.slides);
-        goToSlide(0);
+        // Retoma en la siguiente diapositiva no vista (maxSlideIndexAvance
+        // + 1), no en 0 — entrar desde el card de "continuar" en Overview
+        // para volver a la diapositiva 1 pese a tener avance real se sentía
+        // como perder el progreso. Acotado a currentSlides.length - 1 (por
+        // si ya vio todo) y a slideEstaBloqueada (nunca aterriza pasado el
+        // candado del quiz sin aprobar, mismo criterio que goToSlide en
+        // cualquier otra vía de navegación).
+        let indiceInicial = maxSlideIndexAvance >= 0
+          ? Math.min(maxSlideIndexAvance + 1, currentSlides.length - 1)
+          : 0;
+        if (slideEstaBloqueada(indiceInicial)) indiceInicial = posicionQuizDelCurso(currentSlides, course) - 1;
+        goToSlide(indiceInicial);
         // La entrega vive dentro del visor (capítulo "Entrega", ver
         // mostrarEntrega) en cursos que declaran entregaAntesDelQuiz. La
         // sección externa de abajo queda redundante y se oculta.
@@ -482,9 +493,11 @@
     let quizAprobado = false;
     let currentCourse = null;
     // Candado sobre el capítulo de Quiz: no se puede entrar sin haber visto
-    // TODAS las diapositivas anteriores. A diferencia de currentSlideIndex
-    // (se reinicia en cada carga de página, siempre arranca en goToSlide(0)),
-    // esto viene del avance PERSISTIDO en el backend (GET /academy/me/avance,
+    // TODAS las diapositivas anteriores. currentSlideIndex se reinicia en
+    // cada carga de página (loadCourse arranca en maxSlideIndexAvance + 1,
+    // no en 0 — ver ahí), pero este contador de avance persistido es
+    // independiente de por dónde se entró esta vez: viene del backend
+    // (GET /academy/me/avance,
     // resuelto en loadCourse) — si el alumno ya había llegado a la 5 en una
     // sesión anterior, el quiz aparece desbloqueado de entrada, sin tener que
     // re-navegar. Se actualiza en caliente en cada goToSlide con
