@@ -89,6 +89,15 @@
           <p>El asistente de escritorio que te acompaña mientras estudias, ve tu pantalla, escucha tus dudas y responde con el contexto real de tu clase.</p>
           <button type="button" class="btn btn-primary" id="downloadAppBtn"><i class="ph ph-download-simple"></i> Descargar para Windows</button>
           <div class="download-status" id="downloadAppStatus" role="status"></div>
+          <!-- Guía post-descarga — oculta hasta que la descarga arranca de
+               verdad (kind 'ok' en showDownloadStatus), no un texto fijo
+               siempre visible: antes de descargar no aporta nada, solo
+               ensucia el card. -->
+          <ol class="post-download-guide" id="downloadAppGuide" hidden>
+            <li>Abrí el archivo <strong>PharisSetup.exe</strong> desde tu carpeta de Descargas.</li>
+            <li>Si Windows Defender SmartScreen te avisa "Windows protegió tu PC", tocá <strong>Más información</strong> y después <strong>Ejecutar de todas formas</strong> — pasa porque el instalador es nuevo, no significa que esté dañado.</li>
+            <li>Seguí los pasos del instalador e iniciá sesión con el mismo correo y contraseña que usás acá.</li>
+          </ol>
         </div>
         <div class="course-card" id="downloadsExtensionCard">
           <h2>
@@ -140,7 +149,6 @@
           <a class="btn btn-primary" id="openDashboardBtn" href="#" target="_blank" rel="noopener noreferrer">
             Abrir dashboard <i class="ph ph-arrow-square-out"></i>
           </a>
-          <p class="demo-credentials-hint">Entrás con el mismo correo y contraseña que usás acá en Pharis Academy.</p>
         </div>
       </div>
     </section>
@@ -185,6 +193,12 @@
         const data = await academyFetch('/academy/download/pharis-app');
         window.location.href = data.url;
         showDownloadStatus('downloadAppStatus', 'ok', 'Descarga iniciada.');
+        // La guía post-descarga (instalar, SmartScreen, iniciar sesión) solo
+        // tiene sentido una vez que el archivo realmente empezó a bajar —
+        // antes de eso solo ensucia el card. No se vuelve a ocultar tras
+        // mostrarse (aunque el usuario haga click en Descargar de nuevo):
+        // ya la vio, no hace falta hacerla parpadear.
+        document.getElementById('downloadAppGuide').removeAttribute('hidden');
       } catch (err) {
         showDownloadStatus('downloadAppStatus', 'err', err.message);
       }
