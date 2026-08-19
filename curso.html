@@ -171,7 +171,15 @@
                   </div>
                   <form id="quizForm"></form>
                   <div class="quiz-actions">
-                    <button class="btn btn-primary" id="quizSubmitBtn" type="submit" form="quizForm">Enviar respuestas</button>
+                    <!-- Un solo botón para las 3 fases (enviar → evaluando →
+                         continuar), en vez de un botón que se queda inerte
+                         más un banner de resultado con su PROPIO botón
+                         aparte — ver el listener de click abajo, que cambia
+                         de comportamiento según data-fase. -->
+                    <button class="btn btn-primary" id="quizSubmitBtn" type="submit" form="quizForm" data-fase="enviar">
+                      <i class="ph ph-circle-notch quiz-submit-spinner" aria-hidden="true"></i>
+                      <span id="quizSubmitBtnLabel" aria-live="polite">Enviar respuestas</span>
+                    </button>
                   </div>
                   <div class="quiz-result" id="quizResult"></div>
                 </div>
@@ -1007,6 +1015,10 @@
       const quizViewer = document.getElementById('quizViewer');
       quizViewer.style.display = 'flex';
       document.getElementById('quizResult').innerHTML = '';
+      // Sin esto, repasar un quiz ya aprobado (mostrarQuiz se llama de
+      // nuevo) dejaría el botón todavía en fase 'continuar' de la vez
+      // anterior, antes de que el alumno reintente nada.
+      setQuizSubmitFase('enviar');
 
       // Siempre entra por la intro, aunque ya se haya aprobado antes —
       // permite repasar sin saltar directo al formulario.
@@ -1065,15 +1077,38 @@
       `).join('');
     }
 
+    // El botón cambia de fase en vez de quedar inerte junto a un banner de
+    // resultado con su propio botón aparte: 'enviar' (estado normal, es
+    // type="submit", dispara este listener de submit) → mientras evalúa
+    // queda disabled con el spinner (ver quiz-submit-spinner en CSS) → si
+    // aprueba pasa a fase 'continuar' (mismo botón, ya no envía el form,
+    // el click de abajo lo intercepta y navega). Si NO aprueba, vuelve a
+    // fase 'enviar' para reintentar — no hay límite de intentos.
+    function setQuizSubmitFase(fase) {
+      const btn = document.getElementById('quizSubmitBtn');
+      const label = document.getElementById('quizSubmitBtnLabel');
+      btn.dataset.fase = fase;
+      btn.classList.remove('is-loading');
+      if (fase === 'evaluando') {
+        btn.disabled = true;
+        btn.classList.add('is-loading');
+        label.textContent = 'Evaluando...';
+      } else if (fase === 'continuar') {
+        btn.disabled = false;
+        label.textContent = 'Continuar';
+      } else {
+        btn.disabled = false;
+        label.textContent = 'Enviar respuestas';
+      }
+    }
+
     document.getElementById('quizForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      const submitBtn = document.getElementById('quizSubmitBtn');
       const formData = new FormData(e.target);
       const respuestas = {};
       for (const [id, valor] of formData.entries()) respuestas[id] = Number(valor);
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Enviando...';
+      setQuizSubmitFase('evaluando');
       try {
         const result = await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/quiz/intentar`, {
           method: 'POST', body: JSON.stringify({ respuestas }),
@@ -1087,8 +1122,8 @@
             <div class="quiz-feedback quiz-feedback-ok">
               <i class="ph ph-check-circle" aria-hidden="true"></i>
               ¡Aprobaste! ${result.puntaje}/${result.total} correctas.
-              <button class="btn btn-secondary btn-small" type="button" id="quizVolverBtn">Continuar</button>
             </div>`;
+          setQuizSubmitFase('continuar');
           if (result.puntosGanados > 0) celebrarPuntos(result.puntosGanados);
         } else {
           resultEl.innerHTML = `
@@ -1096,24 +1131,29 @@
               <i class="ph ph-warning-circle" aria-hidden="true"></i>
               ${result.puntaje}/${result.total} correctas — necesitas más para aprobar. Repasa las diapositivas y vuelve a intentar, no hay límite de intentos.
             </div>`;
+          setQuizSubmitFase('enviar');
         }
-        // Al aprobar, todo el rango posterior al quiz ya quedó desbloqueado
-        // (updateChapterLockState arriba). Vuelve al visor y navega a la
-        // primera diapositiva de ese rango (posicionQuizDelCurso), en vez
-        // de a donde estaba el alumno antes de entrar al quiz. Para cursos
-        // con más de 1 diapositiva después del quiz (ver curso-01), esto
-        // aterriza en la primera, no salta directo a la última.
-        document.getElementById('quizVolverBtn')?.addEventListener('click', () => {
-          volverAlVisor();
-          goToSlide(posicionQuizDelCurso(currentSlides, currentCourse));
-        });
       } catch (err) {
         document.getElementById('quizResult').innerHTML =
           `<div class="quiz-feedback quiz-feedback-err">${err.message}</div>`;
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Enviar respuestas';
+        setQuizSubmitFase('enviar');
       }
+    });
+
+    // Intercepta el click ANTES de que dispare el submit nativo del form
+    // (mismo botón, type="submit") — en fase 'continuar' ya no corresponde
+    // reevaluar respuestas, corresponde navegar. Al aprobar, todo el rango
+    // posterior al quiz ya quedó desbloqueado (updateChapterLockState en
+    // el submit de arriba). Vuelve al visor y navega a la primera
+    // diapositiva de ese rango (posicionQuizDelCurso), no a donde estaba
+    // el alumno antes de entrar al quiz. Para cursos con más de 1
+    // diapositiva después del quiz (ver curso-01), esto aterriza en la
+    // primera, no salta directo a la última.
+    document.getElementById('quizSubmitBtn').addEventListener('click', (e) => {
+      if (e.currentTarget.dataset.fase !== 'continuar') return;
+      e.preventDefault();
+      volverAlVisor();
+      goToSlide(posicionQuizDelCurso(currentSlides, currentCourse));
     });
 
     function goToSlide(index) {
