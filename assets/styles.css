@@ -909,7 +909,7 @@ fieldset.field > legend {
    Monta sobre .wf-panel. */
 .categoria-banner {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
   margin-bottom: 24px;
