@@ -894,36 +894,11 @@ fieldset.field > legend {
 }
 
 /* ── Categoría: banner editorial (Alumnos/Profesores) ──
-   Título + descripción larga a la izquierda, hueco de ilustración a la
-   derecha (background-image inline por categoría, vacío hasta subir la
-   imagen — mismo patrón que .wf-sidebar-promo-art). Monta sobre .wf-panel. */
-.categoria-banner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-.categoria-banner-body { max-width: 560px; }
-.categoria-banner-body h2 { margin-bottom: 10px; }
-.categoria-banner-body p { font-size: 0.92rem; color: var(--text-muted); margin: 0; }
-.categoria-banner-art {
-  flex: 0 0 168px;
-  height: 120px;
-  border-radius: 14px;
-  /* --panel-2, no --bg: dentro de .wf-panel (fondo var(--panel)) hace
-     falta un tono que SÍ se distinga como hueco reservado — var(--bg) es
-     casi idéntico a --panel en ambos temas y el placeholder vacío se leía
-     como un borde raro, no como una ilustración pendiente. */
-  background: var(--panel-2);
-  background-size: cover;
-  background-position: center;
-}
-@media (max-width: 720px) {
-  .categoria-banner { flex-direction: column; align-items: flex-start; }
-  .categoria-banner-body { max-width: none; }
-  .categoria-banner-art { width: 100%; flex-basis: auto; }
-}
+   Título + descripción larga, copy fijo por categoría. Monta sobre
+   .wf-panel. */
+.categoria-banner { margin-bottom: 24px; }
+.categoria-banner h2 { margin-bottom: 10px; }
+.categoria-banner p { font-size: 0.92rem; color: var(--text-muted); margin: 0; max-width: 640px; }
 
 /* ── Categoría: banner de invitación cruzada ──
    Invita a ver la OTRA categoría (alumnos↔profesores) sin ocultarla.

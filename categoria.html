@@ -60,19 +60,10 @@
 
     <main class="shell" style="padding-top:28px;">
     <!-- Banner por categoría — copy fijo (Alumnos/Profesores) resuelto en
-         renderCategoriaBanner. El hueco .categoria-banner-art queda vacío
-         hasta que se suba background-image por categoría, mismo patrón que
-         .wf-sidebar-promo-art en el sidebar. -->
+         renderCategoriaBanner. -->
     <div class="wf-panel categoria-banner" id="categoriaBanner">
-      <div class="categoria-banner-body">
-        <h2 id="categoriaTitle">Cargando…</h2>
-        <p id="categoriaBannerDesc"></p>
-      </div>
-      <div class="categoria-banner-art" id="categoriaBannerArt" aria-hidden="true"></div>
-    </div>
-
-    <div class="page-header" style="padding-top:16px;">
-      <p id="categoriaSummary"><i class="ph ph-books categoria-summary-icon" aria-hidden="true"></i>Cualquier alumno o profesor puede tomar cualquiera de estos cursos.</p>
+      <h2 id="categoriaTitle">Cargando…</h2>
+      <p id="categoriaBannerDesc"></p>
     </div>
 
     <!-- Invitación cruzada a la otra categoría, no oculta, solo promociona.
@@ -81,6 +72,10 @@
       <div class="categoria-crosslink-text" id="crosslinkText"></div>
       <span class="btn btn-primary btn-small">Ver cursos <i class="ph ph-arrow-right"></i></span>
     </a>
+
+    <div class="page-header" style="padding-top:16px;">
+      <p id="categoriaSummary"><i class="ph ph-books categoria-summary-icon" aria-hidden="true"></i>Cualquier alumno o profesor puede tomar cualquiera de estos cursos.</p>
+    </div>
 
     <div id="courseSections">
       <div class="empty-state">Cargando cursos...</div>
@@ -271,18 +266,10 @@
     // Copy fijo por categoría — a diferencia de categoria.titulo (viene del
     // backend, solo el nombre corto "Alumnos"/"Profesores"), esta
     // descripción es contenido editorial que no tiene sentido pedirle al
-    // catálogo de cursos. La ilustración queda como hueco vacío
-    // (.categoria-banner-art) hasta que se suba background-image por
-    // categoría — mismo patrón que .wf-sidebar-promo-art en el sidebar.
+    // catálogo de cursos.
     const CATEGORIA_BANNER_COPY = {
-      alumnos: {
-        descripcion: 'Domina el uso de Pharis como tu tutor de IA para estudiar mejor. Esta sección reúne una selección de cursos pensados para ayudarte a sacarle el máximo provecho, desde cómo hacer las preguntas correctas hasta prepararte para tus exámenes.',
-        imagen: null,
-      },
-      profesores: {
-        descripcion: 'Domina el uso de Pharis como tu asistente de IA para enseñar mejor. Esta sección reúne una selección de cursos pensados para ayudarte a integrar la IA en tu salón de clases, desde el diseño de actividades hasta el seguimiento del progreso de tus alumnos.',
-        imagen: 'https://pub-8dbbde7f94954173b9eaa1e10f3a0aa0.r2.dev/assets/Foto%20-%20Top%20Curso%20Maestros.png',
-      },
+      alumnos: 'Domina el uso de Pharis como tu tutor de IA para estudiar mejor. Esta sección reúne una selección de cursos pensados para ayudarte a sacarle el máximo provecho, desde cómo hacer las preguntas correctas hasta prepararte para tus exámenes.',
+      profesores: 'Domina el uso de Pharis como tu asistente de IA para enseñar mejor. Esta sección reúne una selección de cursos pensados para ayudarte a integrar la IA en tu salón de clases, desde el diseño de actividades hasta el seguimiento del progreso de tus alumnos.',
     };
 
     function renderCategoriaBanner(categoriaSlug) {
@@ -293,10 +280,8 @@
       // (ej. tras un hashchange a una categoría inválida y luego a una
       // válida, sin recargar la página).
       document.getElementById('categoriaBanner').style.display = '';
-      const copy = CATEGORIA_BANNER_COPY[categoriaSlug] || CATEGORIA_BANNER_COPY.alumnos;
-      document.getElementById('categoriaBannerDesc').textContent = copy.descripcion;
-      const artEl = document.getElementById('categoriaBannerArt');
-      artEl.style.backgroundImage = copy.imagen ? `url('${copy.imagen}')` : '';
+      document.getElementById('categoriaBannerDesc').textContent =
+        CATEGORIA_BANNER_COPY[categoriaSlug] || CATEGORIA_BANNER_COPY.alumnos;
     }
 
     async function loadCategoria() {
