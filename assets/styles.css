@@ -740,10 +740,10 @@ fieldset.field > legend {
 
 /* ── Home / course list ── */
 .page-header { padding: 40px 0 8px; }
-/* h2, no h1 — categoria.html y curso.html ya tienen su h1 real en
-   .wf-topbar (fijo, "Cursos"/"Curso"), dos h1 en la misma página rompe
-   la jerarquía de encabezados. */
-.page-header h2 { font-size: 1.8rem; }
+/* h1, único de nivel de página (el h1 fijo de .wf-topbar se quitó del
+   sitio) en curso.html y acceso.html. categoria.html usa el h1 de
+   .categoria-banner-body en su lugar, no este selector. */
+.page-header h1 { font-size: 1.8rem; }
 
 /* ── Breadcrumb ──
    Ruta de navegación en la topbar, a la derecha del título de la sección
@@ -908,7 +908,7 @@ fieldset.field > legend {
   margin-bottom: 24px;
 }
 .categoria-banner-body { max-width: 560px; }
-.categoria-banner-body h2 { margin-bottom: 10px; }
+.categoria-banner-body h1 { margin-bottom: 10px; }
 .categoria-banner-body p { font-size: 0.92rem; color: var(--text-muted); margin: 0; }
 .categoria-banner-art {
   flex: 0 0 202px;

@@ -132,7 +132,6 @@ body { display: flex; min-height: 100vh; }
   padding: 20px 32px;
   border-bottom: 1px solid var(--rule);
 }
-.wf-topbar h1 { font-size: 1.5rem; margin: 0; }
 .wf-content { padding: 28px 32px 60px; }
 
 /* Mismo gradiente de marca que #v2-welcome en dashboard-v2 (pharis-api).
@@ -457,8 +456,7 @@ body { display: flex; min-height: 100vh; }
   .wf-mobile-nav a.active { color: var(--accent-bright); background: var(--accent-soft); }
   .wf-mobile-nav a.is-locked { color: var(--text-faint); }
 
-  /* La topbar apretaba h1 + breadcrumb + campana + chip de usuario en el
+  /* La topbar apretaba breadcrumb + campana + chip de usuario en el
      mismo renglón; en 375px eso desborda. */
   .wf-topbar { padding: 16px 18px; flex-wrap: wrap; gap: 10px; }
-  .wf-topbar h1 { font-size: 1.25rem; }
 }
