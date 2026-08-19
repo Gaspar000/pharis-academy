@@ -922,7 +922,11 @@ fieldset.field > legend {
   height: 144px;
   background-size: contain;
   background-repeat: no-repeat;
-  background-position: center;
+  /* bottom, no center: ambas ilustraciones (letrero de Alumnos, persona de
+     Profesores) están recortadas con su base tocando el borde inferior de
+     la imagen — con center quedaban flotando a mitad del hueco en vez de
+     "paradas" sobre el margen inferior del card. */
+  background-position: center bottom;
 }
 @media (max-width: 720px) {
   .categoria-banner { flex-direction: column; align-items: flex-start; }
