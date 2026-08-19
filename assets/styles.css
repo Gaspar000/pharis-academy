@@ -1123,8 +1123,16 @@ fieldset.field > legend {
   border: 1px solid var(--rule);
   border-radius: var(--radius-sm);
   padding: 14px 16px;
-  margin: 0;
+  margin: 0 0 16px;
 }
+/* #quizForm no es flex (es un <form> normal, llenado con innerHTML), así
+   que .quiz-form-wrap{gap:14px} no separa las preguntas entre sí — solo
+   separa al form de .quiz-actions/.quiz-result, sus hermanos directos.
+   Sin margin-bottom acá, las preguntas quedaban con apenas el espacio
+   default entre <fieldset>s consecutivos, casi pegadas. La última no
+   necesita el margen (evita doble espacio contra .quiz-actions, que ya
+   tiene el suyo vía el gap del wrap). */
+.quiz-question:last-child { margin-bottom: 0; }
 .quiz-question legend {
   font-size: 0.92rem;
   font-weight: 600;
