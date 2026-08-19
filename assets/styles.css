@@ -911,8 +911,8 @@ fieldset.field > legend {
 .categoria-banner-body h2 { margin-bottom: 10px; }
 .categoria-banner-body p { font-size: 0.92rem; color: var(--text-muted); margin: 0; }
 .categoria-banner-art {
-  flex: 0 0 168px;
-  height: 120px;
+  flex: 0 0 202px;
+  height: 144px;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
