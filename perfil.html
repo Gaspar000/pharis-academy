@@ -29,7 +29,6 @@
       <a href="index.html"><i class="ph ph-squares-four icon"></i> Overview</a>
       <a href="categoria.html"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="progreso.html"><i class="ph ph-trophy icon"></i> Progreso</a>
-      <a href="https://pharis-api-production.up.railway.app/dashboard" id="navDashboard" target="_blank" rel="noopener" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard <i class="ph ph-arrow-square-out" aria-hidden="true" style="font-size:0.85em; margin-left:auto;"></i></a>
       <a href="acceso.html"><i class="ph ph-puzzle-piece icon"></i> Accede a Pharis</a>
     </nav>
 
@@ -84,7 +83,7 @@
                 <span>Profesor</span>
               </label>
             </div>
-            <div class="field-hint">Cambia los cursos que te mostramos primero y, como profesor, te da acceso al Dashboard con las entregas de todo el curso.</div>
+            <div class="field-hint">Cambia los cursos que te mostramos primero y, como profesor, te da acceso al dashboard de profesor en Accede a Pharis, con las entregas de todo el curso.</div>
           </fieldset>
           <button type="submit" class="btn btn-primary" id="perfilSubmitBtn" style="width:auto; padding:10px 20px;">Guardar cambios</button>
         </form>
@@ -136,12 +135,6 @@
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
     AcademyAuth.renderSidebarPromo(document.getElementById('sidebarPromo'));
-    // El link de Dashboard se revela ANTES del gate: aplicarGateSidebar()
-    // termina construyendo el nav móvil clonando los links visibles, así
-    // que un profesor se quedaría sin Dashboard ahí si se revelara después.
-    if (user.rol === 'profesor') {
-      document.getElementById('navDashboard').style.display = 'flex';
-    }
     AcademyAuth.aplicarGateSidebar();
 
     // ── Info de usuario ──────────────────────────────────────────────────────
@@ -214,9 +207,8 @@
         // llama una vez al cargar la página, nunca de nuevo tras el submit.
         AcademyAuth.renderSidebarPromo(document.getElementById('sidebarPromo'));
         document.getElementById('perfilAvatar').innerHTML = avatarHtml(data.user.nombre, 'lg');
-        document.getElementById('navDashboard').style.display = data.user.rol === 'profesor' ? 'flex' : 'none';
         showBox(perfilSuccessBox, rolCambio
-          ? (data.user.rol === 'profesor' ? 'Perfil actualizado. Ahora tienes acceso al Dashboard.' : 'Perfil actualizado. Ya no tienes acceso al Dashboard.')
+          ? (data.user.rol === 'profesor' ? 'Perfil actualizado. Ahora tienes acceso al dashboard de profesor en Accede a Pharis.' : 'Perfil actualizado. Ya no tienes acceso al dashboard de profesor.')
           : 'Perfil actualizado.');
       } catch (err) {
         showBox(perfilErrorBox, err.message);

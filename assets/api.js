@@ -415,8 +415,8 @@ const AcademyAuth = {
    *
    * Se construye clonando los links del sidebar en vez de duplicar el
    * markup en las 6 páginas: así el nav móvil hereda automáticamente
-   * cualquier cambio del sidebar (links nuevos, el Dashboard que solo se
-   * muestra a profesores, el candado del gate) sin poder desincronizarse.
+   * cualquier cambio del sidebar (links nuevos, links que solo se muestran
+   * a cierto rol, el candado del gate) sin poder desincronizarse.
    * Llamar DESPUÉS de mostrar/ocultar links por rol y de aplicarGateSidebar.
    */
   renderNavMovil() {

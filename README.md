@@ -89,7 +89,7 @@ Todas bajo `pharis-api/src/routes/academy.js`, montadas en `src/index.js`:
 | GET | `/academy/courses` | JWT Academy | Lista de cursos (placeholders) |
 | POST | `/academy/submit` | JWT Academy | Sube actividad (base64) y la evalúa con Claude Haiku |
 
-`GET /academy/dashboard` sigue existiendo en `pharis-api` pero ya no lo consume nada en este repo — el link "Dashboard" del sidebar apunta al dashboard real de Pharis (`pharis-api-production.up.railway.app/dashboard`, otro sistema), no a una vista propia de Academy.
+`GET /academy/dashboard` sigue existiendo en `pharis-api` pero ya no lo consume nada en este repo — no hay ninguna vista de dashboard propia de Academy, ni un link en el sidebar hacia ella. `acceso.html` sí tiene una sección "Dashboard de profesor" (solo visible con `rol: profesor`) con un botón que abre `pharis-api-production.up.railway.app/dashboard-v2`, un sistema completamente distinto (el dashboard real de profesor de Pharis).
 
 ### Registro por invitación (código de un solo uso)
 

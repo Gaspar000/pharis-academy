@@ -30,7 +30,6 @@
       <a href="index.html"><i class="ph ph-squares-four icon"></i> Overview</a>
       <a href="categoria.html"><i class="ph ph-books icon"></i> Cursos</a>
       <a href="progreso.html"><i class="ph ph-trophy icon"></i> Progreso</a>
-      <a href="https://pharis-api-production.up.railway.app/dashboard" id="navDashboard" target="_blank" rel="noopener" style="display:none;"><i class="ph ph-chart-bar icon"></i> Dashboard <i class="ph ph-arrow-square-out" aria-hidden="true" style="font-size:0.85em; margin-left:auto;"></i></a>
       <a href="acceso.html" class="active"><i class="ph ph-puzzle-piece icon"></i> Accede a Pharis</a>
     </nav>
 
@@ -114,8 +113,8 @@
       </div>
     </section>
 
-    <!-- Solo profesores, mismo patrón que #navDashboard (oculto por
-         defecto, revelado por JS si user.rol === 'profesor'). -->
+    <!-- Solo profesores: oculto por defecto, revelado por JS si
+         user.rol === 'profesor'. -->
     <section class="course-section" id="teacherDashboardSection" style="display:none;">
       <h2>Dashboard de profesor <i class="ph ph-lock-simple lock-icon" aria-hidden="true"></i></h2>
       <p>Así es el dashboard real que usan los profesores con Pharis, con la actividad real de tus alumnos en Pharis Academy: entregas, calificaciones y avance por curso.</p>
@@ -137,13 +136,17 @@
     AcademyAuth.renderNotifMenu(document.getElementById('notifMenu'));
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
     AcademyAuth.renderSidebarPromo(document.getElementById('sidebarPromo'));
-    // El link de Dashboard se revela ANTES del gate: aplicarGateSidebar()
-    // termina construyendo el nav móvil clonando los links visibles, así
-    // que un profesor se quedaría sin Dashboard ahí si se revelara después.
     if (user.rol === 'profesor') {
-      document.getElementById('navDashboard').style.display = 'flex';
-      document.getElementById('teacherDashboardSection').style.display = 'block';
+      const teacherSection = document.getElementById('teacherDashboardSection');
+      teacherSection.style.display = 'block';
       document.getElementById('openDashboardBtn').href = 'https://pharis-api-production.up.railway.app/dashboard-v2';
+      // Orden en el HTML es Descargas → Dashboard de profesor (lo que ve un
+      // alumno, que nunca ve la segunda). Para un profesor se invierte:
+      // el dashboard es lo primero que le importa, las descargas quedan
+      // abajo. insertBefore mueve el nodo existente, no lo clona — los
+      // listeners ya cableados más abajo en este script (showDownloadStatus,
+      // interceptarSiBloqueado, etc.) siguen apuntando al mismo elemento.
+      document.getElementById('downloadsSection').before(teacherSection);
     }
     AcademyAuth.aplicarGateSidebar();
 
