@@ -19,7 +19,6 @@ pharis-academy/
 ├── login.html
 ├── register.html
 ├── curso.html           # Vista de curso + subir actividad
-├── dashboard.html        # Solo profesores, usuarios, entregas, export CSV
 ├── assets/
 │   ├── styles.css        # Tokens visuales (fondo #020617, acento #508ff8)
 │   └── api.js             # Cliente fetch + manejo de sesión (localStorage)
@@ -89,11 +88,12 @@ Todas bajo `pharis-api/src/routes/academy.js`, montadas en `src/index.js`:
 | POST | `/academy/login` | sin auth | Login, devuelve JWT propio de Academy |
 | GET | `/academy/courses` | JWT Academy | Lista de cursos (placeholders) |
 | POST | `/academy/submit` | JWT Academy | Sube actividad (base64) y la evalúa con Claude Haiku |
-| GET | `/academy/dashboard` | JWT Academy + rol profesor | Usuarios + entregas |
+
+`GET /academy/dashboard` sigue existiendo en `pharis-api` pero ya no lo consume nada en este repo — el link "Dashboard" del sidebar apunta al dashboard real de Pharis (`pharis-api-production.up.railway.app/dashboard`, otro sistema), no a una vista propia de Academy.
 
 ### Registro por invitación (código de un solo uso)
 
-El registro es privado: **no hay auto-registro libre**. `/academy/register` exige un `codigo` válido y sin usar, el rol (`estudiante`/`profesor`) queda fijado por ese código, no por lo que el cliente mande en el body. Esto evita que cualquiera se auto-asigne `profesor` y lea `/academy/dashboard` (nombres, correos y entregas de todos).
+El registro es privado: **no hay auto-registro libre**. `/academy/register` exige un `codigo` válido y sin usar, y fija el rol inicial (`estudiante`/`profesor`) según ese código. El rol puede cambiarse después libremente desde Perfil (`PATCH /academy/me`).
 
 Para generar un código:
 ```
@@ -112,4 +112,3 @@ Si despliegas `pharis-api` en otra URL, edita `API_BASE` en [assets/api.js](asse
 - **Contenido real de los cursos**: `curso.html` y el catálogo en `pharis-api/src/lib/academy-courses.js` usan placeholders (`slidesEmbedUrl: null`). Para activar las diapositivas, pega la URL de embed de Google Slides (o un visor de PDF) en `slidesEmbedUrl` de cada curso.
 - **Historial de entregas del alumno**: `curso.html` solo muestra las entregas hechas en la sesión actual del navegador (no hay `GET /academy/mis-entregas` todavía).
 - **Recuperación de contraseña**: no implementada, fuera de alcance de esta primera versión.
-- **Paginación del dashboard**: si el número de usuarios/entregas crece mucho, `GET /academy/dashboard` debería paginar en vez de devolver todo en una sola respuesta.

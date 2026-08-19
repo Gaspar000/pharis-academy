@@ -191,9 +191,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   border-bottom: 1px solid var(--rule);
   /* var(--bg) con transparencia, antes era rgba(2,6,23,...) fijo (el
      --bg del oscuro sin variable), así que en modo claro la topbar de
-     curso/categoria/dashboard.html se quedaba con fondo oscuro aunque el
-     resto de la página ya hubiera cambiado a claro. color-mix() calcula
-     la mezcla en tiempo real contra el --bg vigente en cada tema. */
+     curso/categoria se quedaba con fondo oscuro aunque el resto de la
+     página ya hubiera cambiado a claro. color-mix() calcula la mezcla en
+     tiempo real contra el --bg vigente en cada tema. */
   background: color-mix(in srgb, var(--bg) 85%, transparent);
   backdrop-filter: blur(8px);
   position: sticky;
@@ -1765,15 +1765,7 @@ fieldset.field > legend {
 .badge-incompleto { background: var(--red-soft); color: var(--red-text); }
 .badge-pendiente { background: var(--accent-soft); color: var(--accent-bright); }
 
-/* ── Dashboard ── */
-.dash-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 28px 0 16px;
-}
+/* ── Estadísticas (progreso.html) ── */
 .dash-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -1863,49 +1855,6 @@ fieldset.field > legend {
 .progreso-header h2 { font-size: 1.4rem; margin-bottom: 4px; }
 .progreso-header p { margin: 0; }
 
-.table-wrap {
-  overflow-x: auto;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  margin-bottom: 40px;
-}
-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-thead th {
-  text-align: left;
-  padding: 12px 16px;
-  background: var(--panel-2);
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-tbody td {
-  padding: 12px 16px;
-  border-top: 1px solid var(--rule);
-  vertical-align: top;
-}
-/* --accent-soft en vez de un blanco al 2%: ese valor era invisible en tema
-   claro (blanco translúcido sobre --panel #ffffff). El token ya está
-   definido por tema y es el mismo hover que usa .wf-nav. */
-tbody tr:hover { background: var(--accent-soft); }
-.feedback-cell { max-width: 320px; font-size: 0.82rem; color: var(--text-muted); }
-
-/* Select de calificación en dashboard.html — mismo lenguaje visual que
-   .field input (fondo --bg-deep, borde --rule), pero compacto para caber
-   en una celda de tabla. */
-.grade-select {
-  background: var(--bg-deep);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  font-size: 0.82rem;
-  padding: 5px 8px;
-}
-.grade-select:disabled { opacity: 0.6; }
-.grade-edited-hint { font-size: 0.72rem; color: var(--text-faint); margin-top: 3px; }
-
 .empty-state {
   text-align: center;
   padding: 60px 20px;
@@ -1967,5 +1916,4 @@ tbody tr:hover { background: var(--accent-soft); }
   .topbar-inner { padding: 14px 16px; }
   .auth-card { padding: 28px 22px; }
   .course-grid { grid-template-columns: 1fr; }
-  .dash-toolbar { flex-direction: column; align-items: stretch; }
 }

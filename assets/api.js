@@ -265,9 +265,8 @@ const AcademyAuth = {
    * Rellena el card motivacional del sidebar (`.wf-sidebar-promo-text` /
    * `.wf-sidebar-promo-sub` dentro de `container`) con copy propio según el
    * rol del usuario logueado — antes era el mismo texto de alumno fijo en
-   * el HTML de las 6 páginas que no son dashboard.html (que ya tenía el
-   * suyo hardcodeado, ahora también viene de acá para no mantener el copy
-   * en dos lugares). El markup del `.wf-sidebar-promo-art` (la ilustración)
+   * el HTML de las 6 páginas, ahora viene de acá para no mantener el copy
+   * en dos lugares. El markup del `.wf-sidebar-promo-art` (la ilustración)
    * no lo toca, sigue siendo un div vacío pintado por CSS.
    */
   renderSidebarPromo(container) {
@@ -437,6 +436,12 @@ const AcademyAuth = {
 
       const a = document.createElement('a');
       a.href = link.getAttribute('href');
+      // Dashboard apunta a un dominio externo (pharis-api-production, no
+      // esta SPA) con target="_blank" en el sidebar — sin clonar también
+      // target/rel acá, el nav móvil abriría ese link en la misma pestaña
+      // y perdería la sesión de Academy en curso.
+      if (link.target) a.target = link.target;
+      if (link.rel) a.rel = link.rel;
       if (link.classList.contains('active')) a.classList.add('active');
       if (link.classList.contains('is-locked')) a.classList.add('is-locked');
 
