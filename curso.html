@@ -170,6 +170,10 @@
                     </div>
                   </div>
                   <form id="quizForm"></form>
+                  <!-- Arriba del botón, no debajo: en viewports cortos el
+                       resultado quedaba fuera de la vista sin scroll
+                       adicional, el alumno no lo notaba tras enviar. -->
+                  <div class="quiz-result" id="quizResult" role="status"></div>
                   <div class="quiz-actions">
                     <!-- Un solo botón para las 3 fases (enviar → evaluando →
                          continuar), en vez de un botón que se queda inerte
@@ -181,7 +185,6 @@
                       <span id="quizSubmitBtnLabel" aria-live="polite">Enviar respuestas</span>
                     </button>
                   </div>
-                  <div class="quiz-result" id="quizResult"></div>
                 </div>
               </div>
 
@@ -1017,7 +1020,10 @@
       document.getElementById('quizResult').innerHTML = '';
       // Sin esto, repasar un quiz ya aprobado (mostrarQuiz se llama de
       // nuevo) dejaría el botón todavía en fase 'continuar' de la vez
-      // anterior, antes de que el alumno reintente nada.
+      // anterior, antes de que el alumno reintente nada. huboIntentoFallido
+      // también se reinicia acá — un repaso nuevo no debería arrancar con
+      // "Volver a enviar" si el fallo fue de una sesión anterior distinta.
+      huboIntentoFallido = false;
       setQuizSubmitFase('enviar');
 
       // Siempre entra por la intro, aunque ya se haya aprobado antes —
@@ -1083,7 +1089,11 @@
     // queda disabled con el spinner (ver quiz-submit-spinner en CSS) → si
     // aprueba pasa a fase 'continuar' (mismo botón, ya no envía el form,
     // el click de abajo lo intercepta y navega). Si NO aprueba, vuelve a
-    // fase 'enviar' para reintentar — no hay límite de intentos.
+    // fase 'enviar' para reintentar — no hay límite de intentos. El label
+    // en fase 'enviar' cambia a "Volver a enviar" tras un intento fallido
+    // (huboIntentoFallido), para que el alumno note que ya reprobó una vez
+    // en vez de repetir el texto inicial como si nada hubiera pasado.
+    let huboIntentoFallido = false;
     function setQuizSubmitFase(fase) {
       const btn = document.getElementById('quizSubmitBtn');
       const label = document.getElementById('quizSubmitBtnLabel');
@@ -1098,7 +1108,7 @@
         label.textContent = 'Continuar';
       } else {
         btn.disabled = false;
-        label.textContent = 'Enviar respuestas';
+        label.textContent = huboIntentoFallido ? 'Volver a enviar' : 'Enviar respuestas';
       }
     }
 
@@ -1129,8 +1139,9 @@
           resultEl.innerHTML = `
             <div class="quiz-feedback quiz-feedback-warn">
               <i class="ph ph-warning-circle" aria-hidden="true"></i>
-              ${result.puntaje}/${result.total} correctas — necesitas más para aprobar. Repasa las diapositivas y vuelve a intentar, no hay límite de intentos.
+              ${result.puntaje}/${result.total} correctas, necesitas más para aprobar. Repasa las diapositivas y vuelve a intentar, no hay límite de intentos.
             </div>`;
+          huboIntentoFallido = true;
           setQuizSubmitFase('enviar');
         }
       } catch (err) {
