@@ -61,25 +61,41 @@
       <p>Descarga las herramientas de Pharis o mira cómo se ve del otro lado, el dashboard que usan los profesores de verdad.</p>
     </div>
 
-    <section class="course-section" id="downloadsSection">
-      <h2>Descargas <i class="ph ph-lock-simple lock-icon" aria-hidden="true"></i></h2>
+    <!-- Una sola sección/grid para las 3 herramientas — antes Descargas y
+         Dashboard de profesor eran 2 secciones separadas, cada una con su
+         propio h2 grande y su propio candado a nivel de sección, dos
+         títulos casi idénticos compitiendo por atención (ver discusión).
+         Ahora el candado vive por CARD individual (.is-locked-card, ver
+         bloquearCard/interceptarSiBloqueado más abajo), no por sección —
+         necesario porque desbloqueadoApp y desbloqueadoDashboard son
+         flags independientes del backend (cursos distintos), así que
+         Descargas y Dashboard pueden estar bloqueados de forma distinta
+         para el mismo usuario. teacherDashboardCard arranca oculto,
+         revelado por JS solo si user.rol === 'profesor'. -->
+    <section class="course-section">
+      <h2>Herramientas de Pharis</h2>
       <div class="course-grid">
-        <div class="course-card">
+        <div class="course-card" id="downloadsAppCard">
           <h2>
             <span>Pharis App</span>
-            <svg class="course-card-icon" viewBox="0 0 21 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <path d="M0.018654 0C0.291685 0.0346468 1.06363 0.351087 1.35507 0.444175C2.00683 0.652386 2.66098 0.893337 3.30632 1.1157L7.44425 2.51569C8.06511 2.72709 8.66921 2.90399 9.28163 3.14897C9.27745 3.58039 9.21329 4.21939 9.18326 4.67222C9.11664 5.7132 9.04471 6.75378 8.96742 7.79399C8.90088 8.70041 8.87595 9.5429 8.82382 10.438L8.61194 13.5626C8.55515 14.428 8.39189 15.9957 8.40472 16.8065C7.86712 16.785 7.20704 16.8116 6.65379 16.8015C6.24697 16.7941 5.34462 16.7703 4.9748 16.8225C5.17644 16.3851 5.28948 15.8819 5.4424 15.4234C6.19564 13.1646 6.9358 10.8953 7.67625 8.63259C7.92098 7.93723 8.10071 7.37357 8.29986 6.66252C7.99596 6.82813 7.43703 6.98952 7.09294 7.10483L5.15151 7.75164C3.9828 8.13023 2.75982 8.58522 1.59136 8.9865C1.14081 9.14125 0.395517 9.31603 0.0199016 9.55254C0.00992916 8.76633 -0.022738 7.75843 0.0263541 6.98817C0.650986 6.90894 9.11771 4.70463 9.03973 4.77851C8.91731 4.62324 7.17078 4.26203 6.87252 4.18944L3.81818 3.43088C2.59209 3.13691 1.23158 2.74788 0.000468966 2.50575C0.0457848 1.81065 0.0160509 0.727473 0.018654 0Z" fill="#508FF8"/>
-              <path d="M20.2672 0.0289993L20.3871 0.0302827C20.4597 0.124471 20.4258 2.21354 20.4249 2.49028C18.2297 3.0131 16.04 3.55894 13.8563 4.12766C13.5136 4.21342 11.545 4.59757 11.479 4.78639C11.655 4.86837 12.1966 4.9594 12.4251 5.01729L15.214 5.71423C16.9305 6.1261 18.725 6.6281 20.4239 7.02197C20.4254 7.37599 20.4564 9.20695 20.3958 9.44314C19.9444 9.43269 16.2385 8.06739 15.5812 7.84396L13.6376 7.19099C13.1168 7.01981 12.568 6.86388 12.079 6.62051C12.3181 7.16521 12.5208 7.916 12.7227 8.50749C12.9069 8.9939 13.0299 9.48999 13.1962 9.98319L14.8492 14.9667C14.9894 15.3789 15.2887 16.4491 15.4624 16.7646C14.3807 16.8598 13.1516 16.7846 12.0532 16.8182C12.0684 16.5415 11.9832 15.6921 11.9634 15.3661L11.7317 11.8073C11.6749 10.9925 11.6565 10.2069 11.6083 9.40552C11.4933 7.31429 11.3464 5.22496 11.1675 3.13823C12.1316 2.77479 13.1446 2.46883 14.1199 2.12588C16.1561 1.40981 18.2385 0.762741 20.2672 0.0289993Z" fill="#508FF8"/>
-            </svg>
+            <span class="course-card-h2-right">
+              <i class="ph ph-lock-simple lock-icon" aria-hidden="true"></i>
+              <svg class="course-card-icon" viewBox="0 0 21 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M0.018654 0C0.291685 0.0346468 1.06363 0.351087 1.35507 0.444175C2.00683 0.652386 2.66098 0.893337 3.30632 1.1157L7.44425 2.51569C8.06511 2.72709 8.66921 2.90399 9.28163 3.14897C9.27745 3.58039 9.21329 4.21939 9.18326 4.67222C9.11664 5.7132 9.04471 6.75378 8.96742 7.79399C8.90088 8.70041 8.87595 9.5429 8.82382 10.438L8.61194 13.5626C8.55515 14.428 8.39189 15.9957 8.40472 16.8065C7.86712 16.785 7.20704 16.8116 6.65379 16.8015C6.24697 16.7941 5.34462 16.7703 4.9748 16.8225C5.17644 16.3851 5.28948 15.8819 5.4424 15.4234C6.19564 13.1646 6.9358 10.8953 7.67625 8.63259C7.92098 7.93723 8.10071 7.37357 8.29986 6.66252C7.99596 6.82813 7.43703 6.98952 7.09294 7.10483L5.15151 7.75164C3.9828 8.13023 2.75982 8.58522 1.59136 8.9865C1.14081 9.14125 0.395517 9.31603 0.0199016 9.55254C0.00992916 8.76633 -0.022738 7.75843 0.0263541 6.98817C0.650986 6.90894 9.11771 4.70463 9.03973 4.77851C8.91731 4.62324 7.17078 4.26203 6.87252 4.18944L3.81818 3.43088C2.59209 3.13691 1.23158 2.74788 0.000468966 2.50575C0.0457848 1.81065 0.0160509 0.727473 0.018654 0Z" fill="#508FF8"/>
+                <path d="M20.2672 0.0289993L20.3871 0.0302827C20.4597 0.124471 20.4258 2.21354 20.4249 2.49028C18.2297 3.0131 16.04 3.55894 13.8563 4.12766C13.5136 4.21342 11.545 4.59757 11.479 4.78639C11.655 4.86837 12.1966 4.9594 12.4251 5.01729L15.214 5.71423C16.9305 6.1261 18.725 6.6281 20.4239 7.02197C20.4254 7.37599 20.4564 9.20695 20.3958 9.44314C19.9444 9.43269 16.2385 8.06739 15.5812 7.84396L13.6376 7.19099C13.1168 7.01981 12.568 6.86388 12.079 6.62051C12.3181 7.16521 12.5208 7.916 12.7227 8.50749C12.9069 8.9939 13.0299 9.48999 13.1962 9.98319L14.8492 14.9667C14.9894 15.3789 15.2887 16.4491 15.4624 16.7646C14.3807 16.8598 13.1516 16.7846 12.0532 16.8182C12.0684 16.5415 11.9832 15.6921 11.9634 15.3661L11.7317 11.8073C11.6749 10.9925 11.6565 10.2069 11.6083 9.40552C11.4933 7.31429 11.3464 5.22496 11.1675 3.13823C12.1316 2.77479 13.1446 2.46883 14.1199 2.12588C16.1561 1.40981 18.2385 0.762741 20.2672 0.0289993Z" fill="#508FF8"/>
+              </svg>
+            </span>
           </h2>
           <p>El asistente de escritorio que te acompaña mientras estudias, ve tu pantalla, escucha tus dudas y responde con el contexto real de tu clase.</p>
           <button type="button" class="btn btn-primary" id="downloadAppBtn"><i class="ph ph-download-simple"></i> Descargar para Windows</button>
           <div class="download-status" id="downloadAppStatus" role="status"></div>
         </div>
-        <div class="course-card">
+        <div class="course-card" id="downloadsExtensionCard">
           <h2>
             <span>Pharis Extension</span>
-            <svg class="course-card-icon course-card-icon-lg" viewBox="0 0 250 249" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <span class="course-card-h2-right">
+              <i class="ph ph-lock-simple lock-icon" aria-hidden="true"></i>
+              <svg class="course-card-icon course-card-icon-lg" viewBox="0 0 250 249" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
               <g clip-path="url(#extIconClip)">
                 <path d="M0.199937 68.3799C3.12633 68.7533 11.4002 72.1635 14.5239 73.1667C21.5096 75.4105 28.5209 78.0072 35.4377 80.4036L79.7888 95.4911C86.4433 97.7693 92.9182 99.6757 99.4822 102.316C99.4374 106.965 98.7497 113.852 98.4278 118.732C97.7138 129.95 96.9428 141.164 96.1144 152.374C95.4012 162.143 95.134 171.222 94.5753 180.868L92.3043 214.542C91.6957 223.868 89.9458 240.763 90.0833 249.501C84.3212 249.269 77.2464 249.556 71.3165 249.447C66.9562 249.367 57.2846 249.111 53.3208 249.673C55.482 244.959 56.6936 239.536 58.3326 234.595C66.406 210.253 74.3392 185.797 82.2754 161.412C84.8985 153.918 86.8249 147.844 88.9594 140.181C85.7022 141.965 79.7114 143.705 76.0234 144.947L55.2148 151.918C42.6884 155.998 29.5803 160.901 17.0565 165.226C12.2274 166.894 4.23922 168.777 0.213309 171.326C0.106423 162.853 -0.24371 151.991 0.282468 143.69C6.97739 142.836 97.7253 119.081 96.8895 119.877C95.5773 118.204 76.8577 114.311 73.6609 113.529L40.9239 105.354C27.7825 102.186 13.2003 97.9933 0.00502651 95.3839C0.49073 87.893 0.172037 76.2197 0.199937 68.3799Z" fill="url(#extIconGrad1)"/>
                 <path d="M217.23 68.6929L218.515 68.7067C219.293 69.7218 218.929 92.2353 218.92 95.2177C195.391 100.852 171.922 106.734 148.516 112.863C144.843 113.788 123.743 117.928 123.036 119.962C124.922 120.846 130.727 121.827 133.176 122.451L163.068 129.962C181.466 134.4 200.7 139.81 218.909 144.055C218.925 147.87 219.257 167.602 218.608 170.147C213.77 170.035 174.049 155.321 167.004 152.913L146.172 145.876C140.59 144.032 134.708 142.351 129.467 139.728C132.03 145.599 134.202 153.69 136.366 160.064C138.34 165.306 139.659 170.652 141.441 175.968L159.158 229.674C160.661 234.116 163.869 245.65 165.731 249.05C154.137 250.076 140.963 249.265 129.19 249.627C129.353 246.645 128.44 237.491 128.228 233.978L125.744 195.626C125.136 186.845 124.938 178.378 124.422 169.742C123.189 147.205 121.615 124.689 119.697 102.201C130.031 98.2838 140.888 94.9865 151.342 91.2906C173.166 83.5736 195.486 76.6003 217.23 68.6929Z" fill="url(#extIconGrad2)"/>
@@ -103,25 +119,29 @@
                   <rect width="225.082" height="183.206" fill="white" transform="translate(0 68.3799)"/>
                 </clipPath>
               </defs>
-            </svg>
+              </svg>
+            </span>
           </h2>
           <p>La extensión de Chrome para trabajar directo desde tu navegador, sin instalar nada, ideal si usás una laptop compartida o del colegio.</p>
           <button type="button" class="btn btn-secondary" id="downloadExtensionBtn"><i class="ph ph-download-simple"></i> Descargar extensión</button>
           <div class="download-status" id="downloadExtensionStatus" role="status"></div>
         </div>
-      </div>
-    </section>
-
-    <!-- Solo profesores: oculto por defecto, revelado por JS si
-         user.rol === 'profesor'. -->
-    <section class="course-section" id="teacherDashboardSection" style="display:none;">
-      <h2>Dashboard de profesor <i class="ph ph-lock-simple lock-icon" aria-hidden="true"></i></h2>
-      <p>Así es el dashboard real que usan los profesores con Pharis, con la actividad real de tus alumnos en Pharis Academy: entregas, calificaciones y avance por curso.</p>
-      <div class="wf-panel" id="teacherDemoPanel">
-        <a class="btn btn-primary" id="openDashboardBtn" href="#" target="_blank" rel="noopener noreferrer">
-          Abrir dashboard de profesor <i class="ph ph-arrow-square-out"></i>
-        </a>
-        <p class="demo-credentials-hint">Entrás con el mismo correo y contraseña que usás acá en Pharis Academy.</p>
+        <!-- Solo profesores: oculto por defecto, revelado por JS si
+             user.rol === 'profesor'. -->
+        <div class="course-card" id="teacherDashboardCard" style="display:none;">
+          <h2>
+            <span>Dashboard de profesor</span>
+            <span class="course-card-h2-right">
+              <i class="ph ph-lock-simple lock-icon" aria-hidden="true"></i>
+              <i class="ph ph-chart-bar course-card-icon" aria-hidden="true" style="font-size:1.6rem; color:#508FF8;"></i>
+            </span>
+          </h2>
+          <p>Así es el dashboard real que usan los profesores con Pharis, con la actividad real de tus alumnos en Pharis Academy: entregas, calificaciones y avance por curso.</p>
+          <a class="btn btn-primary" id="openDashboardBtn" href="#" target="_blank" rel="noopener noreferrer">
+            Abrir dashboard <i class="ph ph-arrow-square-out"></i>
+          </a>
+          <p class="demo-credentials-hint">Entrás con el mismo correo y contraseña que usás acá en Pharis Academy.</p>
+        </div>
       </div>
     </section>
     </main>
@@ -136,16 +156,16 @@
     AcademyAuth.renderUserMenu(document.getElementById('userMenu'));
     AcademyAuth.renderSidebarPromo(document.getElementById('sidebarPromo'));
     if (user.rol === 'profesor') {
-      const teacherSection = document.getElementById('teacherDashboardSection');
-      teacherSection.style.display = 'block';
+      const teacherCard = document.getElementById('teacherDashboardCard');
+      teacherCard.style.display = 'flex';
       document.getElementById('openDashboardBtn').href = 'https://pharis-api-production.up.railway.app/dashboard-v2';
-      // Orden en el HTML es Descargas → Dashboard de profesor (lo que ve un
-      // alumno, que nunca ve la segunda). Para un profesor se invierte:
-      // el dashboard es lo primero que le importa, las descargas quedan
-      // abajo. insertBefore mueve el nodo existente, no lo clona — los
+      // Orden en el HTML es App → Extensión → Dashboard de profesor (lo
+      // que ve un alumno, que nunca ve la 3ra card). Para un profesor se
+      // invierte: el dashboard es lo primero que le importa dentro del
+      // mismo grid. .before() mueve el nodo existente, no lo clona — los
       // listeners ya cableados más abajo en este script (showDownloadStatus,
       // interceptarSiBloqueado, etc.) siguen apuntando al mismo elemento.
-      document.getElementById('downloadsSection').before(teacherSection);
+      document.getElementById('downloadsAppCard').before(teacherCard);
     }
     AcademyAuth.aplicarGateSidebar();
 
@@ -179,33 +199,39 @@
     // Gate por función, independiente del gate del sidebar (aplicarGateSidebar
     // solo decide si el link del sidebar está habilitado — quien entra acá
     // directo por URL, con el link bloqueado o no, igual necesita ver las
-    // secciones correctas atenuadas). Falla abierto ante error de red (no
+    // cards correctas atenuadas). Falla abierto ante error de red (no
     // atenúa nada) — mismo criterio que aplicarGateSidebar, un timeout acá
     // no debe bloquear a un alumno que ya tenía acceso real.
     // aria-disabled (no el atributo nativo `disabled`, que sacaría a los
     // <a> del árbol de foco por completo) marca la acción como bloqueada
     // para lectores de pantalla — antes la única señal era visual
-    // (opacity: 0.5 vía .is-locked-section), un usuario de teclado
-    // llegaba al botón sin ninguna pista previa de que estaba bloqueado.
-    function bloquearSeccion(sectionId) {
-      const section = document.getElementById(sectionId);
-      section.classList.add('is-locked-section');
-      section.querySelectorAll('a, button').forEach(el => el.setAttribute('aria-disabled', 'true'));
+    // (opacity: 0.5 vía .is-locked-card), un usuario de teclado llegaba
+    // al botón sin ninguna pista previa de que estaba bloqueado.
+    // Candado por CARD, no por sección — App/Extensión/Dashboard pueden
+    // bloquearse independientemente (ver comentario junto a .is-locked-card
+    // en styles.css).
+    function bloquearCard(cardId) {
+      const card = document.getElementById(cardId);
+      card.classList.add('is-locked-card');
+      card.querySelectorAll('a, button').forEach(el => el.setAttribute('aria-disabled', 'true'));
     }
 
     academyFetch('/academy/me/acceso').then(acceso => {
-      if (!acceso.desbloqueadoApp) bloquearSeccion('downloadsSection');
-      // Solo relevante si la sección de profesor ya está visible (rol
-      // 'profesor') — para un alumno, teacherDashboardSection sigue oculta
+      if (!acceso.desbloqueadoApp) {
+        bloquearCard('downloadsAppCard');
+        bloquearCard('downloadsExtensionCard');
+      }
+      // Solo relevante si la card de profesor ya está visible (rol
+      // 'profesor') — para un alumno, teacherDashboardCard sigue oculta
       // por display:none y este atenuado no tiene efecto visible.
-      if (!acceso.desbloqueadoDashboard) bloquearSeccion('teacherDashboardSection');
+      if (!acceso.desbloqueadoDashboard) bloquearCard('teacherDashboardCard');
     }).catch(() => {});
 
-    function interceptarSiBloqueado(sectionId, mensaje) {
-      const section = document.getElementById(sectionId);
-      section.querySelectorAll('a, button').forEach(el => {
+    function interceptarSiBloqueado(cardId, mensaje) {
+      const card = document.getElementById(cardId);
+      card.querySelectorAll('a, button').forEach(el => {
         el.addEventListener('click', (e) => {
-          if (!section.classList.contains('is-locked-section')) return;
+          if (!card.classList.contains('is-locked-card')) return;
           e.preventDefault();
           e.stopImmediatePropagation();
           AcademyAuth.mostrarToast(mensaje);
@@ -215,8 +241,9 @@
     // Los mensajes nombran el curso y la acción concreta que desbloquea
     // (recorrer las diapositivas o entregar la actividad), en vez del vago
     // "primero haz el curso" — que no decía qué contaba como hacerlo.
-    interceptarSiBloqueado('downloadsSection', 'Recorre "Introducción para alumnos" o entrega su actividad para desbloquear las descargas.');
-    interceptarSiBloqueado('teacherDashboardSection', 'Recorre "Introducción para profesores" o entrega su actividad para desbloquear el dashboard.');
+    interceptarSiBloqueado('downloadsAppCard', 'Recorre "Introducción para alumnos" o entrega su actividad para desbloquear las descargas.');
+    interceptarSiBloqueado('downloadsExtensionCard', 'Recorre "Introducción para alumnos" o entrega su actividad para desbloquear las descargas.');
+    interceptarSiBloqueado('teacherDashboardCard', 'Recorre "Introducción para profesores" o entrega su actividad para desbloquear el dashboard.');
   </script>
 </body>
 </html>

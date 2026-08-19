@@ -810,6 +810,13 @@ fieldset.field > legend {
   font-size: 1.15rem;
   margin-bottom: 4px;
 }
+/* Agrupa candado + ícono de marca como una sola unidad a la derecha del
+   h2 — necesario porque .course-card h2 usa justify-content:space-between
+   con exactamente 2 hijos esperados (título / lo demás). Sin este wrapper,
+   el candado (3er hijo directo, oculto por defecto pero SIEMPRE presente
+   en el DOM en acceso.html — ver .course-card.is-locked-card) quedaría
+   flotando en el medio del h2 en vez de junto al ícono cuando se revela. */
+.course-card-h2-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 /* Ícono por categoría (ver ICONO_CATEGORIA en index.html), a la derecha
    del título. Distingue "Para profesores" de "Para alumnos" de un
    vistazo, antes eran dos tarjetas con la misma forma exacta. Reusado
@@ -995,17 +1002,28 @@ fieldset.field > legend {
   border-bottom: 1px solid var(--rule);
 }
 .course-section:last-child { border-bottom: none; }
-.course-section h2 { font-size: 1.3rem; }
-/* Sección de acceso.html (Descargas / Dashboard de profesor) bloqueada
-   hasta completar el curso introductorio correspondiente (ver
-   interceptarSiBloqueado en acceso.html) — atenuada pero interactiva
-   (el click sigue llegando, solo que dispara un toast en vez de la
-   acción real), por eso NO usa pointer-events:none. El ícono de candado
-   es un <i class="ph ph-lock-simple lock-icon"> real en el HTML (mismo
-   patrón que .chapter-lock-icon), no un pseudo-elemento con codepoint. */
-.course-section.is-locked-section { opacity: 0.5; }
-.course-section .lock-icon { display: none; margin-left: 8px; font-size: 0.8rem; color: var(--text-faint); vertical-align: middle; }
-.course-section.is-locked-section .lock-icon { display: inline; }
+/* .course-section > h2 (hijo DIRECTO, no descendiente cualquiera) — desde
+   que acceso.html anida .course-card DENTRO de .course-section (antes
+   solo pasaba en categoria.html/curso.html, que no anidan así), un <h2>
+   de card matchea ESTE selector Y .course-card h2 a la vez si se usa el
+   combinador de descendiente normal. Misma especificidad (0,0,1,1) en
+   ambos, así que sin el combinador de hijo directo ganaba el que apareciera
+   después en la hoja (este, más abajo), pisando el font-size:1.15rem
+   pensado para los h2 de card con un 1.3rem que no correspondía. */
+.course-section > h2 { font-size: 1.3rem; }
+/* Card de acceso.html (Pharis App / Extension / Dashboard de profesor)
+   bloqueada hasta completar el curso introductorio correspondiente (ver
+   interceptarSiBloqueado en acceso.html) — atenuada pero interactiva (el
+   click sigue llegando, solo que dispara un toast en vez de la acción
+   real), por eso NO usa pointer-events:none. Candado por CARD individual,
+   no por sección: desbloqueadoApp y desbloqueadoDashboard son flags
+   independientes del backend, cada card puede estar bloqueada aparte de
+   sus hermanas en el mismo grid. El ícono de candado es un
+   <i class="ph ph-lock-simple lock-icon"> real en el HTML (mismo patrón
+   que .chapter-lock-icon), no un pseudo-elemento con codepoint. */
+.course-card.is-locked-card { opacity: 0.5; }
+.course-card .lock-icon { display: none; font-size: 0.8rem; color: var(--text-faint); }
+.course-card.is-locked-card .lock-icon { display: inline; }
 /* "Subir actividad": mismo ancho que la columna del visor en
    .course-watch-grid (resta los 260px fijos del panel de Capítulos +
    su gap de 20px), no vive dentro del grid (está en otra sección más
