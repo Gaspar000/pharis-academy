@@ -927,6 +927,11 @@ fieldset.field > legend {
      la imagen — con center quedaban flotando a mitad del hueco en vez de
      "paradas" sobre el margen inferior del card. */
   background-position: center bottom;
+  /* margin-bottom negativo = el padding-bottom de 20px del .wf-panel
+     contenedor: sin esto la imagen queda pegada al PADDING del panel, no
+     al borde real del card — se pidió explícitamente que toque el límite
+     inferior, no que respete el mismo aire que el texto. */
+  margin-bottom: -20px;
 }
 @media (max-width: 720px) {
   .categoria-banner { flex-direction: column; align-items: flex-start; }
