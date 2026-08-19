@@ -60,10 +60,17 @@
 
     <main class="shell" style="padding-top:28px;">
     <!-- Banner por categoría — copy fijo (Alumnos/Profesores) resuelto en
-         renderCategoriaBanner. -->
+         renderCategoriaBanner. .categoria-banner-art no tiene fondo propio
+         (a diferencia de .wf-sidebar-promo-art): sin background-image
+         puesto queda invisible a propósito, no un hueco con color de
+         relleno — el diseño pedido es "se ve la ilustración libre", no
+         "una caja esperando imagen". -->
     <div class="wf-panel categoria-banner" id="categoriaBanner">
-      <h2 id="categoriaTitle">Cargando…</h2>
-      <p id="categoriaBannerDesc"></p>
+      <div class="categoria-banner-body">
+        <h2 id="categoriaTitle">Cargando…</h2>
+        <p id="categoriaBannerDesc"></p>
+      </div>
+      <div class="categoria-banner-art" id="categoriaBannerArt" aria-hidden="true"></div>
     </div>
 
     <!-- Invitación cruzada a la otra categoría, no oculta, solo promociona.
@@ -266,10 +273,18 @@
     // Copy fijo por categoría — a diferencia de categoria.titulo (viene del
     // backend, solo el nombre corto "Alumnos"/"Profesores"), esta
     // descripción es contenido editorial que no tiene sentido pedirle al
-    // catálogo de cursos.
+    // catálogo de cursos. imagen: null (alumnos) dibuja el hueco sin
+    // background-image — invisible hasta que se suba, no un placeholder
+    // con color de relleno (ver .categoria-banner-art en styles.css).
     const CATEGORIA_BANNER_COPY = {
-      alumnos: 'Domina el uso de Pharis como tu tutor de IA para estudiar mejor. Esta sección reúne una selección de cursos pensados para ayudarte a sacarle el máximo provecho, desde cómo hacer las preguntas correctas hasta prepararte para tus exámenes.',
-      profesores: 'Domina el uso de Pharis como tu asistente de IA para enseñar mejor. Esta sección reúne una selección de cursos pensados para ayudarte a integrar la IA en tu salón de clases, desde el diseño de actividades hasta el seguimiento del progreso de tus alumnos.',
+      alumnos: {
+        descripcion: 'Domina el uso de Pharis como tu tutor de IA para estudiar mejor. Esta sección reúne una selección de cursos pensados para ayudarte a sacarle el máximo provecho, desde cómo hacer las preguntas correctas hasta prepararte para tus exámenes.',
+        imagen: null,
+      },
+      profesores: {
+        descripcion: 'Domina el uso de Pharis como tu asistente de IA para enseñar mejor. Esta sección reúne una selección de cursos pensados para ayudarte a integrar la IA en tu salón de clases, desde el diseño de actividades hasta el seguimiento del progreso de tus alumnos.',
+        imagen: 'https://pub-8dbbde7f94954173b9eaa1e10f3a0aa0.r2.dev/assets/Foto%20-%20Top%20Curso%20Maestros.png',
+      },
     };
 
     function renderCategoriaBanner(categoriaSlug) {
@@ -280,8 +295,10 @@
       // (ej. tras un hashchange a una categoría inválida y luego a una
       // válida, sin recargar la página).
       document.getElementById('categoriaBanner').style.display = '';
-      document.getElementById('categoriaBannerDesc').textContent =
-        CATEGORIA_BANNER_COPY[categoriaSlug] || CATEGORIA_BANNER_COPY.alumnos;
+      const copy = CATEGORIA_BANNER_COPY[categoriaSlug] || CATEGORIA_BANNER_COPY.alumnos;
+      document.getElementById('categoriaBannerDesc').textContent = copy.descripcion;
+      document.getElementById('categoriaBannerArt').style.backgroundImage =
+        copy.imagen ? `url('${copy.imagen}')` : '';
     }
 
     async function loadCategoria() {
