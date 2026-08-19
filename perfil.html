@@ -76,20 +76,6 @@
             <legend>Soy</legend>
             <div class="category-toggle">
               <label>
-                <input type="radio" name="categoriaPreferida" value="alumnos" />
-                <span>Alumno</span>
-              </label>
-              <label>
-                <input type="radio" name="categoriaPreferida" value="profesores" />
-                <span>Profesor</span>
-              </label>
-            </div>
-            <div class="field-hint">Solo para mostrarte cursos relevantes primero, puedes tomar cualquier curso de cualquier categoría.</div>
-          </fieldset>
-          <fieldset class="field">
-            <legend>Tipo de cuenta</legend>
-            <div class="category-toggle">
-              <label>
                 <input type="radio" name="rol" value="estudiante" />
                 <span>Alumno</span>
               </label>
@@ -98,7 +84,7 @@
                 <span>Profesor</span>
               </label>
             </div>
-            <div class="field-hint">Esto sí cambia lo que puedes ver y hacer: como profesor, obtienes acceso al Dashboard con las entregas de todo el curso.</div>
+            <div class="field-hint">Cambia los cursos que te mostramos primero y, como profesor, te da acceso al Dashboard con las entregas de todo el curso.</div>
           </fieldset>
           <button type="submit" class="btn btn-primary" id="perfilSubmitBtn" style="width:auto; padding:10px 20px;">Guardar cambios</button>
         </form>
@@ -180,11 +166,17 @@
     // el usuario puede seguir viendo/editando con lo que ya tenía en sesión).
     document.getElementById('nombre').value = user.nombre;
     document.getElementById('email').value = user.email;
-    const categoriaInicial = perfilForm.querySelector(`input[name="categoriaPreferida"][value="${user.categoriaPreferida || 'alumnos'}"]`);
-    if (categoriaInicial) categoriaInicial.checked = true;
     const rolInicial = perfilForm.querySelector(`input[name="rol"][value="${user.rol}"]`);
     if (rolInicial) rolInicial.checked = true;
     document.getElementById('perfilAvatar').innerHTML = avatarHtml(user.nombre, 'lg');
+
+    // Un único toggle "Soy" controla tanto rol (acceso real) como
+    // categoriaPreferida (qué cursos se destacan) — antes eran 2 controles
+    // separados y confundía (ver categoriaPreferida vs rol en PATCH
+    // /academy/me): el usuario esperaba que cambiar "Soy" cambiara todo.
+    function categoriaPara(rolValue) {
+      return rolValue === 'profesor' ? 'profesores' : 'alumnos';
+    }
 
     async function loadPerfil() {
       try {
@@ -192,8 +184,6 @@
         AcademyAuth.updateUser(data.user);
         document.getElementById('nombre').value = data.user.nombre;
         document.getElementById('email').value = data.user.email;
-        const categoria = perfilForm.querySelector(`input[name="categoriaPreferida"][value="${data.user.categoriaPreferida}"]`);
-        if (categoria) categoria.checked = true;
         const rol = perfilForm.querySelector(`input[name="rol"][value="${data.user.rol}"]`);
         if (rol) rol.checked = true;
       } catch { /* se queda con los datos de localStorage, no bloquea la página */ }
@@ -208,14 +198,13 @@
 
       const nombre = document.getElementById('nombre').value.trim();
       const email = document.getElementById('email').value.trim();
-      const categoriaPreferida = perfilForm.querySelector('input[name="categoriaPreferida"]:checked').value;
       const rol = perfilForm.querySelector('input[name="rol"]:checked').value;
       const rolCambio = rol !== user.rol;
 
       try {
         const data = await academyFetch('/academy/me', {
           method: 'PATCH',
-          body: JSON.stringify({ nombre, email, categoriaPreferida, rol }),
+          body: JSON.stringify({ nombre, email, categoriaPreferida: categoriaPara(rol), rol }),
         });
         AcademyAuth.updateUser(data.user, data.token);
         user.rol = data.user.rol; // esta misma carga de página ya no debe re-detectar el cambio como nuevo
