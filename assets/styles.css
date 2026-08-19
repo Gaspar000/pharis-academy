@@ -923,20 +923,60 @@ fieldset.field > legend {
   .categoria-banner-art { width: 100%; flex-basis: auto; }
 }
 
-/* ── Categoría: banner de invitación cruzada ──
-   Invita a ver la OTRA categoría (alumnos↔profesores) sin ocultarla.
-   Monta sobre .wf-panel (mismo patrón que .wf-leader-you-panel). */
+/* ── Categoría: invitación cruzada, toast flotante ──
+   Invita a ver la OTRA categoría (alumnos↔profesores). Antes vivía fija en
+   el flujo de la página; ahora es un toast en la esquina, mismo criterio
+   de entrada/salida que .academy-toast (opacity+transform, ver
+   renderCrosslink/ocultarCrosslink en categoria.html) pero con su propio
+   layout de card (texto + 2 acciones) en vez del pill de solo texto.
+   Monta sobre .wf-panel. */
 .categoria-crosslink {
+  position: fixed;
+  right: 24px;
+  bottom: 28px;
+  z-index: 40;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 28px;
+  gap: 14px;
+  max-width: min(92vw, 420px);
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.28);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease);
 }
-.categoria-crosslink-text { font-size: 0.9rem; color: var(--text-muted); }
+.categoria-crosslink.is-visible { opacity: 1; transform: translateY(0); }
+/* [hidden] pierde contra .categoria-crosslink{display:flex}: una clase
+   tiene más especificidad que la regla [hidden]{display:none} de la hoja
+   de estilos del user-agent — sin esto, el toast quedaría visible pese al
+   atributo hidden puesto por JS. */
+.categoria-crosslink[hidden] { display: none; }
+.categoria-crosslink-text { font-size: 0.88rem; color: var(--text-muted); }
 .categoria-crosslink-text strong { color: var(--text); }
 .categoria-crosslink .btn { flex-shrink: 0; }
+.crosslink-close {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-faint);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.crosslink-close:hover { background: var(--panel-2); color: var(--text); }
+@media (max-width: 640px) {
+  .categoria-crosslink {
+    left: 16px;
+    right: 16px;
+    bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    max-width: none;
+    flex-wrap: wrap;
+  }
+}
 
 /* ── Categoría: agrupación por tema ──
    Título (.wf-section-title, reusado tal cual) + su propio .course-grid,

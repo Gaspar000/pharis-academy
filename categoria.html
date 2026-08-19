@@ -71,12 +71,16 @@
       <div class="categoria-banner-art" id="categoriaBannerArt" aria-hidden="true"></div>
     </div>
 
-    <!-- Invitación cruzada a la otra categoría, no oculta, solo promociona.
-         Oculto hasta que loadCategoria() resuelva cuál es la "opuesta". -->
-    <a class="wf-panel categoria-crosslink" id="crosslinkBanner" style="display:none;">
+    <!-- Invitación cruzada a la otra categoría — toast flotante, no un
+         panel fijo en el flujo (ver renderCrosslink). role="status": es
+         informativo/promocional, no una alerta que deba interrumpir. -->
+    <div class="wf-panel categoria-crosslink" id="crosslinkBanner" role="status" hidden>
       <div class="categoria-crosslink-text" id="crosslinkText"></div>
-      <span class="btn btn-primary btn-small">Ver cursos <i class="ph ph-arrow-right"></i></span>
-    </a>
+      <a class="btn btn-primary btn-small" id="crosslinkGoBtn">Ver cursos <i class="ph ph-arrow-right"></i></a>
+      <button type="button" class="crosslink-close" id="crosslinkCloseBtn" aria-label="Cerrar aviso">
+        <i class="ph ph-x" aria-hidden="true"></i>
+      </button>
+    </div>
 
     <div class="page-header" style="padding-top:16px;">
       <p id="categoriaSummary"><i class="ph ph-books categoria-summary-icon" aria-hidden="true"></i>Cualquier alumno o profesor puede tomar cualquiera de estos cursos.</p>
@@ -102,14 +106,61 @@
     const titleEl = document.getElementById('categoriaTitle');
     const crosslinkBanner = document.getElementById('crosslinkBanner');
     const crosslinkText = document.getElementById('crosslinkText');
+    const crosslinkGoBtn = document.getElementById('crosslinkGoBtn');
+    const crosslinkCloseBtn = document.getElementById('crosslinkCloseBtn');
+
+    // sessionStorage (no localStorage): la invitación cruzada es un
+    // recordatorio de descubrimiento, no una preferencia permanente — vale
+    // la pena que vuelva a aparecer en una sesión nueva, pero no debe
+    // insistir dentro de la misma. Clave por slug de DESTINO (a dónde
+    // invita, no la categoría actual): cerrar "¿vas a Profesores?" no debe
+    // silenciar también "¿vas a Alumnos?" si el usuario navega entre
+    // ambas categorías en la misma sesión.
+    function crosslinkCerrado(destinoSlug) {
+      return sessionStorage.getItem(`academy_crosslink_cerrado_${destinoSlug}`) === '1';
+    }
+    // Timeout de la transición de salida — guardado en módulo para poder
+    // cancelarlo. Sin esto, clickear "Ver cursos" dispara ocultarCrosslink()
+    // Y un hashchange casi inmediato (navega a la otra categoría), que
+    // vuelve a llamar renderCrosslink() para el crosslink OPUESTO (el que
+    // no estaba cerrado) mientras el hidden diferido de la vez anterior
+    // seguía pendiente — dos operaciones async sobre el mismo nodo podían
+    // pisarse y dejarlo oculto pese a acabar de mostrarse.
+    let crosslinkHideTimeout = null;
+
+    function ocultarCrosslink(destinoSlug) {
+      if (destinoSlug) sessionStorage.setItem(`academy_crosslink_cerrado_${destinoSlug}`, '1');
+      clearTimeout(crosslinkHideTimeout);
+      crosslinkBanner.classList.remove('is-visible');
+      // hidden después de la transición de salida (ver CSS), no de
+      // inmediato — si se oculta ya, la animación de cierre no se alcanza
+      // a ver.
+      crosslinkHideTimeout = setTimeout(() => crosslinkBanner.setAttribute('hidden', ''), 220);
+    }
+    crosslinkCloseBtn.addEventListener('click', () => ocultarCrosslink(crosslinkBanner.dataset.destino));
+    crosslinkGoBtn.addEventListener('click', () => ocultarCrosslink(crosslinkBanner.dataset.destino));
 
     function renderCrosslink(categoria, categorias) {
       const otra = categorias.find(c => c.slug !== categoria.slug);
-      if (!otra) { crosslinkBanner.style.display = 'none'; return; }
+      clearTimeout(crosslinkHideTimeout);
+      if (!otra || crosslinkCerrado(otra.slug)) { crosslinkBanner.setAttribute('hidden', ''); return; }
 
-      crosslinkBanner.href = `categoria.html#slug=${encodeURIComponent(otra.slug)}`;
+      crosslinkBanner.dataset.destino = otra.slug;
+      crosslinkGoBtn.href = `categoria.html#slug=${encodeURIComponent(otra.slug)}`;
+      // hidden se quita ANTES de escribir el texto, no después: role="status"
+      // es una región live, y un lector de pantalla anuncia mutaciones de
+      // contenido dentro de una región que YA está visible — si el texto se
+      // escribe mientras sigue hidden, el anuncio queda librado a que el
+      // propio toggle de hidden re-dispare la lectura del subárbol (funciona
+      // en la práctica en los navegadores más comunes, pero no es el
+      // comportamiento garantizado por spec).
+      crosslinkBanner.removeAttribute('hidden');
       crosslinkText.innerHTML = `¿Buscas algo distinto? También tenemos <strong>${otra.titulo}</strong>.`;
-      crosslinkBanner.style.display = 'flex';
+      // Entra en el próximo frame, no en el mismo — el toggle de la clase
+      // necesita un estado inicial ya pintado (hidden recién quitado) para
+      // que la transición de opacity/transform en CSS se dispare, en vez
+      // de arrancar directo en el estado final sin animación visible.
+      requestAnimationFrame(() => crosslinkBanner.classList.add('is-visible'));
     }
 
     // Agrupa los cursos de la categoría actual por tema, preservando el
@@ -293,8 +344,19 @@
         copy.imagen ? `url('${copy.imagen}')` : '';
     }
 
+    // Token de turno — hashchange puede disparar loadCategoria() de nuevo
+    // (ej. click en "Ver cursos" del crosslink, o en el crosslink banner de
+    // arriba) mientras el fetch anterior sigue en vuelo. Sin esto, dos
+    // invocaciones concurrentes de loadCategoria() pueden resolver fuera de
+    // orden y la respuesta más VIEJA terminaría pisando el DOM (incluido el
+    // crosslink) después de que la más NUEVA ya renderizó. Cada invocación
+    // se descarta a sí misma si, al resolver su await, ya no es la última
+    // en haber arrancado.
+    let loadCategoriaTurno = 0;
+
     async function loadCategoria() {
       const categoriaSlug = categoriaSlugActual();
+      const miTurno = ++loadCategoriaTurno;
       renderCategoriaBanner(categoriaSlug);
       try {
         // avance y progreso-resumen no bloquean la grilla si fallan — el
@@ -306,6 +368,7 @@
           academyFetch('/academy/me/avance').catch(() => ({})),
           academyFetch('/academy/me/progreso-resumen').catch(() => ({ cursosCompletadosSlugs: [] })),
         ]);
+        if (miTurno !== loadCategoriaTurno) return; // una invocación más nueva ya arrancó, no pisar su resultado
         const categorias = data.categorias || [];
         const temas = data.temas || [];
         const cursosCompletadosSet = new Set(resumen.cursosCompletadosSlugs || []);
@@ -316,7 +379,9 @@
           document.getElementById('breadcrumbCurrent').textContent = 'Categoría no encontrada';
           document.getElementById('categoriaBanner').style.display = 'none';
           sectionsEl.innerHTML = '';
-          crosslinkBanner.style.display = 'none';
+          clearTimeout(crosslinkHideTimeout);
+          crosslinkBanner.classList.remove('is-visible');
+          crosslinkBanner.setAttribute('hidden', '');
           return;
         }
         titleEl.textContent = categoria.titulo;
@@ -332,10 +397,13 @@
         renderCategoriaSummary(cursos, cursosCompletadosSet);
         renderGrupos(agruparPorTema(cursos, temas), avance, cursosCompletadosSet);
       } catch (err) {
+        if (miTurno !== loadCategoriaTurno) return; // ídem — un turno más nuevo ya está a cargo del DOM
         titleEl.textContent = 'Error al cargar';
         document.getElementById('categoriaBanner').style.display = 'none';
         sectionsEl.innerHTML = `<div class="empty-state">${err.message}</div>`;
-        crosslinkBanner.style.display = 'none';
+        clearTimeout(crosslinkHideTimeout);
+        crosslinkBanner.classList.remove('is-visible');
+        crosslinkBanner.setAttribute('hidden', '');
       }
     }
 
