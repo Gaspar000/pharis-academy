@@ -110,5 +110,4 @@ Si despliegas `pharis-api` en otra URL, edita `API_BASE` en [assets/api.js](asse
 ## Pendiente / próximos pasos
 
 - **Contenido real de los cursos**: `curso.html` y el catálogo en `pharis-api/src/lib/academy-courses.js` usan placeholders (`slidesEmbedUrl: null`). Para activar las diapositivas, pega la URL de embed de Google Slides (o un visor de PDF) en `slidesEmbedUrl` de cada curso.
-- **Historial de entregas del alumno**: `curso.html` solo muestra las entregas hechas en la sesión actual del navegador (no hay `GET /academy/mis-entregas` todavía).
 - **Recuperación de contraseña**: no implementada, fuera de alcance de esta primera versión.
