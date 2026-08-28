@@ -1090,19 +1090,28 @@ fieldset.field > legend {
    src hasta que la nueva ya cargó), así que esto es la única señal de
    que algo está pasando, sin la cual un salto entre imágenes se sentía
    como que el click no había hecho nada. */
-.slide-loading-spinner {
+/* Velo (fondo semitransparente, cubre el frame entero) e ícono (el que
+   gira) van en dos elementos separados a propósito: la animación de
+   rotación en .slide-loading-spinner NO debe tocar .slide-loading-overlay
+   — antes eran un único <i> con inset:0 + animation en el mismo
+   elemento, así que al rotar giraba el velo completo (su fondo, sus
+   bordes) junto con el ícono, en vez de solo el ícono quieto en el
+   centro. */
+.slide-loading-overlay {
   display: none;
   position: absolute;
   inset: 0;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  color: #fff;
   background: rgba(2, 6, 23, 0.25);
   pointer-events: none;
 }
+.slide-viewer.is-loading .slide-loading-overlay { display: flex; }
+.slide-loading-spinner {
+  font-size: 2rem;
+  color: #fff;
+}
 .slide-viewer.is-loading .slide-loading-spinner {
-  display: flex;
   animation: quiz-spinner-spin 0.8s linear infinite;
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1593,6 +1602,18 @@ fieldset.field > legend {
    260px fijo para el panel de capítulos, el embed toma el resto,
    angostado desde 320px para darle más ancho relativo al visor de
    diapositivas. */
+/* align-items:start (default, no "stretch"): .watch-main-col incluye el
+   visor MÁS el texto de abajo (tags/título/autor/social) — un
+   align-items:stretch hubiera igualado .chapters-panel a esa altura
+   TOTAL de la columna (visor + texto), no solo a la del visor, que es
+   el límite real que se pidió ("Capítulos" debe llegar hasta donde
+   llega el visor, no hasta donde termina todo el bloque de texto
+   debajo). En su lugar, la altura real del visor se mide por JS (ver
+   ajustarAltoCapitulos en curso.html) y se aplica directamente a
+   .chapters-panel vía su propiedad --chapters-max-height — mismo
+   criterio que el fix de altura dinámica del calendario en dashboard-v2:
+   un valor CSS estático no sirve acá porque el visor cambia de alto con
+   el aspect-ratio 16:9 según el ancho de columna disponible. */
 .course-watch-grid {
   display: grid;
   grid-template-columns: 1fr 260px;
@@ -1602,14 +1623,48 @@ fieldset.field > legend {
 /* Único hijo de la columna 1fr, evita que el grid item se desborde si
    algún contenido interno (ej. texto largo) pide más ancho del disponible. */
 .watch-main-col { min-width: 0; }
-.chapters-panel { display: flex; flex-direction: column; gap: 2px; max-height: 100%; }
+/* max-height vía variable (default 'none' hasta que el JS la calcule, así
+   la primera carga —antes del primer resize/reflow— no queda con un
+   límite de 0px). display:flex + flex-direction:column: el título queda
+   fijo (flex-shrink:0 en .chapters-panel-title) y .chapters-list (flex:1)
+   ocupa el resto dentro de ese límite. */
+.chapters-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: var(--chapters-max-height, none);
+}
 .chapters-panel-title {
   font-size: 0.86rem;
   font-weight: 600;
   color: var(--text);
   margin-bottom: 10px;
+  flex-shrink: 0;
 }
-.chapters-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+/* overflow-y:auto + min-height:0: el título de arriba queda fijo (su
+   flex-shrink:0), la lista ocupa el resto del panel y solo ella hace
+   scroll cuando el curso tiene más capítulos de los que caben en la
+   altura del visor — antes crecía sin límite (ver .chapters-panel
+   arriba: sin una altura real que respetar, un curso de 17 capítulos
+   como curso-01-profesores empujaba el panel muy por debajo del visor). */
+.chapters-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+/* Scrollbar delgado, mismo lenguaje que html::-webkit-scrollbar (línea
+   ~157) pero más fino: este panel mide 260px de ancho, el scrollbar
+   default de 8px se sentía grueso en un contenedor tan angosto. */
+.chapters-list::-webkit-scrollbar { width: 6px; }
+.chapters-list::-webkit-scrollbar-track { background: transparent; }
+.chapters-list::-webkit-scrollbar-thumb { background: var(--panel-2); border-radius: 3px; }
+.chapters-list::-webkit-scrollbar-thumb:hover { background: var(--rule-strong); }
+.chapters-list { scrollbar-width: thin; scrollbar-color: var(--panel-2) transparent; }
 /* Mismo patrón "fila con separador top, sin borde en la primera" que
    .wf-leader-row / .news-item (home.css), coherencia visual, aunque este
    vive en styles.css por ser específico de curso.html. */

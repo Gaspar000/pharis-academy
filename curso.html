@@ -92,8 +92,14 @@
                      termina de bajar (ver goToSlide/.slide-viewer.is-loading
                      en el CSS) — activado entre asignar img.src y su evento
                      load/error, para que un salto entre imágenes no se
-                     sienta como que el click no hizo nada. -->
-                <i class="ph ph-circle-notch slide-loading-spinner" aria-hidden="true"></i>
+                     sienta como que el click no hizo nada. Velo (el fondo
+                     semitransparente, fijo) e ícono (el que gira) son dos
+                     elementos separados: la animación va SOLO en el <i>,
+                     no en el contenedor con inset:0 — de lo contrario la
+                     rotación se aplicaba también al velo entero. -->
+                <div class="slide-loading-overlay">
+                  <i class="ph ph-circle-notch slide-loading-spinner" aria-hidden="true"></i>
+                </div>
               </div>
 
               <!-- Entrega de actividad (texto o archivo), mismo criterio que
@@ -608,7 +614,32 @@
       });
 
       updateChapterLockState();
+      ajustarAltoCapitulos();
     }
+
+    // Limita el panel de Capítulos a la altura real del visor de
+    // diapositivas (ver .chapters-panel { max-height:
+    // var(--chapters-max-height) } en styles.css) — antes crecía sin
+    // límite: un curso con muchos capítulos (ej. curso-01-profesores, 17)
+    // empujaba el panel bien por debajo del visor, sin relación visual con
+    // él. No es un valor CSS fijo porque el alto del visor varía con su
+    // aspect-ratio 16:9 según el ancho disponible de columna (más angosto
+    // en viewports chicos, así que el límite real también cambia). Se mide
+    // #viewerShell, no #embedFrame directamente ni .watch-main-col
+    // completo: el shell es exactamente el visor (imagen + controles), sin
+    // el texto de tags/título/autor/social que sigue debajo en la misma
+    // columna — ese texto no debe formar parte del límite ("hasta donde
+    // llega el visor", no "hasta donde termina el bloque completo").
+    function ajustarAltoCapitulos() {
+      const shell = document.getElementById('viewerShell');
+      const panel = document.getElementById('chaptersPanel');
+      if (!shell || !panel) return;
+      panel.style.setProperty('--chapters-max-height', `${shell.getBoundingClientRect().height}px`);
+    }
+    // El ancho de columna (y por ende el alto del visor 16:9) cambia con
+    // el viewport — sin este listener, redimensionar la ventana dejaba el
+    // límite calculado en la carga inicial, ya desalineado del visor real.
+    window.addEventListener('resize', ajustarAltoCapitulos);
 
     // Punto único de entrada al quiz (click en su capítulo o en "Siguiente"
     // desde la penúltima diapositiva, ver goToSlide/intentarAvanzar más
@@ -1266,6 +1297,16 @@
       const progress = currentSlides.length > 1 ? (currentSlideIndex / (currentSlides.length - 1)) * 100 : 100;
       document.getElementById('viewerProgressFill').style.width = `${progress}%`;
       updateChapterActiveState();
+      // Revela la barra si estaba oculta por inactividad (ver
+      // resetControlsIdleTimer más abajo, hoisted) — sin esto, navegar con
+      // el atajo de teclado GLOBAL (línea ~1414, foco fuera de #embedFrame,
+      // ej. el alumno tecleando con el cursor quieto sobre la diapositiva)
+      // cambiaba de diapositiva sin que el listener local de embedFrame se
+      // enterara: el contador avanzaba pero la barra (y su indicador de
+      // progreso) seguía invisible hasta el próximo movimiento de mouse.
+      // Cualquier navegación real —vía el listener local, el global, seek,
+      // o los botones prev/next— cuenta como actividad genuina.
+      resetControlsIdleTimer();
 
       // Actualiza el avance EN CALIENTE (Math.max, mismo criterio que
       // GREATEST en el backend) antes de esperar la respuesta del POST de
