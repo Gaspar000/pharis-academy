@@ -85,7 +85,10 @@
             </div>
             <div class="field-hint">Cambia los cursos que te mostramos primero y, como profesor, te da acceso al dashboard de profesor en Accede a Pharis, con las entregas de todo el curso.</div>
           </fieldset>
-          <button type="submit" class="btn btn-primary" id="perfilSubmitBtn" style="width:auto; padding:10px 20px;">Guardar cambios</button>
+          <button type="submit" class="btn btn-primary" id="perfilSubmitBtn" style="width:auto; padding:10px 20px;">
+            <i class="ph ph-circle-notch btn-spinner" aria-hidden="true"></i>
+            <span id="perfilSubmitBtnLabel">Guardar cambios</span>
+          </button>
         </form>
       </div>
 
@@ -107,7 +110,10 @@
             <label for="passwordConfirmar">Confirmar contraseña nueva</label>
             <input type="password" id="passwordConfirmar" required minlength="6" autocomplete="new-password" />
           </div>
-          <button type="submit" class="btn btn-primary" id="passwordSubmitBtn" style="width:auto; padding:10px 20px;">Cambiar contraseña</button>
+          <button type="submit" class="btn btn-primary" id="passwordSubmitBtn" style="width:auto; padding:10px 20px;">
+            <i class="ph ph-circle-notch btn-spinner" aria-hidden="true"></i>
+            <span id="passwordSubmitBtnLabel">Cambiar contraseña</span>
+          </button>
         </form>
       </div>
 
@@ -122,7 +128,10 @@
         <div class="field-hint" style="margin-bottom:14px;">
           Si dejaste tu sesión abierta en una computadora compartida o perdiste tu equipo, cierra tu sesión en todos los dispositivos. Vas a tener que volver a iniciar sesión acá también.
         </div>
-        <button type="button" class="btn btn-danger" id="cerrarSesionesBtn" style="width:auto; padding:10px 20px;">Cerrar sesión en todos los dispositivos</button>
+        <button type="button" class="btn btn-danger" id="cerrarSesionesBtn" style="width:auto; padding:10px 20px;">
+          <i class="ph ph-circle-notch btn-spinner" aria-hidden="true"></i>
+          <span id="cerrarSesionesBtnLabel">Cerrar sesión en todos los dispositivos</span>
+        </button>
       </div>
     </main>
   </div>
@@ -144,6 +153,7 @@
     const perfilErrorBox = document.getElementById('perfilErrorBox');
     const perfilSuccessBox = document.getElementById('perfilSuccessBox');
     const perfilSubmitBtn = document.getElementById('perfilSubmitBtn');
+    const perfilSubmitBtnLabel = document.getElementById('perfilSubmitBtnLabel');
 
     function showBox(box, msg) {
       box.textContent = msg;
@@ -187,7 +197,8 @@
       hideBox(perfilErrorBox);
       hideBox(perfilSuccessBox);
       perfilSubmitBtn.disabled = true;
-      perfilSubmitBtn.textContent = 'Guardando...';
+      perfilSubmitBtn.classList.add('is-loading');
+      perfilSubmitBtnLabel.textContent = 'Guardando…';
 
       const nombre = document.getElementById('nombre').value.trim();
       const email = document.getElementById('email').value.trim();
@@ -214,7 +225,8 @@
         showBox(perfilErrorBox, err.message);
       } finally {
         perfilSubmitBtn.disabled = false;
-        perfilSubmitBtn.textContent = 'Guardar cambios';
+        perfilSubmitBtn.classList.remove('is-loading');
+        perfilSubmitBtnLabel.textContent = 'Guardar cambios';
       }
     });
 
@@ -223,6 +235,7 @@
     const passwordErrorBox = document.getElementById('passwordErrorBox');
     const passwordSuccessBox = document.getElementById('passwordSuccessBox');
     const passwordSubmitBtn = document.getElementById('passwordSubmitBtn');
+    const passwordSubmitBtnLabel = document.getElementById('passwordSubmitBtnLabel');
 
     passwordForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -241,7 +254,8 @@
       }
 
       passwordSubmitBtn.disabled = true;
-      passwordSubmitBtn.textContent = 'Cambiando...';
+      passwordSubmitBtn.classList.add('is-loading');
+      passwordSubmitBtnLabel.textContent = 'Cambiando…';
 
       try {
         const data = await academyFetch('/academy/me/password', {
@@ -259,12 +273,14 @@
         showBox(passwordErrorBox, err.message);
       } finally {
         passwordSubmitBtn.disabled = false;
-        passwordSubmitBtn.textContent = 'Cambiar contraseña';
+        passwordSubmitBtn.classList.remove('is-loading');
+        passwordSubmitBtnLabel.textContent = 'Cambiar contraseña';
       }
     });
 
     // ── Seguridad: cerrar sesión en todos los dispositivos ──────────────────
     const cerrarSesionesBtn = document.getElementById('cerrarSesionesBtn');
+    const cerrarSesionesBtnLabel = document.getElementById('cerrarSesionesBtnLabel');
     const sesionesErrorBox = document.getElementById('sesionesErrorBox');
     const sesionesSuccessBox = document.getElementById('sesionesSuccessBox');
 
@@ -279,7 +295,8 @@
       hideBox(sesionesErrorBox);
       hideBox(sesionesSuccessBox);
       cerrarSesionesBtn.disabled = true;
-      cerrarSesionesBtn.textContent = 'Cerrando...';
+      cerrarSesionesBtn.classList.add('is-loading');
+      cerrarSesionesBtnLabel.textContent = 'Cerrando…';
 
       try {
         await academyFetch('/academy/me/cerrar-sesiones', { method: 'POST' });
@@ -290,7 +307,8 @@
       } catch (err) {
         showBox(sesionesErrorBox, err.message);
         cerrarSesionesBtn.disabled = false;
-        cerrarSesionesBtn.textContent = 'Cerrar sesión en todos los dispositivos';
+        cerrarSesionesBtn.classList.remove('is-loading');
+        cerrarSesionesBtnLabel.textContent = 'Cerrar sesión en todos los dispositivos';
       }
     });
 

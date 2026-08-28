@@ -88,6 +88,12 @@
                 <!-- Capa de celebración de puntos (ver celebrarPuntos), sus
                      hijos los crea y borra el JS en cada diapositiva nueva. -->
                 <div class="slide-points-layer" id="slidePointsLayer"></div>
+                <!-- Spinner mientras la imagen de la próxima diapositiva
+                     termina de bajar (ver goToSlide/.slide-viewer.is-loading
+                     en el CSS) — activado entre asignar img.src y su evento
+                     load/error, para que un salto entre imágenes no se
+                     sienta como que el click no hizo nada. -->
+                <i class="ph ph-circle-notch slide-loading-spinner" aria-hidden="true"></i>
               </div>
 
               <!-- Entrega de actividad (texto o archivo), mismo criterio que
@@ -114,8 +120,11 @@
                 </div>
 
                 <div class="entrega-panel" id="entregaPanelTexto">
-                  <textarea class="entrega-textarea" id="entregaTextarea" placeholder="Escribe aquí el resultado de tu actividad..." maxlength="20000"></textarea>
-                  <button class="btn btn-primary" id="entregaTextoBtn" style="width:auto; align-self:flex-end;">Enviar texto</button>
+                  <textarea class="entrega-textarea" id="entregaTextarea" placeholder="Escribe aquí el resultado de tu actividad…" maxlength="20000"></textarea>
+                  <button class="btn btn-primary" id="entregaTextoBtn" style="width:auto; align-self:flex-end;">
+                    <i class="ph ph-circle-notch btn-spinner" aria-hidden="true"></i>
+                    <span id="entregaTextoBtnLabel">Enviar texto</span>
+                  </button>
                 </div>
 
                 <div class="entrega-panel" id="entregaPanelArchivo" style="display:none;">
@@ -126,7 +135,10 @@
                       <p class="dropzone-text" id="entregaDropzoneText">Suelta tu archivo aquí, o <span class="dropzone-link">haz clic para subir</span></p>
                       <p class="dropzone-hint">PDF, JPG o PNG, hasta 10MB</p>
                     </label>
-                    <button class="btn btn-primary" id="entregaArchivoBtn">Subir actividad</button>
+                    <button class="btn btn-primary" id="entregaArchivoBtn">
+                      <i class="ph ph-circle-notch btn-spinner" aria-hidden="true"></i>
+                      <span id="entregaArchivoBtnLabel">Subir actividad</span>
+                    </button>
                   </div>
                 </div>
 
@@ -229,7 +241,7 @@
           <div class="course-meta-tags" id="courseTags"></div>
 
           <div class="page-header">
-            <h1 id="courseTitle">Cargando curso...</h1>
+            <h1 id="courseTitle">Cargando curso…</h1>
           </div>
 
           <!-- Autor (mock fijo, no existe ese campo en el curso, ver README) +
@@ -305,7 +317,10 @@
             <span id="resourceFilePickerLabel">Seleccionar archivo</span>
           </label>
         </div>
-        <button class="btn btn-primary" id="resourceUploadBtn" style="width:auto; padding:10px 20px;">Subir recurso</button>
+        <button class="btn btn-primary" id="resourceUploadBtn" style="width:auto; padding:10px 20px;">
+          <i class="ph ph-circle-notch btn-spinner" aria-hidden="true"></i>
+          <span id="resourceUploadBtnLabel">Subir recurso</span>
+        </button>
         <div class="upload-status" id="resourceUploadStatus" role="status"></div>
       </div>
     </section>
@@ -328,7 +343,10 @@
           <p class="dropzone-text" id="dropzoneText">Suelta tu archivo aquí, o <span class="dropzone-link">haz clic para subir</span></p>
           <p class="dropzone-hint">PDF, JPG o PNG, hasta 10MB</p>
         </label>
-        <button class="btn btn-primary" id="uploadBtn">Subir actividad</button>
+        <button class="btn btn-primary" id="uploadBtn">
+          <i class="ph ph-circle-notch btn-spinner" aria-hidden="true"></i>
+          <span id="uploadBtnLabel">Subir actividad</span>
+        </button>
         <div class="upload-status" id="uploadStatus" role="status"></div>
       </div>
 
@@ -932,13 +950,15 @@
 
     document.getElementById('entregaTextoBtn').addEventListener('click', async () => {
       const btn = document.getElementById('entregaTextoBtn');
+      const btnLabel = document.getElementById('entregaTextoBtnLabel');
       const textarea = document.getElementById('entregaTextarea');
       const texto = textarea.value.trim();
       if (!texto) { showEntregaStatus('warn', 'Escribe algo antes de enviar.'); return; }
 
       btn.disabled = true;
-      btn.textContent = 'Evaluando con Pharis...';
-      showEntregaStatus('warn', 'Enviando y evaluando tu actividad, puede tardar unos segundos...');
+      btn.classList.add('is-loading');
+      btnLabel.textContent = 'Evaluando con Pharis…';
+      showEntregaStatus('warn', 'Enviando y evaluando tu actividad, puede tardar unos segundos…');
 
       try {
         const result = await academyFetch('/academy/submit', {
@@ -957,19 +977,22 @@
         showEntregaStatus('err', err.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Enviar texto';
+        btn.classList.remove('is-loading');
+        btnLabel.textContent = 'Enviar texto';
       }
     });
 
     document.getElementById('entregaArchivoBtn').addEventListener('click', async () => {
       const btn = document.getElementById('entregaArchivoBtn');
+      const btnLabel = document.getElementById('entregaArchivoBtnLabel');
       const file = document.getElementById('entregaFileInput').files[0];
       if (!file) { showEntregaStatus('warn', 'Selecciona un archivo primero.'); return; }
       if (file.size > MAX_FILE_BYTES) { showEntregaStatus('err', 'El archivo supera el límite de 10MB.'); return; }
 
       btn.disabled = true;
-      btn.textContent = 'Evaluando con Pharis...';
-      showEntregaStatus('warn', 'Subiendo y evaluando tu actividad, puede tardar unos segundos...');
+      btn.classList.add('is-loading');
+      btnLabel.textContent = 'Evaluando con Pharis…';
+      showEntregaStatus('warn', 'Subiendo y evaluando tu actividad, puede tardar unos segundos…');
 
       try {
         const dataUrl = await fileToBase64(file);
@@ -990,7 +1013,8 @@
         showEntregaStatus('err', err.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Subir actividad';
+        btn.classList.remove('is-loading');
+        btnLabel.textContent = 'Subir actividad';
       }
     });
 
@@ -1102,7 +1126,7 @@
       if (fase === 'evaluando') {
         btn.disabled = true;
         btn.classList.add('is-loading');
-        label.textContent = 'Evaluando...';
+        label.textContent = 'Evaluando…';
       } else if (fase === 'continuar') {
         btn.disabled = false;
         label.textContent = 'Continuar';
@@ -1202,6 +1226,13 @@
       img.alt = slide.alt
         ? `Diapositiva ${currentSlideIndex + 1} de ${currentSlides.length}. ${slide.titulo}. ${slide.alt}`
         : `Diapositiva ${currentSlideIndex + 1} de ${currentSlides.length}. ${slide.titulo}.`;
+      // Spinner mientras esta imagen nueva termina de bajar — la vieja se
+      // queda visible debajo hasta que termine (no se limpia el src antes),
+      // así que sin esto un salto entre diapositivas con conexión lenta se
+      // sentía como que el click no hizo nada. Se quita en los listeners
+      // load/error de #slideImage (ver más abajo), no acá con un timeout:
+      // el tiempo real de descarga varía con la conexión de cada alumno.
+      document.getElementById('slideViewer').classList.add('is-loading');
       img.src = slide.url;
       renderHotspots(slide);
 
@@ -1311,16 +1342,51 @@
       }
     });
 
+    // Apaga el spinner de carga (activado en goToSlide al asignar
+    // img.src) apenas la imagen nueva termina de bajar, con éxito o sin él
+    // — cualquiera de los dos resuelve el estado de "cargando", el error
+    // real lo cubre el listener de abajo.
+    document.getElementById('slideImage').addEventListener('load', () => {
+      document.getElementById('slideViewer').classList.remove('is-loading');
+    });
+
     // Manejo de error de imagen, sin precedente en el proyecto, tratamiento
     // simple: si la URL de GCS falla (placeholder sin reemplazar, 404, etc.),
     // se ve un texto claro en vez de un ícono roto de navegador.
     document.getElementById('slideImage').addEventListener('error', (e) => {
+      document.getElementById('slideViewer').classList.remove('is-loading');
       e.target.style.display = 'none';
       const viewer = document.getElementById('slideViewer');
       if (!viewer.querySelector('.slide-error')) {
         viewer.insertAdjacentHTML('beforeend', '<div class="slide-error">No se pudo cargar esta diapositiva.</div>');
       }
     });
+
+    // Auto-hide de la barra de controles tras 3s de INACTIVIDAD, aunque el
+    // mouse siga sobre el frame — a diferencia de :hover/:focus-within
+    // (CSS puro, solo reaccionan a entrar/salir), esto cubre mouse quieto
+    // encima mientras el alumno lee: sin esto la barra tapaba parte de la
+    // diapositiva indefinidamente en cuanto el cursor quedaba encima.
+    // .embed-frame.is-idle (ver CSS) fuerza opacity:0 pese al :hover. Se
+    // reinicia con cualquier señal de actividad real (mouse, teclado,
+    // touch) dentro del frame — no un listener global de document, que
+    // resetearía el timer por actividad en el resto de la página sin que
+    // el alumno esté mirando el visor. No aplica en touch (mismo criterio
+    // que @media (hover:none) del CSS): sin mouse no hay forma de "revelar
+    // la barra de nuevo" moviendo el cursor, así que ahí debe quedarse
+    // siempre visible.
+    const embedFrame = document.getElementById('embedFrame');
+    let controlsIdleTimeout = null;
+    function resetControlsIdleTimer() {
+      embedFrame.classList.remove('is-idle');
+      clearTimeout(controlsIdleTimeout);
+      controlsIdleTimeout = setTimeout(() => embedFrame.classList.add('is-idle'), 3000);
+    }
+    if (window.matchMedia('(hover: hover)').matches) {
+      ['mousemove', 'mousedown', 'keydown', 'wheel'].forEach(evt => {
+        embedFrame.addEventListener(evt, resetControlsIdleTimer);
+      });
+    }
 
     document.getElementById('slidePrevBtn').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
     document.getElementById('slideNextBtn').addEventListener('click', () => {
@@ -1522,6 +1588,7 @@
 
     const MAX_FILE_BYTES = 10 * 1024 * 1024;
     const uploadBtn = document.getElementById('uploadBtn');
+    const uploadBtnLabel = document.getElementById('uploadBtnLabel');
     const statusBox = document.getElementById('uploadStatus');
 
     function showStatus(kind, msg) {
@@ -1535,8 +1602,9 @@
       if (file.size > MAX_FILE_BYTES) { showStatus('err', 'El archivo supera el límite de 10MB.'); return; }
 
       uploadBtn.disabled = true;
-      uploadBtn.textContent = 'Evaluando con Pharis...';
-      showStatus('warn', 'Subiendo y evaluando tu actividad, puede tardar unos segundos...');
+      uploadBtn.classList.add('is-loading');
+      uploadBtnLabel.textContent = 'Evaluando con Pharis…';
+      showStatus('warn', 'Subiendo y evaluando tu actividad, puede tardar unos segundos…');
 
       try {
         const dataUrl = await fileToBase64(file);
@@ -1565,7 +1633,8 @@
         showStatus('err', err.message);
       } finally {
         uploadBtn.disabled = false;
-        uploadBtn.textContent = 'Subir actividad';
+        uploadBtn.classList.remove('is-loading');
+        uploadBtnLabel.textContent = 'Subir actividad';
       }
     });
 
@@ -1631,6 +1700,7 @@
     }
 
     const resourceUploadBtn = document.getElementById('resourceUploadBtn');
+    const resourceUploadBtnLabel = document.getElementById('resourceUploadBtnLabel');
     resourceUploadBtn.addEventListener('click', async () => {
       const tituloInput = document.getElementById('resourceTitulo');
       const resourceFileInput = document.getElementById('resourceFileInput');
@@ -1647,7 +1717,8 @@
       if (file.size > MAX_FILE_BYTES) { showResourceStatus('err', 'El archivo supera el límite de 10MB.'); return; }
 
       resourceUploadBtn.disabled = true;
-      resourceUploadBtn.textContent = 'Subiendo...';
+      resourceUploadBtn.classList.add('is-loading');
+      resourceUploadBtnLabel.textContent = 'Subiendo…';
       try {
         const dataUrl = await fileToBase64(file);
         await academyFetch(`/academy/courses/${encodeURIComponent(slug)}/recursos`, {
@@ -1663,7 +1734,8 @@
         showResourceStatus('err', err.message);
       } finally {
         resourceUploadBtn.disabled = false;
-        resourceUploadBtn.textContent = 'Subir recurso';
+        resourceUploadBtn.classList.remove('is-loading');
+        resourceUploadBtnLabel.textContent = 'Subir recurso';
       }
     });
 

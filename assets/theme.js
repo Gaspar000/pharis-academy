@@ -47,6 +47,7 @@ const AcademyTheme = {
       const icon = btn.querySelector('i');
       if (icon) icon.className = isLight ? 'ph ph-sun' : 'ph ph-moon';
       btn.classList.toggle('is-light', isLight);
+      if (btn.hasAttribute('aria-pressed')) btn.setAttribute('aria-pressed', String(isLight));
       // El label vive en el <button> mismo para .theme-toggle circular,
       // pero en el <div class="theme-row"> hermano para .theme-switch
       // (el switch no tiene espacio propio para texto), se busca en

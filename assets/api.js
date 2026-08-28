@@ -212,7 +212,7 @@ const AcademyAuth = {
         </div>
         <div class="user-dropdown-item theme-row">
           <span data-theme-label>Modo oscuro</span>
-          <button class="theme-switch" data-theme-toggle aria-label="Cambiar tema">
+          <button class="theme-switch" data-theme-toggle aria-label="Cambiar tema" aria-pressed="false">
             <span class="theme-switch-thumb"></span>
           </button>
         </div>

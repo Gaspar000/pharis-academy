@@ -132,7 +132,7 @@
             </span>
           </h2>
           <p>La extensión de Chrome para trabajar directo desde tu navegador, sin instalar nada, ideal si usás una laptop compartida o del colegio.</p>
-          <button type="button" class="btn btn-secondary" id="downloadExtensionBtn"><i class="ph ph-download-simple"></i> Descargar extensión</button>
+          <button type="button" class="btn btn-secondary is-unavailable" id="downloadExtensionBtn" aria-disabled="true"><i class="ph ph-download-simple"></i> Descargar extensión</button>
           <div class="download-status" id="downloadExtensionStatus" role="status"></div>
         </div>
         <!-- Solo profesores: oculto por defecto, revelado por JS si
@@ -188,7 +188,7 @@
     // servir el archivo directo desde acá (ver GET /academy/download/pharis-app).
     document.getElementById('downloadAppBtn').addEventListener('click', async (e) => {
       e.preventDefault();
-      showDownloadStatus('downloadAppStatus', 'warn', 'Preparando descarga...');
+      showDownloadStatus('downloadAppStatus', 'warn', 'Preparando descarga…');
       try {
         const data = await academyFetch('/academy/download/pharis-app');
         window.location.href = data.url;
@@ -204,7 +204,11 @@
       }
     });
 
-    // Pharis Extension: todavía no hay un paquete real que distribuir.
+    // Pharis Extension: todavía no hay un paquete real que distribuir —
+    // aria-disabled + .is-unavailable (CSS) marcan el estado, pero el
+    // botón sigue siendo type="button" sin el atributo `disabled` nativo,
+    // así que este listener sigue corriendo igual (aria-disabled no
+    // bloquea la interacción real, solo la anuncia).
     document.getElementById('downloadExtensionBtn').addEventListener('click', (e) => {
       e.preventDefault();
       showDownloadStatus('downloadExtensionStatus', 'warn', 'La extensión todavía no está disponible para descarga, pronto.');
