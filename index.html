@@ -291,11 +291,24 @@
 
     async function loadCourses() {
       try {
-        const [data, avance] = await Promise.all([
+        const [data, avance, resumen] = await Promise.all([
           academyFetch('/academy/courses'),
           academyFetch('/academy/me/avance').catch(() => ({})), // no bloquea el resto de la página si falla
+          // "Completado" = misma fuente que categoria.html/progreso.html
+          // (última diapositiva vista + quiz aprobado, resuelto server-side
+          // — ver GET /academy/me/progreso-resumen), no un recálculo local
+          // con solo `avance` que divergiría del criterio real en cursos
+          // con quiz. Antes esto usaba data.courses.length a secas: "Tienes
+          // 4 cursos por explorar" seguía diciendo lo mismo aunque el
+          // usuario ya hubiera completado los 4, contradiciendo "por
+          // explorar" con las propias tarjetas del hero mostrando 100%.
+          academyFetch('/academy/me/progreso-resumen').catch(() => ({ cursosCompletadosSlugs: [] })),
         ]);
-        statCoursesLabel.textContent = `Tienes ${data.courses.length} curso${data.courses.length === 1 ? '' : 's'} por explorar`;
+        const cursosCompletadosSet = new Set(resumen.cursosCompletadosSlugs || []);
+        const pendientes = data.courses.filter(c => !cursosCompletadosSet.has(c.slug)).length;
+        statCoursesLabel.textContent = pendientes > 0
+          ? `Tienes ${pendientes} curso${pendientes === 1 ? '' : 's'} por explorar`
+          : '¡Completaste todos los cursos disponibles!';
 
         if (!data.courses.length) {
           categoriaGrid.innerHTML = '<div class="empty-state">No hay cursos disponibles todavía.</div>';
@@ -303,16 +316,33 @@
           return;
         }
 
-        // Hero: solo los cursos de la categoría preferida del usuario (2 de
-        // los 4), categoriaPreferida es clasificatorio, no restringe acceso;
-        // el usuario igual puede tomar cualquier curso desde "Todos los
-        // cursos". Si por algún motivo no hay coincidencias, se muestran los
-        // primeros 2 cursos como respaldo. Barra de progreso real por
-        // diapositiva (GET /academy/me/avance) — los cursos sin contenido
-        // (slides:null) no muestran barra, solo título (ver renderHeroCard).
+        // Hero: 2 tarjetas de todo el catálogo, ordenadas por dos claves —
+        // 1) SIN completar antes que completados (el hero es "esto es lo
+        //    próximo que puedes hacer", no tiene sentido destacar algo ya
+        //    terminado al 100% mientras hay pendientes en OTRA categoría;
+        //    antes filtraba por categoría preferida primero, así que un
+        //    usuario que ya había completado los 2 cursos de su categoría
+        //    seguía viendo esas mismas 2 tarjetas indefinidamente, aunque
+        //    hubiera pendientes reales del otro lado del catálogo);
+        // 2) dentro de cada grupo (pendiente/completado), categoría
+        //    preferida primero — categoriaPreferida es clasificatorio, no
+        //    restringe acceso, el usuario igual puede tomar cualquier
+        //    curso desde "Todos los cursos", así que sigue siendo la señal
+        //    de qué mostrar CUANDO hay empate en completitud.
+        // Si todo el catálogo ya está completo, el resultado sigue siendo
+        // determinista (los 2 primeros de la categoría preferida) — no
+        // tiene sentido dejar el hero vacío solo porque no hay pendientes.
+        // Barra de progreso real por diapositiva (GET /academy/me/avance)
+        // — los cursos sin contenido (slides:null) no muestran barra, solo
+        // título (ver renderHeroCard).
         const categoriaUsuario = user.categoriaPreferida || 'alumnos';
-        const cursosDestacados = data.courses.filter(c => c.categoria === categoriaUsuario);
-        const cursosParaHero = cursosDestacados.length ? cursosDestacados : data.courses.slice(0, 2);
+        const cursosParaHero = [...data.courses]
+          .sort((a, b) => {
+            const pendienteDiff = Number(cursosCompletadosSet.has(a.slug)) - Number(cursosCompletadosSet.has(b.slug));
+            if (pendienteDiff !== 0) return pendienteDiff;
+            return Number(b.categoria === categoriaUsuario) - Number(a.categoria === categoriaUsuario);
+          })
+          .slice(0, 2);
 
         heroCards.innerHTML = cursosParaHero.map(c => renderHeroCard(c, avance)).join('');
 
